@@ -115,6 +115,87 @@
     }
     .filter-btn.all-hide:hover { background: rgba(80,50,30,0.28); color: #907060; border-color: #6a4028; }
 
+    .filter-btn.achieve {
+      background: rgba(232,48,32,0.08);
+      border-color: #8a4030; color: #d49070;
+      opacity: 1;
+    }
+    .filter-btn.achieve:hover { background: rgba(232,48,32,0.18); color: #ff9a8a; border-color: #c05838; }
+
+    /* ── 巡り達成チェック モーダル ── */
+    .achieve-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 3000;
+      background: rgba(10,5,2,0.72);
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .achieve-overlay.open { display: flex; }
+    .achieve-modal {
+      background: linear-gradient(180deg, #1c1108 0%, #120a05 100%);
+      border: 1px solid #4a2a10;
+      border-radius: 10px;
+      width: min(720px, 100%);
+      max-height: 86vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+    }
+    .achieve-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid #3a2010;
+      flex-shrink: 0;
+    }
+    .achieve-title { font-size: 16px; color: #f5d08a; letter-spacing: 0.06em; }
+    .achieve-close {
+      cursor: pointer; color: #907050; font-size: 20px; line-height: 1;
+      padding: 4px 8px; border-radius: 4px;
+    }
+    .achieve-close:hover { color: #f5d08a; background: rgba(245,208,138,0.1); }
+
+    .achieve-summary {
+      padding: 16px 20px; border-bottom: 1px solid #3a2010; flex-shrink: 0;
+    }
+    .achieve-summary-num { font-size: 30px; color: #f5d08a; font-weight: bold; }
+    .achieve-summary-label { font-size: 12px; color: #907050; margin-top: 2px; }
+    .achieve-bar-track {
+      margin-top: 10px; height: 8px; border-radius: 4px;
+      background: rgba(255,255,255,0.06); overflow: hidden;
+    }
+    .achieve-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #c47a08, #f5c842);
+      border-radius: 4px; transition: width 0.4s ease;
+    }
+
+    .achieve-body { overflow-y: auto; padding: 8px 20px 20px; }
+    .achieve-region { margin-top: 16px; }
+    .achieve-region:first-child { margin-top: 4px; }
+    .achieve-region-title {
+      font-size: 11px; letter-spacing: 0.1em; color: #907050;
+      border-bottom: 1px solid #3a2010; padding-bottom: 5px; margin-bottom: 8px;
+    }
+    .achieve-prov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+    .achieve-prov {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.02);
+    }
+    .achieve-prov.done { background: rgba(212,134,10,0.1); }
+    .achieve-prov-icon {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; border: 1.5px solid #5a3a1a; color: transparent;
+    }
+    .achieve-prov.done .achieve-prov-icon {
+      background: rgba(245,208,138,0.25); border-color: #f5d08a; color: #f5d08a;
+    }
+    .achieve-prov-name { font-size: 12px; color: #ddd0a0; }
+    .achieve-prov.done .achieve-prov-name { color: #f5d08a; }
+    .achieve-prov-count { font-size: 10px; color: #705030; margin-left: auto; }
+
+    @media (max-width: 640px) {
+      .achieve-prov-grid { grid-template-columns: 1fr; }
+    }
+
     .filter-btn.more-toggle {
       background: rgba(245,208,138,0.06);
       border-color: #5a4020; color: #907050;
@@ -535,9 +616,21 @@
     <div class="ctrl-divider"></div>
     <button class="filter-btn all-show" onclick="showAll()">全表示</button>
     <button class="filter-btn all-hide" onclick="hideAll()">全非表示</button>
+    <button class="filter-btn achieve" onclick="openAchieveModal()">⛩ 一宮巡り達成状況</button>
     <div class="stats" id="stats">読み込み中...</div>
   </div>
 </header>
+
+<div class="achieve-overlay" id="achieve-overlay" onclick="if(event.target===this) closeAchieveModal()">
+  <div class="achieve-modal">
+    <div class="achieve-header">
+      <span class="achieve-title">⛩ 一宮巡り達成状況</span>
+      <span class="achieve-close" onclick="closeAchieveModal()">✕</span>
+    </div>
+    <div class="achieve-summary" id="achieve-summary"></div>
+    <div class="achieve-body" id="achieve-body"></div>
+  </div>
+</div>
 
 <div id="map-area">
   <div id="map"></div>
@@ -572,6 +665,28 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const PRIORITY = { jingu:10, taisha:9, ichi:8, ni:7, meisha:6, meisha2:5, hachiman:4, inari:3, meisha3:2, kinun:1, kaiun:0 };
+
+// ===== 令制国 → 地方区分（一宮巡り達成チェック用） =====
+const REGION_ORDER = ['畿内','東海道','東山道','北陸道','山陰道','山陽道','南海道','西海道','北海道','沖縄'];
+const PROVINCE_REGION = {
+  "山城国":"畿内","大和国":"畿内","河内国":"畿内","和泉国":"畿内","摂津国":"畿内",
+  "伊賀国":"東海道","伊勢国":"東海道","志摩国":"東海道","尾張国":"東海道","三河国":"東海道",
+  "遠江国":"東海道","駿河国":"東海道","伊豆国":"東海道","甲斐国":"東海道","相模国":"東海道",
+  "武蔵国":"東海道","安房国":"東海道","上総国":"東海道","下総国":"東海道","常陸国":"東海道",
+  "近江国":"東山道","美濃国":"東山道","飛騨国":"東山道","信濃国":"東山道","上野国":"東山道",
+  "下野国":"東山道","陸奥国":"東山道","出羽国":"東山道","陸中国":"東山道","岩代国":"東山道","津軽国":"東山道",
+  "若狭国":"北陸道","越前国":"北陸道","加賀国":"北陸道","能登国":"北陸道","越中国":"北陸道",
+  "越後国":"北陸道","佐渡国":"北陸道",
+  "丹波国":"山陰道","丹後国":"山陰道","但馬国":"山陰道","因幡国":"山陰道","伯耆国":"山陰道",
+  "出雲国":"山陰道","石見国":"山陰道","隠岐国":"山陰道",
+  "播磨国":"山陽道","美作国":"山陽道","備前国":"山陽道","備中国":"山陽道","備後国":"山陽道",
+  "安芸国":"山陽道","周防国":"山陽道","長門国":"山陽道",
+  "紀伊国":"南海道","淡路国":"南海道","阿波国":"南海道","讃岐国":"南海道","伊予国":"南海道","土佐国":"南海道",
+  "筑前国":"西海道","筑後国":"西海道","豊前国":"西海道","豊後国":"西海道","肥前国":"西海道",
+  "肥後国":"西海道","日向国":"西海道","大隅国":"西海道","薩摩国":"西海道","壱岐国":"西海道","対馬国":"西海道",
+  "蝦夷":"北海道",
+  "琉球":"沖縄",
+};
 
 // reason フィールド: 名社のみに付く「なぜ著名か」の説明
 const shrines = [
@@ -611,13 +726,12 @@ const shrines = [
   { pref:"東京",   name:"大国魂神社",          tags:["meisha"],        province:"武蔵国",       lat:35.66733, lng:139.47900, deity:"大国魂大神（大己貴命）", reason:"武蔵国総社。旧官幣小社。武蔵国内の神々を合祀する国の鎮守。" },
   { pref:"東京",   name:"靖国神社",            tags:["meisha"],        province:"武蔵国",       lat:35.69396, lng:139.74269, deity:"国事殉難者の御霊", reason:"旧別格官幣社。勅祭社。明治以降の戦没者246万余柱を祀る。春秋大祭に勅使参向。" },
   { pref:"神奈川", name:"寒川神社",            tags:["ichi"],          province:"相模国",       lat:35.37979, lng:139.38361, deity:"寒川比古命・寒川比女命" },
-  { pref:"神奈川", name:"川勾神社",            tags:["ichi"],            province:"相模国",       lat:35.30033, lng:139.23812, deity:"大名牟遅命ほか" },
+  { pref:"神奈川", name:"川勾神社",            tags:["ni"],            province:"相模国",       lat:35.30033, lng:139.23812, deity:"大名牟遅命ほか" },
 
   // ── 甲信越・北陸 ──
   { pref:"新潟",    name:"弥彦神社",           tags:["ichi"],          province:"越後国",       lat:37.70655, lng:138.82635, deity:"天香山命" },
   { pref:"新潟",    name:"居多神社",           tags:["ichi"],            province:"越後国",       lat:37.16646, lng:138.22334, deity:"大己貴命・奴奈川姫命・建御名方命" },
-  { pref:"山梨・静岡", name:"富士山本宮浅間大社", tags:["ichi","taisha"], province:"駿河国・甲斐国", lat:35.22740, lng:138.61017, deity:"木花之佐久夜毘売命" },
-  { pref:"山梨",    name:"美和神社",           tags:["ni"],            province:"甲斐国",       lat:35.62992, lng:138.65356, deity:"大物主神" },
+    { pref:"山梨",    name:"美和神社",           tags:["ni"],            province:"甲斐国",       lat:35.62992, lng:138.65356, deity:"大物主神" },
   { pref:"静岡",    name:"三嶋大社",           tags:["ichi","taisha"], province:"伊豆国",       lat:35.12266, lng:138.91870, deity:"大山祇命・事代主神" },
   { pref:"静岡",    name:"久能山東照宮",       tags:["meisha"],        province:"駿河国",       lat:34.96474, lng:138.46764, deity:"徳川家康（東照大権現）", reason:"旧別格官幣社。徳川家康が最初に祀られた社。国宝の社殿が有名。" },
   { pref:"静岡",    name:"小國神社",           tags:["ichi"],            province:"遠江国",       lat:34.84717, lng:137.89951, deity:"大己貴命" },
@@ -1290,6 +1404,7 @@ function renderList() {
 
 // ===== リスト選択ハイライト =====
 function highlightListItem(el) {
+  if (!el) return;
   if (selectedListItem) selectedListItem.classList.remove('selected');
   el.classList.add('selected');
   selectedListItem = el;
@@ -1381,6 +1496,85 @@ function toggleMoreFilters() {
   filtersExpanded = !filtersExpanded;
   try { localStorage.setItem(EXPAND_KEY, filtersExpanded ? '1' : '0'); } catch(e) {}
   applyExpandState();
+}
+
+// ===== 一宮巡り達成チェック =====
+// 令制国ごとに一宮(ichiタグ)の神社を集め、1社でも参拝済みならその国は「達成」
+function computeAchievement() {
+  const byProvince = {};
+  markerList.forEach(({ shrine, idx }) => {
+    if (!shrine.tags.includes('ichi')) return;
+    const prov = shrine.province;
+    if (!byProvince[prov]) byProvince[prov] = [];
+    byProvince[prov].push({ shrine, idx, visited: isVisited(shrine) });
+  });
+  return byProvince;
+}
+
+function renderAchieveModal() {
+  const byProvince = computeAchievement();
+  const provinces = Object.keys(byProvince);
+  const doneCount = provinces.filter(p => byProvince[p].some(x => x.visited)).length;
+  const total = provinces.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+  document.getElementById('achieve-summary').innerHTML = `
+    <span class="achieve-summary-num">${doneCount} / ${total} 国</span>
+    <span class="achieve-summary-label">の一宮を参拝済み（${pct}%）</span>
+    <div class="achieve-bar-track"><div class="achieve-bar-fill" style="width:${pct}%"></div></div>`;
+
+  // 地方ごとにグループ化
+  const byRegion = {};
+  provinces.forEach(prov => {
+    const region = PROVINCE_REGION[prov] || 'その他';
+    if (!byRegion[region]) byRegion[region] = [];
+    byRegion[region].push(prov);
+  });
+
+  const body = document.getElementById('achieve-body');
+  body.innerHTML = '';
+  REGION_ORDER.forEach(region => {
+    const provs = byRegion[region];
+    if (!provs || provs.length === 0) return;
+
+    const sec = document.createElement('div');
+    sec.className = 'achieve-region';
+    const title = document.createElement('div');
+    title.className = 'achieve-region-title';
+    const regionDone = provs.filter(p => byProvince[p].some(x => x.visited)).length;
+    title.textContent = `${region}（${regionDone}/${provs.length}）`;
+    sec.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'achieve-prov-grid';
+    provs.forEach(prov => {
+      const items = byProvince[prov];
+      const done = items.some(x => x.visited);
+      const names = items.map(x => x.shrine.name).join('・');
+      const row = document.createElement('div');
+      row.className = 'achieve-prov' + (done ? ' done' : '');
+      row.title = names;
+      row.innerHTML = `
+        <div class="achieve-prov-icon">✓</div>
+        <div class="achieve-prov-name">${prov}</div>
+        <div class="achieve-prov-count">${items.filter(x=>x.visited).length}/${items.length}</div>`;
+      row.addEventListener('click', () => {
+        closeAchieveModal();
+        focusShrine(items[0].idx, document.querySelector(`.shrine-item[data-idx="${items[0].idx}"]`));
+      });
+      grid.appendChild(row);
+    });
+    sec.appendChild(grid);
+    body.appendChild(sec);
+  });
+}
+
+function openAchieveModal() {
+  renderAchieveModal();
+  document.getElementById('achieve-overlay').classList.add('open');
+}
+function closeAchieveModal() {
+  document.getElementById('achieve-overlay').classList.remove('open');
 }
 
 // ===== サイドバー開閉 =====
