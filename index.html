@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全国神社マップ — 神宮・大社・一宮・二宮・名社１・名社２</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛩️</text></svg>">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'MS Mincho', serif;
+      background: #1a1209;
+      color: #f0e6c8;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2c1810 0%, #1a0f0a 100%);
+      border-bottom: 2px solid #6b3a1f;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 1000;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      flex-wrap: wrap;
+    }
+
+    .torii-icon { font-size: 26px; filter: drop-shadow(0 0 6px rgba(220,80,30,0.6)); }
+
+    header h1 {
+      font-size: 17px;
+      letter-spacing: 0.1em;
+      color: #f5d08a;
+      text-shadow: 0 0 12px rgba(245,180,60,0.4);
+      white-space: nowrap;
+    }
+    header p {
+      font-size: 11px;
+      color: #907040;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 20px;
+      border: 1.5px solid;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      opacity: 0.42;
+    }
+    .filter-btn.active { opacity: 1; }
+
+    .filter-btn.jingu   { background:rgba(212,134,10,0.12); border-color:#d4860a; color:#f5c842; }
+    .filter-btn.jingu.active   { background:rgba(212,134,10,0.38); box-shadow:0 0 9px rgba(212,134,10,0.4); }
+    .filter-btn.taisha  { background:rgba(124,58,237,0.12); border-color:#7c3aed; color:#c4a8ff; }
+    .filter-btn.taisha.active  { background:rgba(124,58,237,0.32); box-shadow:0 0 9px rgba(124,58,237,0.4); }
+    .filter-btn.ichi    { background:rgba(232,48,32,0.12); border-color:#e83020; color:#ff9a8a; }
+    .filter-btn.ichi.active    { background:rgba(232,48,32,0.36); box-shadow:0 0 9px rgba(232,48,32,0.4); }
+    .filter-btn.ni      { background:rgba(26,80,216,0.12); border-color:#1a50d8; color:#88b4ff; }
+    .filter-btn.ni.active      { background:rgba(26,80,216,0.32); box-shadow:0 0 9px rgba(26,80,216,0.4); }
+    .filter-btn.meisha  { background:rgba(5,150,105,0.12); border-color:#059669; color:#6ee7b7; }
+    .filter-btn.meisha.active  { background:rgba(5,150,105,0.32); box-shadow:0 0 9px rgba(5,150,105,0.4); }
+    .filter-btn.meisha2 { background:rgba(2,132,199,0.12); border-color:#0284c7; color:#7dd3fc; }
+    .filter-btn.meisha2.active { background:rgba(2,132,199,0.32); box-shadow:0 0 9px rgba(2,132,199,0.4); }
+    .filter-btn.meisha3 { background:rgba(180,83,9,0.12);  border-color:#b45309; color:#fcd34d; }
+    .filter-btn.meisha3.active { background:rgba(180,83,9,0.32);  box-shadow:0 0 9px rgba(180,83,9,0.4); }
+    .filter-btn.kinun  { background:rgba(184,134,11,0.12); border-color:#b8860b; color:#ffd700; }
+    .filter-btn.kinun.active  { background:rgba(184,134,11,0.38); box-shadow:0 0 9px rgba(184,134,11,0.4); }
+    .filter-btn.kaiun  { background:rgba(220,80,20,0.12);  border-color:#c03808; color:#ff7a3e; }
+    .filter-btn.kaiun.active  { background:rgba(220,80,20,0.38);  box-shadow:0 0 9px rgba(220,80,20,0.4); }
+    .filter-btn.hachiman { background:rgba(190,24,93,0.12); border-color:#be185d; color:#f9a8d4; }
+    .filter-btn.hachiman.active { background:rgba(190,24,93,0.36); box-shadow:0 0 9px rgba(190,24,93,0.4); }
+    .filter-btn.inari  { background:rgba(13,148,136,0.12); border-color:#0d9488; color:#5eead4; }
+    .filter-btn.inari.active  { background:rgba(13,148,136,0.36); box-shadow:0 0 9px rgba(13,148,136,0.4); }
+    .filter-btn.sanpai { background:rgba(245,208,138,0.10); border-color:#c8a860; color:#f5d08a; }
+    .filter-btn.sanpai.active { background:rgba(245,208,138,0.30); box-shadow:0 0 9px rgba(245,208,138,0.4); }
+
+    /* 全表示 / 全非表示 ボタン */
+    .ctrl-divider {
+      width: 1px; height: 22px;
+      background: #3a2010;
+      margin: 0 4px;
+      flex-shrink: 0;
+    }
+    .filter-btn.all-show {
+      background: rgba(245,208,138,0.08);
+      border-color: #7a6030; color: #c8a860;
+      opacity: 1;
+    }
+    .filter-btn.all-show:hover { background: rgba(245,208,138,0.18); color: #f5d08a; border-color: #b08040; }
+    .filter-btn.all-hide {
+      background: rgba(80,50,30,0.12);
+      border-color: #4a3020; color: #6a5040;
+      opacity: 1;
+    }
+    .filter-btn.all-hide:hover { background: rgba(80,50,30,0.28); color: #907060; border-color: #6a4028; }
+
+    .filter-btn.more-toggle {
+      background: rgba(245,208,138,0.06);
+      border-color: #5a4020; color: #907050;
+      opacity: 1;
+    }
+    .filter-btn.more-toggle:hover { background: rgba(245,208,138,0.14); color: #d4b880; border-color: #8a6838; }
+    .filter-btn.more-toggle.expanded { color: #f5d08a; border-color: #b08040; }
+    .more-filters { display: none; gap: 6px; }
+    .more-filters.expanded { display: contents; }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.gold    { background:#f5c842; box-shadow:0 0 5px #f5c842; }
+    .dot.purple  { background:#a070f8; box-shadow:0 0 5px #a070f8; }
+    .dot.red     { background:#e83020; box-shadow:0 0 5px #e83020; }
+    .dot.blue    { background:#2060e8; box-shadow:0 0 5px #2060e8; }
+    .dot.green   { background:#34d399; box-shadow:0 0 5px #34d399; }
+    .dot.cyan    { background:#38bdf8; box-shadow:0 0 5px #38bdf8; }
+    .dot.orange  { background:#fb923c; box-shadow:0 0 5px #fb923c; }
+
+    .stats { font-size: 12px; color: #705030; border-left: 1px solid #4a2a10; padding-left: 10px; white-space: nowrap; }
+
+    /* ── マップエリア（地図＋サイドバー） ── */
+    #map-area {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+    #map { flex: 1; min-width: 0; z-index: 1; }
+    /* タイルのみに適用（マーカー・ポップアップには影響しない）
+       OSM 白地図を暗色に反転しつつ、コントラストを穏やかに保つ */
+    .leaflet-tile-pane {
+      filter: invert(0.91) hue-rotate(180deg) contrast(0.80) brightness(0.88) saturate(0.60);
+    }
+
+    /* ── サイドバー ── */
+    #sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #160b04 0%, #0d0813 100%);
+      border-left: 1px solid #3a1e08;
+      display: flex;
+      flex-direction: column;
+      z-index: 500;
+      transition: width 0.25s ease, opacity 0.25s ease;
+    }
+    #sidebar.collapsed { width: 0; opacity: 0; pointer-events: none; }
+
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-bottom: 1px solid #3a1e08;
+      background: rgba(44,24,16,0.6);
+      flex-shrink: 0;
+    }
+    .sidebar-title {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: #b08040;
+    }
+    .sidebar-count {
+      font-size: 11px;
+      color: #5a3a1a;
+    }
+    .sidebar-toggle-btn {
+      background: none;
+      border: 1px solid #4a2a10;
+      color: #907040;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      padding: 2px 6px;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .sidebar-toggle-btn:hover { background: rgba(255,200,80,0.1); color: #f5d08a; }
+
+    #sidebar-list {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #3a1e08 transparent;
+    }
+    #sidebar-list::-webkit-scrollbar { width: 4px; }
+    #sidebar-list::-webkit-scrollbar-track { background: transparent; }
+    #sidebar-list::-webkit-scrollbar-thumb { background: #3a1e08; border-radius: 4px; }
+
+    .sidebar-section-title {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 5px 12px 5px 10px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sidebar-section-count {
+      font-size: 10px;
+      opacity: 0.6;
+    }
+
+    .shrine-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(58,30,8,0.4);
+      transition: background 0.12s;
+    }
+    .shrine-item:hover    { background: rgba(245,208,138,0.07); }
+    .shrine-item.selected { background: rgba(245,208,138,0.16); }
+
+    .shrine-item-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .shrine-item-name {
+      font-size: 12px;
+      color: #ddd0a0;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .shrine-item.selected .shrine-item-name { color: #f5d08a; }
+    .shrine-item-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+    .shrine-item-pref {
+      font-size: 10px;
+      color: #5a3a1a;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .shrine-item.visited .shrine-item-name { color: #f5d08a; }
+
+    /* 参拝済みチェック */
+    .visit-check {
+      flex-shrink: 0;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid #6a5030;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      color: transparent;
+      transition: all 0.15s;
+    }
+    .visit-check:hover { border-color: #c8a860; }
+    .visit-check.checked {
+      background: rgba(245,208,138,0.28);
+      border-color: #f5d08a;
+      color: #f5d08a;
+    }
+    .visit-date {
+      flex-shrink: 0;
+      font-size: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid #4a2a10;
+      color: #d4b880;
+      border-radius: 4px;
+      padding: 2px 3px;
+      font-family: inherit;
+      width: 92px;
+      color-scheme: dark;
+    }
+
+    /* サイドバー開閉ボタン（地図上に浮かせる） */
+    #sidebar-open-btn {
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      z-index: 600;
+      background: rgba(30,14,6,0.88);
+      border: 1px solid #4a2a10;
+      border-right: none;
+      color: #f5d08a;
+      border-radius: 6px 0 0 6px;
+      padding: 10px 5px;
+      cursor: pointer;
+      font-size: 12px;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.1em;
+      transition: all 0.15s;
+      display: none;
+      font-family: inherit;
+    }
+    #sidebar-open-btn:hover { background: rgba(60,30,10,0.95); color:#fff; }
+    #sidebar-open-btn.visible { display: block; }
+
+    /* Popup */
+    .shrine-popup .leaflet-popup-content-wrapper {
+      background: linear-gradient(135deg, #1e0e06 0%, #0f0a1a 100%);
+      border: 1px solid #6b3a1f; border-radius: 8px; color: #f0e6c8;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 15px rgba(200,80,20,0.12);
+    }
+    .shrine-popup .leaflet-popup-tip { background: #6b3a1f; }
+    .shrine-popup .leaflet-popup-close-button { color: #907040 !important; }
+
+    .popup-content { font-family: 'Hiragino Mincho ProN','Yu Mincho',serif; min-width: 190px; }
+
+    .popup-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+    .popup-badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; letter-spacing:0.06em; border:1px solid; }
+    .popup-badge.jingu   { background:rgba(212,134,10,0.22); border-color:#d4860a; color:#f5c842; }
+    .popup-badge.taisha  { background:rgba(124,58,237,0.22); border-color:#7c3aed; color:#c4a8ff; }
+    .popup-badge.ichi    { background:rgba(232,48,32,0.22);  border-color:#e83020; color:#ff9a8a; }
+    .popup-badge.ni      { background:rgba(26,80,216,0.22);  border-color:#1a50d8; color:#88b4ff; }
+    .popup-badge.meisha  { background:rgba(5,150,105,0.22);  border-color:#059669; color:#6ee7b7; }
+    .popup-badge.meisha2 { background:rgba(2,132,199,0.22);  border-color:#0284c7; color:#7dd3fc; }
+    .popup-badge.meisha3 { background:rgba(180,83,9,0.22);   border-color:#b45309; color:#fcd34d; }
+    .popup-badge.hachiman{ background:rgba(190,24,93,0.22);  border-color:#be185d; color:#f9a8d4; }
+    .popup-badge.inari   { background:rgba(13,148,136,0.22); border-color:#0d9488; color:#5eead4; }
+    .popup-badge.sanpai  { background:rgba(245,208,138,0.22);border-color:#c8a860; color:#f5d08a; }
+
+    .popup-name    { font-size:16px; font-weight:bold; color:#f5d08a; letter-spacing:0.05em; margin-bottom:3px; text-shadow:0 0 8px rgba(245,180,60,0.3); }
+    .popup-pref    { font-size:11px; color:#907040; margin-bottom:7px; }
+    .popup-province{ font-size:11px; color:#b08858; padding:3px 8px; background:rgba(255,255,255,0.05); border-radius:4px; margin-bottom:5px; }
+    .popup-reason  { font-size:11px; color:#708870; padding:3px 8px; background:rgba(0,255,128,0.04); border-radius:4px; margin-bottom:5px; }
+    .popup-deity   { font-size:11px; color:#906848; line-height:1.6; margin-bottom:8px; }
+
+    .popup-visit { margin-bottom:9px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+    .popup-visit-btn {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:4px 10px; border-radius:14px; border:1.5px solid #6a5030;
+      color:#c8a860; font-size:11px; letter-spacing:0.04em;
+      cursor:pointer; transition:all 0.15s; user-select:none;
+    }
+    .popup-visit-btn:hover { border-color:#c8a860; }
+    .popup-visit-btn.checked {
+      background:rgba(245,208,138,0.22); border-color:#f5d08a; color:#f5d08a;
+    }
+    .popup-visit-date {
+      font-size:10px; background:rgba(0,0,0,0.3); border:1px solid #4a2a10;
+      color:#d4b880; border-radius:4px; padding:2px 4px; font-family:inherit;
+      color-scheme: dark;
+    }
+
+    .popup-gmaps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 6px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      background: rgba(66,133,244,0.14);
+      border: 1px solid rgba(66,133,244,0.35);
+      color: #7eb8ff;
+      font-size: 11px;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: background 0.15s, color 0.15s;
+    }
+    .popup-gmaps:hover {
+      background: rgba(66,133,244,0.28);
+      color: #aad4ff;
+    }
+    .popup-gmaps-icon { font-size: 13px; }
+
+    /* Legend */
+    .legend {
+      position:absolute; bottom:24px; left:16px; z-index:1000;
+      background:linear-gradient(135deg,rgba(30,14,6,0.93) 0%,rgba(15,10,26,0.93) 100%);
+      border:1px solid #4a2a10; border-radius:8px; padding:10px 14px;
+      backdrop-filter:blur(4px); box-shadow:0 4px 16px rgba(0,0,0,0.5);
+    }
+    .legend-title { font-size:10px; letter-spacing:0.12em; color:#5a3a1a; margin-bottom:8px; border-bottom:1px solid #3a2010; padding-bottom:5px; }
+    .legend-item  { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .legend-item:last-child { margin-bottom:0; }
+    .legend-pin   { width:13px; height:16px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:1.5px solid; flex-shrink:0; }
+    .legend-pin.jingu   { background:rgba(212,134,10,0.85); border-color:#f5c842; box-shadow:0 0 5px rgba(212,134,10,0.5); }
+    .legend-pin.taisha  { background:rgba(124,58,237,0.85); border-color:#c4a8ff; box-shadow:0 0 5px rgba(124,58,237,0.5); }
+    .legend-pin.ichi    { background:rgba(232,48,32,0.85);  border-color:#ff9a8a; box-shadow:0 0 5px rgba(232,48,32,0.5); }
+    .legend-pin.ni      { background:rgba(26,80,216,0.85);  border-color:#88b4ff; box-shadow:0 0 5px rgba(26,80,216,0.5); }
+    .legend-pin.meisha  { background:rgba(5,150,105,0.85);  border-color:#6ee7b7; box-shadow:0 0 5px rgba(5,150,105,0.5); }
+    .legend-pin.meisha2 { background:rgba(2,132,199,0.85);  border-color:#7dd3fc; box-shadow:0 0 5px rgba(2,132,199,0.5); }
+    .legend-pin.meisha3 { background:rgba(180,83,9,0.85);   border-color:#fcd34d; box-shadow:0 0 5px rgba(180,83,9,0.5); }
+    .legend-pin.hachiman{ background:rgba(190,24,93,0.85);  border-color:#f9a8d4; box-shadow:0 0 5px rgba(190,24,93,0.5); }
+    .legend-pin.inari   { background:rgba(13,148,136,0.85); border-color:#5eead4; box-shadow:0 0 5px rgba(13,148,136,0.5); }
+    .legend-label       { font-size:11px; line-height:1.3; }
+    .legend-label strong{ display:block; color:#d4b880; }
+    .legend-label span  { color:#706050; font-size:10px; }
+
+  /* ============================================================
+     スマホ対応（700px以下）
+  ============================================================ */
+  @media (max-width: 700px) {
+
+    /* ── ヘッダー：縦積みレイアウト ── */
+    header {
+      padding: 7px 10px 4px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .torii-icon { font-size: 20px; }
+    header h1 { font-size: 13px; white-space: normal; line-height: 1.3; }
+    header p  { display: none; }
+    .title-full  { display: none; }
+    .title-short { display: inline; }
+
+    /* フィルターボタンを横スクロール一列に */
+    .controls {
+      margin-left: 0;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      gap: 5px;
+      padding-bottom: 3px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .controls::-webkit-scrollbar { display: none; }
+    .ctrl-divider { display: none; }
+    .stats { display: none; }
+
+    .filter-btn {
+      padding: 4px 9px;
+      font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    /* ── サイドバー → ボトムシート ── */
+    #sidebar {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      top: auto !important;
+      width: 100% !important;
+      height: 55vh;
+      border-left: none;
+      border-top: 2px solid #6b3a1f;
+      z-index: 2000;
+      transform: translateY(0);
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transition: transform 0.28s ease;
+    }
+    #sidebar.collapsed {
+      transform: translateY(101%);
+      pointer-events: none !important;
+    }
+
+    /* ── 引き出しボタン → 画面下中央に浮かせる ── */
+    #sidebar-open-btn {
+      position: fixed !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      writing-mode: horizontal-tb !important;
+      border-radius: 20px !important;
+      border: 1.5px solid #6b3a1f !important;
+      padding: 8px 22px !important;
+      font-size: 13px !important;
+      letter-spacing: 0.12em;
+      background: rgba(30,14,6,0.93) !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    }
+    #sidebar-open-btn.visible { display: block; }
+
+    /* ── 凡例：スマホでは非表示 ── */
+    .legend { display: none !important; }
+
+    /* ── ポップアップ：スマホ幅に合わせる ── */
+    .popup-content { min-width: 200px; max-width: 80vw; }
+    .popup-name    { font-size: 15px; }
+    .popup-reason  { font-size: 10px; line-height: 1.5; }
+    .shrine-popup .leaflet-popup-content-wrapper { max-width: 82vw; }
+  }
+
+  /* デスクトップ: title-short は非表示 */
+  @media (min-width: 701px) {
+    .title-short { display: none; }
+    .header-top  { display: contents; }
+  }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-top"><div class="torii-icon">⛩</div>
+  <div>
+    <h1><span class="title-full">全国神社マップ — 神宮・大社・一宮・二宮・名社１〜３</span><span class="title-short">神社マップ</span></h1>
+    <p>旧国・令制国を基準とした格式神社の分布</p>
+  </div></div>
+  <div class="controls">
+    <button class="filter-btn sanpai" onclick="toggleFilter('sanpai')"><span class="dot" style="background:#f5d08a;box-shadow:0 0 5px #f5d08a"></span> 参拝済み</button>
+    <button class="filter-btn jingu"  onclick="toggleFilter('jingu')" ><span class="dot gold"  ></span> 神宮</button>
+    <button class="filter-btn taisha" onclick="toggleFilter('taisha')"><span class="dot purple"></span> 大社</button>
+    <button class="filter-btn ichi"   onclick="toggleFilter('ichi')"  ><span class="dot red"   ></span> 一宮</button>
+    <button class="filter-btn meisha" onclick="toggleFilter('meisha')" ><span class="dot green"></span> 名社１</button>
+    <button class="filter-btn more-toggle" id="more-toggle-btn" onclick="toggleMoreFilters()">▾ その他のタグ</button>
+    <div id="more-filters" class="more-filters">
+      <button class="filter-btn ni" onclick="toggleFilter('ni')"><span class="dot blue"></span> 二宮</button>
+      <button class="filter-btn meisha2" onclick="toggleFilter('meisha2')"><span class="dot cyan"></span> 名社２</button>
+      <button class="filter-btn meisha3" onclick="toggleFilter('meisha3')"><span class="dot orange"></span> 名社３</button>
+      <button class="filter-btn hachiman" onclick="toggleFilter('hachiman')"><span class="dot" style="background:#be185d;box-shadow:0 0 5px #be185d"></span> 八幡</button>
+      <button class="filter-btn inari" onclick="toggleFilter('inari')"><span class="dot" style="background:#0d9488;box-shadow:0 0 5px #0d9488"></span> 稲荷</button>
+      <button class="filter-btn kinun" onclick="toggleFilter('kinun')" ><span class="dot" style="background:#ffd700;box-shadow:0 0 5px #ffd700"></span> 金運</button>
+      <button class="filter-btn kaiun" onclick="toggleFilter('kaiun')" ><span class="dot" style="background:#ff7a3e;box-shadow:0 0 5px #ff7a3e"></span> 開運</button>
+    </div>
+    <div class="ctrl-divider"></div>
+    <button class="filter-btn all-show" onclick="showAll()">全表示</button>
+    <button class="filter-btn all-hide" onclick="hideAll()">全非表示</button>
+    <div class="stats" id="stats">読み込み中...</div>
+  </div>
+</header>
+
+<div id="map-area">
+  <div id="map"></div>
+
+  <!-- ── 右サイドバー ── -->
+  <div id="sidebar">
+    <div class="sidebar-top">
+      <span class="sidebar-title">⛩ 神社リスト</span>
+      <span class="sidebar-count" id="sidebar-count"></span>
+      <button class="sidebar-toggle-btn" onclick="toggleSidebar()">◀ 閉じる</button>
+    </div>
+    <div id="sidebar-list"></div>
+  </div>
+
+  <!-- サイドバーを閉じたときに出る開くボタン -->
+  <button id="sidebar-open-btn" onclick="toggleSidebar()">リスト</button>
+
+  <div class="legend">
+    <div class="legend-title">凡 例</div>
+    <div class="legend-item"><div class="legend-pin jingu" ></div><div class="legend-label"><strong>神宮</strong><span>〜神宮の称号を持つ社</span></div></div>
+    <div class="legend-item"><div class="legend-pin taisha"></div><div class="legend-label"><strong>大社</strong><span>〜大社の称号を持つ社</span></div></div>
+    <div class="legend-item"><div class="legend-pin ichi"  ></div><div class="legend-label"><strong>一宮</strong><span>旧国最高格式の神社</span></div></div>
+    <div class="legend-item"><div class="legend-pin ni"    ></div><div class="legend-label"><strong>二宮</strong><span>旧国第二格式の神社</span></div></div>
+    <div class="legend-item"><div class="legend-pin meisha" ></div><div class="legend-label"><strong>名社１</strong><span>勅祭社・世界遺産・著名社</span></div></div>
+    <div class="legend-item"><div class="legend-pin meisha2"></div><div class="legend-label"><strong>名社２</strong><span>氷川・大神宮など著名社</span></div></div>
+    <div class="legend-item"><div class="legend-pin meisha3"></div><div class="legend-label"><strong>名社３</strong><span>地名代表社・浅間神社系</span></div></div>
+    <div class="legend-item"><div class="legend-pin hachiman"></div><div class="legend-label"><strong>八幡</strong><span>八幡宮・八幡神社</span></div></div>
+    <div class="legend-item"><div class="legend-pin inari"></div><div class="legend-label"><strong>稲荷</strong><span>稲荷神社</span></div></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const PRIORITY = { jingu:10, taisha:9, ichi:8, ni:7, meisha:6, meisha2:5, hachiman:4, inari:3, meisha3:2, kinun:1, kaiun:0 };
+
+// reason フィールド: 名社のみに付く「なぜ著名か」の説明
+const shrines = [
+  // ── 北海道 ──
+  { pref:"北海道", name:"北海道神宮",         tags:["ichi"],          province:"蝦夷",         lat:43.05424, lng:141.30771, deity:"大国魂神・大那牟遅神・少彦名神・明治天皇" },
+
+  // ── 東北 ──
+  { pref:"青森",   name:"岩木山神社",          tags:["ichi"],          province:"津軽国",       lat:40.61606, lng:140.36546, deity:"顕国魂神・多都比姫神ほか" },
+  { pref:"青森",   name:"善知鳥神社",          tags:["ni"],            province:"津軽国",       lat:40.82669, lng:140.74244, deity:"宇賀能売命" },
+  { pref:"岩手",   name:"駒形神社",            tags:["ichi"],          province:"陸中国",       lat:39.13661, lng:141.13801, deity:"天照大御神ほか六柱" },
+  { pref:"宮城",   name:"鹽竈神社",            tags:["ichi"],          province:"陸奥国",       lat:38.31875, lng:141.01256, deity:"塩土老翁神・武甕槌神・経津主神" },
+  { pref:"宮城",   name:"志波彦神社",          tags:["ni"],            province:"陸奥国",       lat:38.31875, lng:141.01256, deity:"志波彦神" },
+  { pref:"秋田",   name:"太平山三吉神社",      tags:["ichi"],          province:"出羽国",       lat:39.72617, lng:140.14439, deity:"三吉霊神・大己貴神・少彦名神" },
+  { pref:"山形",   name:"鳥海山大物忌神社",    tags:["ichi"],          province:"出羽国",       lat:39.09769, lng:140.04869, deity:"大物忌神" },
+  { pref:"山形",   name:"月山神社",            tags:["ni"],            province:"出羽国",       lat:38.54870, lng:140.02696, deity:"月読命" },
+  { pref:"福島",   name:"伊佐須美神社",        tags:["ichi"],          province:"岩代国",       lat:37.45690, lng:139.84072, deity:"伊弉諾尊・伊弉冉尊ほか" },
+
+  // ── 関東 ──
+  { pref:"茨城",   name:"鹿島神宮",            tags:["ichi","jingu"],  province:"常陸国",       lat:35.96878, lng:140.63154, deity:"武甕槌大神" },
+  { pref:"茨城",   name:"静神社",              tags:["ni"],            province:"常陸国",       lat:36.50214, lng:140.42220, deity:"建葉槌命" },
+  { pref:"栃木",   name:"日光二荒山神社",      tags:["ichi"],          province:"下野国",       lat:36.75895, lng:139.59643, deity:"大己貴命・田心姫命・味耜高彦根命" },
+  { pref:"栃木",   name:"日光東照宮",          tags:["meisha"],        province:"下野国",       lat:36.75917, lng:139.59861, deity:"徳川家康（東照大権現）", reason:"旧別格官幣社。江戸幕府の権威の象徴。世界遺産登録（1999年）。" },
+  { pref:"栃木",   name:"宇都宮二荒山神社",    tags:["ichi"],            province:"下野国",       lat:36.56266, lng:139.88573, deity:"豊城入彦命" },
+  { pref:"群馬",   name:"貫前神社",            tags:["ichi"],          province:"上野国",       lat:36.25514, lng:138.85788, deity:"経津主神・姫大神" },
+  { pref:"群馬",   name:"赤城神社",            tags:["ni"],            province:"上野国",       lat:36.55281, lng:139.18350, deity:"大己貴命" },
+  { pref:"群馬",   name:"榛名神社",            tags:["meisha"],        province:"上野国",       lat:36.45424, lng:138.85016, deity:"火産霊神・埴山姫神", reason:"上毛三山の一・榛名山の山岳信仰。奇岩に囲まれた霊場として名高い。" },
+  { pref:"埼玉",   name:"武蔵一宮氷川神社",    tags:["ichi"],          province:"武蔵国",       lat:35.91704, lng:139.62946, deity:"須佐之男命・稲田姫命・大己貴命" },
+  { pref:"埼玉",   name:"金鑚神社",            tags:["ni"],            province:"武蔵国",       lat:36.18042, lng:139.07292, deity:"天照大御神・素戔嗚尊" },
+  { pref:"埼玉",   name:"三峯神社",            tags:["meisha"],        province:"武蔵国",       lat:35.92543, lng:138.93040, deity:"伊弉諾命・伊弉冉命", reason:"秩父三社のひとつ。眷属に狼を持ち、強力な気が宿るとされる関東屈指のパワースポット。" },
+  { pref:"千葉",   name:"玉前神社",            tags:["ichi"],          province:"上総国",       lat:35.37626, lng:140.36053, deity:"玉依姫命" },
+  { pref:"千葉",   name:"香取神宮",            tags:["ichi","jingu"],    province:"下総国",       lat:35.88621, lng:140.52852, deity:"経津主大神" },
+  { pref:"東京",   name:"小野神社",            tags:["ichi"],          province:"武蔵国",       lat:35.65300, lng:139.44227, deity:"天下春命" },
+  { pref:"東京",   name:"二宮神社",            tags:["ni"],            province:"武蔵国",       lat:35.72689, lng:139.31357, deity:"国常立尊" },
+  { pref:"東京",   name:"明治神宮",            tags:["jingu"],         province:"武蔵国",       lat:35.67611, lng:139.69917, deity:"明治天皇・昭憲皇太后" },
+  { pref:"東京",   name:"神田神社（神田明神）", tags:["meisha"],       province:"武蔵国",       lat:35.70194, lng:139.76778, deity:"大己貴命・少彦名命・平将門命", reason:"江戸総鎮守。旧府社・別表神社。江戸城・将軍家の守護として崇敬された。" },
+  { pref:"東京",   name:"日枝神社",            tags:["meisha"],        province:"武蔵国",       lat:35.67472, lng:139.73958, deity:"大山咋神", reason:"勅祭社。旧官幣大社。江戸城（皇居）の産土神。山王祭は天下三大祭のひとつ。" },
+  { pref:"東京",   name:"大国魂神社",          tags:["meisha"],        province:"武蔵国",       lat:35.66733, lng:139.47900, deity:"大国魂大神（大己貴命）", reason:"武蔵国総社。旧官幣小社。武蔵国内の神々を合祀する国の鎮守。" },
+  { pref:"東京",   name:"靖国神社",            tags:["meisha"],        province:"武蔵国",       lat:35.69396, lng:139.74269, deity:"国事殉難者の御霊", reason:"旧別格官幣社。勅祭社。明治以降の戦没者246万余柱を祀る。春秋大祭に勅使参向。" },
+  { pref:"神奈川", name:"寒川神社",            tags:["ichi"],          province:"相模国",       lat:35.37979, lng:139.38361, deity:"寒川比古命・寒川比女命" },
+  { pref:"神奈川", name:"川勾神社",            tags:["ichi"],            province:"相模国",       lat:35.30033, lng:139.23812, deity:"大名牟遅命ほか" },
+
+  // ── 甲信越・北陸 ──
+  { pref:"新潟",    name:"弥彦神社",           tags:["ichi"],          province:"越後国",       lat:37.70655, lng:138.82635, deity:"天香山命" },
+  { pref:"新潟",    name:"居多神社",           tags:["ichi"],            province:"越後国",       lat:37.16646, lng:138.22334, deity:"大己貴命・奴奈川姫命・建御名方命" },
+  { pref:"山梨・静岡", name:"富士山本宮浅間大社", tags:["ichi","taisha"], province:"駿河国・甲斐国", lat:35.22740, lng:138.61017, deity:"木花之佐久夜毘売命" },
+  { pref:"山梨",    name:"美和神社",           tags:["ni"],            province:"甲斐国",       lat:35.62992, lng:138.65356, deity:"大物主神" },
+  { pref:"静岡",    name:"三嶋大社",           tags:["ichi","taisha"], province:"伊豆国",       lat:35.12266, lng:138.91870, deity:"大山祇命・事代主神" },
+  { pref:"静岡",    name:"久能山東照宮",       tags:["meisha"],        province:"駿河国",       lat:34.96474, lng:138.46764, deity:"徳川家康（東照大権現）", reason:"旧別格官幣社。徳川家康が最初に祀られた社。国宝の社殿が有名。" },
+  { pref:"静岡",    name:"小國神社",           tags:["ichi"],            province:"遠江国",       lat:34.84717, lng:137.89951, deity:"大己貴命" },
+  { pref:"長野",    name:"諏訪大社本宮",       tags:["ichi","taisha"], province:"信濃国",       lat:35.99837, lng:138.11888, deity:"建御名方神・八坂刀売神" },
+  { pref:"長野",    name:"南宮神社",           tags:["ni"],            province:"信濃国",       lat:35.8971, lng:137.7697, deity:"金山彦命" },
+  { pref:"長野",    name:"戸隠神社",           tags:["meisha"],        province:"信濃国",       lat:36.74250, lng:138.08513, deity:"天手力雄命", reason:"奥社・中社・宝光社・九頭龍社・火之御子社の五社から成る。天岩戸神話ゆかりの霊場。" },
+  { pref:"富山",    name:"高瀬神社",           tags:["ichi"],          province:"越中国",       lat:36.57144, lng:136.94829, deity:"大己貴神" },
+  { pref:"富山",    name:"気多神社",           tags:["ichi"],            province:"越中国",       lat:36.80021, lng:137.04466, deity:"大己貴命" },
+  { pref:"石川",    name:"気多大社",           tags:["ichi","taisha"], province:"能登国",       lat:36.92600, lng:136.76800, deity:"大己貴命" },
+  { pref:"石川",    name:"白山比咩神社",       tags:["ichi"],            province:"加賀国",       lat:36.43489, lng:136.63583, deity:"白山比咩大神・伊弉諾尊・伊弉冉尊" },
+  { pref:"福井",    name:"気比神宮",           tags:["ichi","jingu"],  province:"越前国",       lat:35.65472, lng:136.07473, deity:"伊奢沙別命ほか七柱" },
+  { pref:"福井",    name:"劔神社",             tags:["ni"],            province:"越前国",       lat:35.95784, lng:136.05539, deity:"気比大神ほか" },
+
+  // ── 東海 ──
+  { pref:"愛知",    name:"真清田神社",         tags:["ichi"],          province:"尾張国",       lat:35.30732, lng:136.80197, deity:"天火明命" },
+  { pref:"愛知",    name:"大縣神社",           tags:["ni"],            province:"尾張国",       lat:35.33008, lng:136.96700, deity:"大縣大神" },
+  { pref:"愛知",    name:"熱田神宮",           tags:["jingu"],         province:"尾張国",       lat:35.12651, lng:136.90870, deity:"熱田大神（草薙剣）" },
+  { pref:"岐阜",    name:"南宮大社",           tags:["ichi","taisha"], province:"美濃国",       lat:35.36078, lng:136.52496, deity:"金山彦命" },
+  { pref:"岐阜",    name:"伊奈波神社",         tags:["ni"],            province:"美濃国",       lat:35.42723, lng:136.77081, deity:"五十瓊敷入彦命" },
+  { pref:"三重",    name:"椿大神社",           tags:["ichi"],          province:"伊勢国",       lat:34.96430, lng:136.45203, deity:"猿田彦大神" },
+  { pref:"三重",    name:"多度大社",           tags:["meisha"],        province:"伊勢国",       lat:35.13444, lng:136.62391, deity:"天津彦根命", reason:"旧国幣大社。「北伊勢大神宮」と称され伊勢神宮に次ぐ格式。上げ馬神事でも有名。" },
+  { pref:"三重",    name:"伊勢神宮（内宮）",   tags:["jingu"],         province:"伊勢国",       lat:34.45498, lng:136.72516, deity:"天照坐皇大御神" },
+  { pref:"三重",    name:"伊勢神宮（外宮）",   tags:["jingu"],         province:"伊勢国",       lat:34.48722, lng:136.70333, deity:"豊受大御神" },
+
+  // ── 近畿 ──
+  { pref:"滋賀",    name:"建部大社",           tags:["ichi","taisha"], province:"近江国",       lat:34.97361, lng:135.91350, deity:"日本武尊・大己貴命" },
+  { pref:"滋賀",    name:"苗村神社",           tags:["ni"],            province:"近江国",       lat:35.06428, lng:136.12770, deity:"大国主命ほか" },
+  { pref:"滋賀",    name:"多賀大社",           tags:["taisha"],        province:"近江国",       lat:35.22513, lng:136.29101, deity:"伊弉諾尊・伊弉冉尊" },
+  { pref:"滋賀",    name:"近江神宮",           tags:["meisha"],        province:"近江国",       lat:35.03244, lng:135.85131, deity:"天智天皇", reason:"勅祭社。旧官幣大社。近江遷都の地に天智天皇を祀る。かるたの聖地としても知られる。" },
+  { pref:"京都",    name:"上賀茂神社",         tags:["ichi"],          province:"山城国",       lat:35.06051, lng:135.75275, deity:"賀茂別雷大神" },
+  { pref:"京都",    name:"下鴨神社",           tags:["ichi"],            province:"山城国",       lat:35.03907, lng:135.77301, deity:"賀茂御祖大神" },
+  { pref:"京都",    name:"平安神宮",           tags:["jingu"],         province:"山城国",       lat:35.01667, lng:135.78222, deity:"桓武天皇・孝明天皇" },
+  { pref:"京都",    name:"伏見稲荷大社",       tags:["taisha","inari"],        province:"山城国",       lat:34.96720, lng:135.77339, deity:"宇迦之御魂大神ほか五柱" },
+  { pref:"京都",    name:"石清水八幡宮",       tags:["meisha","hachiman"],        province:"山城国",       lat:34.87972, lng:135.70000, deity:"応神天皇・比咩大神・神功皇后", reason:"勅祭社。旧官幣大社。二所宗廟のひとつ。伊勢神宮に次ぐ格式とも。" },
+  { pref:"京都",    name:"松尾大社",           tags:["taisha"],        province:"山城国",       lat:34.99997, lng:135.68501, deity:"大山咋神・市杵島姫命" },
+  { pref:"京都",    name:"北野天満宮",         tags:["meisha"],        province:"山城国",       lat:35.02920, lng:135.73501, deity:"菅原道真", reason:"旧官幣中社。全国約12,000社の天満宮・天神社の総本社。学問の神として全国的な信仰を集める。" },
+  { pref:"京都",    name:"貴船神社",           tags:["meisha"],        province:"山城国",       lat:35.12173, lng:135.76299, deity:"高龗神", reason:"旧官幣中社。全国450社以上の貴船神社の総本社。水の神。二十二社の一。" },
+  { pref:"京都",    name:"八坂神社",           tags:["meisha"],        province:"山城国",       lat:35.00364, lng:135.77853, deity:"素戔嗚尊・奇稲田姫命・八柱御子神", reason:"旧官幣大社。祇園祭の中心神社。全国約2,300社の祇園信仰の総本社。" },
+  { pref:"大阪",    name:"住吉大社",           tags:["ichi","taisha"], province:"摂津国",       lat:34.61251, lng:135.49293, deity:"底筒男命・中筒男命・表筒男命・息長帯比売命" },
+  { pref:"大阪",    name:"枚岡神社",           tags:["ichi"],            province:"河内国",       lat:34.66995, lng:135.65107, deity:"天児屋根命・比売御神ほか" },
+  { pref:"兵庫",    name:"伊和神社",           tags:["ichi"],          province:"播磨国",       lat:35.08769, lng:134.58642, deity:"大己貴神" },
+  { pref:"兵庫",    name:"粒坐天照神社",       tags:["ni"],            province:"播磨国",       lat:34.86362, lng:134.54030, deity:"天照国照彦火明命" },
+  { pref:"兵庫",    name:"伊弉諾神宮",         tags:["jingu","ichi"],         province:"淡路国",       lat:34.46020, lng:134.85250, deity:"伊弉諾大神・伊弉冉大神" },
+  { pref:"兵庫",    name:"生田神社",           tags:["meisha"],        province:"摂津国",       lat:34.69477, lng:135.19069, deity:"稚日女尊", reason:"旧官幣中社。神戸の総鎮守。縁結びの神として信仰厚い。社号が「生田」の地名の由来。" },
+  { pref:"奈良",    name:"大神神社",           tags:["ichi"],          province:"大和国",       lat:34.52910, lng:135.85305, deity:"大物主大神" },
+  { pref:"奈良",    name:"石上神宮",           tags:["ni","jingu"],    province:"大和国",       lat:34.59788, lng:135.85167, deity:"布都御魂大神ほか" },
+  { pref:"奈良",    name:"春日大社",           tags:["taisha"],        province:"大和国",       lat:34.68134, lng:135.84835, deity:"天児屋根命・比売神・経津主命・武甕槌命" },
+  { pref:"奈良",    name:"橿原神宮",           tags:["jingu"],         province:"大和国",       lat:34.48802, lng:135.78758, deity:"神武天皇・媛蹈韛五十鈴媛命" },
+  { pref:"奈良",    name:"吉野神宮",           tags:["meisha"],        province:"大和国",       lat:34.38444, lng:135.84556, deity:"後醍醐天皇", reason:"旧官幣大社。南朝の吉野に後醍醐天皇を祀る。吉野山の桜と南朝の歴史で知られる。" },
+  { pref:"和歌山",  name:"日前神宮・國懸神宮", tags:["ichi","jingu"],  province:"紀伊国",       lat:34.22840, lng:135.20199, deity:"日前大神・国懸大神" },
+  { pref:"和歌山",  name:"竈山神社",           tags:["ni"],            province:"紀伊国",       lat:34.20090, lng:135.20462, deity:"彦五瀬命" },
+  { pref:"和歌山",  name:"熊野本宮大社",       tags:["taisha"],        province:"紀伊国",       lat:33.84040, lng:135.77355, deity:"家都美御子大神" },
+  { pref:"和歌山",  name:"熊野速玉大社",       tags:["taisha"],        province:"紀伊国",       lat:33.73209, lng:135.98361, deity:"熊野速玉大神・熊野夫須美大神" },
+  { pref:"和歌山",  name:"熊野那智大社",       tags:["taisha"],        province:"紀伊国",       lat:33.66857, lng:135.89049, deity:"熊野夫須美大神" },
+
+  // ── 中国 ──
+  { pref:"鳥取",    name:"宇倍神社",           tags:["ichi"],          province:"因幡国",       lat:35.48079, lng:134.26907, deity:"武内宿禰命" },
+  { pref:"鳥取",    name:"倭文神社",           tags:["ichi"],            province:"伯耆国",       lat:35.49024, lng:133.90296, deity:"建葉槌命・下照姫命" },
+  { pref:"島根",    name:"熊野大社",           tags:["ichi","taisha"], province:"出雲国",       lat:35.37312, lng:133.07060, deity:"神祖熊野大神櫛御気野命" },
+  { pref:"島根",    name:"出雲大社",           tags:["taisha","ichi"],        province:"出雲国",       lat:35.40194, lng:132.68544, deity:"大国主大神" },
+  { pref:"島根",    name:"須佐神社",           tags:["meisha"],        province:"出雲国",       lat:35.23459, lng:132.73701, deity:"須佐之男命", reason:"延喜式内名神大社。素戔嗚尊が最後に鎮まった地と伝わる。出雲でも特に強い霊気を持つとされる。" },
+  { pref:"島根",    name:"佐太神社",           tags:["ni"],            province:"出雲国",       lat:35.50892, lng:133.00644, deity:"佐太大神" },
+  { pref:"岡山",    name:"吉備津彦神社",       tags:["ichi"],          province:"備前国",       lat:34.67672, lng:133.86386, deity:"大吉備津彦大神" },
+  { pref:"岡山",    name:"中山神社",           tags:["ichi"],            province:"美作国",       lat:35.10016, lng:133.99470, deity:"鏡作神・天糠戸神" },
+  { pref:"広島",    name:"速谷神社",           tags:["ichi"],          province:"安芸国",       lat:34.35916, lng:132.30875, deity:"飽速玉男命" },
+  { pref:"広島",    name:"吉備津神社",         tags:["ichi"],            province:"備後国",       lat:34.56922, lng:133.27103, deity:"大吉備津彦命" },
+  { pref:"広島",    name:"厳島神社",           tags:["meisha","ichi"],        province:"安芸国",       lat:34.29577, lng:132.32011, deity:"宗像三女神（市杵島姫命ほか）", reason:"旧官幣中社。世界遺産登録（1996年）。海上に立つ大鳥居と社殿が日本三景のひとつ。平清盛ゆかりの社。" },
+  { pref:"山口",    name:"住吉神社",           tags:["ichi"],          province:"長門国",       lat:33.99978, lng:130.95654, deity:"表筒男命・中筒男命・底筒男命" },
+  { pref:"山口",    name:"玉祖神社",           tags:["ichi"],            province:"周防国",       lat:34.05755, lng:131.53381, deity:"玉祖命" },
+
+  // ── 四国 ──
+  { pref:"徳島",    name:"大麻比古神社",       tags:["ichi"],          province:"阿波国",       lat:34.17075, lng:134.50256, deity:"大麻比古神・猿田彦神" },
+  { pref:"徳島",    name:"事代主神社",         tags:["ni"],            province:"阿波国",       lat:34.17452, lng:134.60032, deity:"事代主命" },
+  { pref:"香川",    name:"田村神社",           tags:["ichi"],          province:"讃岐国",       lat:34.28640, lng:134.02731, deity:"倭迹迹日百襲姫命ほか五柱" },
+  { pref:"香川",    name:"高家神社",           tags:["ni"],            province:"讃岐国",       lat:34.33633, lng:133.90882, deity:"天太玉命" },
+  { pref:"香川",    name:"金刀比羅宮",         tags:["meisha"],        province:"讃岐国",       lat:34.18426, lng:133.80961, deity:"大物主神・崇徳天皇", reason:"旧国幣中社。「こんぴらさん」として全国的に有名。海の守護神として船乗りの信仰を集めてきた。" },
+  { pref:"愛媛",    name:"大山祇神社",         tags:["ichi"],          province:"伊予国",       lat:34.24789, lng:133.00571, deity:"大山積神" },
+  { pref:"愛媛",    name:"三嶋神社",           tags:["ni"],            province:"伊予国",       lat:33.89610, lng:133.10721, deity:"大山積神" },
+  { pref:"高知",    name:"土佐神社",           tags:["ichi"],          province:"土佐国",       lat:33.59266, lng:133.57704, deity:"味鋤高彦根神・一言主神" },
+  { pref:"高知",    name:"朝倉神社",           tags:["ni"],            province:"土佐国",       lat:33.55335, lng:133.48175, deity:"朝倉太郎彦命" },
+
+  // ── 九州 ──
+  { pref:"福岡",    name:"住吉神社",           tags:["ichi"],          province:"筑前国",       lat:33.58575, lng:130.41375, deity:"表筒男神・中筒男神・底筒男神" },
+  { pref:"福岡",    name:"筥崎宮",             tags:["ichi"],            province:"筑前国",       lat:33.61475, lng:130.42289, deity:"応神天皇・神功皇后・玉依姫命" },
+  { pref:"福岡",    name:"宗像大社",           tags:["meisha"],        province:"筑前国",       lat:33.83083, lng:130.51417, deity:"沖津宮・中津宮・辺津宮の宗像三女神", reason:"旧官幣大社。世界遺産登録（2017年）。全国6,200社以上の宗像神社の総本社。「神宿る島」沖ノ島を擁する。" },
+  { pref:"福岡",    name:"太宰府天満宮",       tags:["meisha"],        province:"筑前国",       lat:33.52143, lng:130.53500, deity:"菅原道真", reason:"旧官幣中社。北野天満宮と並ぶ天満宮の総本社。道真公の墓所に建立。年間約1,000万人が参拝。" },
+  { pref:"佐賀",    name:"千栗八幡宮",         tags:["ichi","hachiman"],          province:"肥前国",       lat:33.33140, lng:130.47900, deity:"応神天皇" },
+  { pref:"佐賀",    name:"與止日女神社",       tags:["ichi"],            province:"肥前国",       lat:33.32627, lng:130.26829, deity:"淀姫神" },
+  { pref:"長崎",    name:"海神神社",           tags:["ichi"],          province:"対馬国",       lat:34.46409, lng:129.28304, deity:"綿津見神" },
+  { pref:"長崎",    name:"住吉神社",           tags:["ni"],            province:"壱岐国",       lat:33.78837, lng:129.70650, deity:"上筒男命ほか" },
+  { pref:"熊本",    name:"阿蘇神社",           tags:["ichi"],          province:"肥後国",       lat:32.94778, lng:131.11597, deity:"健磐龍命ほか十二神" },
+  { pref:"熊本",    name:"健軍神社",           tags:["ni"],            province:"肥後国",       lat:32.78472, lng:130.75528, deity:"健磐龍命" },
+  { pref:"大分",    name:"宇佐神宮",           tags:["ichi","jingu"],  province:"豊前国",       lat:33.52602, lng:131.37463, deity:"八幡大神・比売大神・神功皇后" },
+  { pref:"大分",    name:"西寒多神社",         tags:["ichi"],            province:"豊後国",       lat:33.17294, lng:131.59828, deity:"天照大御神" },
+  { pref:"宮崎",    name:"都農神社",           tags:["ichi"],          province:"日向国",       lat:32.26313, lng:131.55867, deity:"大己貴命" },
+  { pref:"宮崎",    name:"霧島神宮",           tags:["ni","jingu"],    province:"日向国",       lat:31.85864, lng:130.87132, deity:"天饒石国饒石天津日高彦火瓊瓊杵尊" },
+  { pref:"宮崎",    name:"高千穂神社",         tags:["meisha"],        province:"日向国",       lat:32.70667, lng:131.30167, deity:"三毛入野命・十社大明神", reason:"旧国幣小社。天孫降臨の地・高千穂峡に鎮座。夜神楽発祥の社として全国的に知られる。" },
+  { pref:"鹿児島",  name:"鹿児島神宮",         tags:["ichi","jingu"],  province:"大隅国",       lat:31.75371, lng:130.73787, deity:"天津日高彦穂穂出見命・豊玉比売命" },
+  { pref:"鹿児島",  name:"新田神社",           tags:["ichi"],            province:"薩摩国",       lat:31.82773, lng:130.29271, deity:"天津日高彦穂穂出見命" },
+  { pref:"沖縄",    name:"波上宮",             tags:["ichi"],          province:"琉球",         lat:26.22064, lng:127.67135, deity:"熊野三所権現" },
+
+  // ══════════════════════════════════════════
+  // ── 名社２：八幡宮の有名どころ ──
+  // ══════════════════════════════════════════
+  { pref:"神奈川",  name:"鶴岡八幡宮",         tags:["meisha2","hachiman"],       province:"相模国",       lat:35.32608, lng:139.55642, deity:"応神天皇・比売神・神功皇后", reason:"八幡宮。源頼朝が鎌倉幕府の守護神として創建。日本三大八幡宮の一。鎌倉の総鎮守として年間数百万人が参拝。" },
+  { pref:"大阪",    name:"誉田八幡宮",          tags:["meisha2","hachiman"],       province:"河内国",       lat:34.55907, lng:135.61125, deity:"応神天皇・仲哀天皇・神功皇后", reason:"八幡宮。全国八幡社の宗廟と称される。応神天皇陵（誉田御廟山古墳）に隣接する日本最古の八幡宮。" },
+  { pref:"東京",    name:"大宮八幡宮",          tags:["meisha2","hachiman"],       province:"武蔵国",       lat:35.68238, lng:139.63966, deity:"応神天皇・仲哀天皇・神功皇后", reason:"八幡宮。武蔵国八幡一宮。境内面積は都内屈指。「東京のへそ」に位置する。" },
+
+  // ── 名社２：稲荷の有名どころ ──
+  { pref:"宮城",    name:"竹駒神社",            tags:["meisha2"],       province:"陸奥国",       lat:38.10500, lng:140.86200, deity:"倉稲魂命・保食神・稚産霊神", reason:"稲荷。日本三大稲荷の一（一説）。参拝者数は東北屈指。1,200年以上の歴史を持つ。" },
+  { pref:"茨城",    name:"笠間稲荷神社",        tags:["meisha2","inari"],       province:"常陸国",       lat:36.38610, lng:140.25400, deity:"宇迦之御魂神", reason:"稲荷。日本三大稲荷の一。約1,300年の歴史。全国から年間350万人超が参拝。" },
+  { pref:"愛知",    name:"豊川稲荷",            tags:["meisha2","inari"],       province:"三河国",       lat:34.82452, lng:137.39201, deity:"豊川ダキニ真天（荼枳尼眞天）", reason:"稲荷。日本三大稲荷の一。正式には「妙厳寺」（曹洞宗）。商売繁盛の神として全国的に信仰。" },
+  { pref:"岡山",    name:"最上稲荷",            tags:["meisha2","inari"],       province:"備中国",       lat:34.70896, lng:133.83341, deity:"最上位経王大菩薩", reason:"稲荷。日本三大稲荷の一（一説）。正式名は「最上稲荷山妙教寺」（日蓮宗）。大鳥居が有名。" },
+  { pref:"佐賀",    name:"祐徳稲荷神社",        tags:["meisha2","inari"],       province:"肥前国",       lat:33.07361, lng:130.10833, deity:"倉稲魂大神・大宮売大神・猿田彦大神", reason:"稲荷。日本三大稲荷の一（一説）。年間300万人の参拝者。切妻屋根の社殿が絶景として有名。" },
+
+  // ── 名社２：現代で一宮と言われているところ ──
+  { pref:"千葉",    name:"安房神社",            tags:["meisha2","ichi"],       province:"安房国",       lat:34.92222, lng:139.83658, deity:"天太玉命・天比理刀咩命ほか", reason:"安房国一宮。旧官幣大社。全国木工・建築の神の総本社。房総半島南端の霊場。" },
+  { pref:"新潟",    name:"度津神社",            tags:["meisha2","ichi"],       province:"佐渡国",       lat:37.86032, lng:138.33074, deity:"五十猛命", reason:"佐渡国一宮。旧国幣中社。佐渡島を代表する格式ある古社。" },
+  { pref:"三重",    name:"敢國神社",            tags:["meisha2","ichi"],       province:"伊賀国",       lat:34.78734, lng:136.16396, deity:"大彦命・少彦名命・金山比咩命", reason:"伊賀国一宮。旧国幣中社。忍者の里・伊賀の守護神として古くから信仰される。" },
+  { pref:"愛知",    name:"砥鹿神社",            tags:["meisha2","ichi"],       province:"三河国",       lat:34.84759, lng:137.42104, deity:"大己貴命", reason:"三河国一宮。旧国幣中社。本宮は本宮山（標高789m）山頂に鎮座する山岳信仰の社。" },
+  { pref:"岐阜",    name:"水無神社",            tags:["meisha2","ichi"],       province:"飛騨国",       lat:36.08523, lng:137.25195, deity:"水無神（三尾神）", reason:"飛騨国一宮。旧国幣中社。高山の山岳霊場に鎮座。全国の水無神社・御霊神社の総本社。" },
+  { pref:"大阪",    name:"大鳥大社",            tags:["meisha2","taisha","ichi"], province:"和泉国",    lat:34.53690, lng:135.46077, deity:"日本武尊・大鳥連祖神", reason:"和泉国一宮。旧官幣大社。全国約280社の大鳥神社の総本社。日本武尊終焉の地と伝わる。" },
+  { pref:"京都",    name:"籠神社",              tags:["meisha2","ichi"],       province:"丹後国",       lat:35.58303, lng:135.19670, deity:"彦火明命・豊受大神ほか", reason:"丹後国一宮。旧国幣中社。天橋立・元伊勢と称される。内宮・外宮の神が最初に鎮座したとされる。" },
+  { pref:"京都",    name:"出雲大神宮",          tags:["meisha2","ichi"],       province:"丹波国",       lat:35.05925, lng:135.57838, deity:"大国主命・三穂津姫命", reason:"丹波国一宮。旧国幣中社。「元出雲」とも呼ばれ出雲大社より古いとする伝承を持つ。" },
+  { pref:"兵庫",    name:"廣田神社",            tags:["meisha2"],       province:"摂津国",       lat:34.75264, lng:135.34014, deity:"天照大神荒魂", reason:"摂津国一宮（一説）。旧官幣大社。神功皇后が三韓征伐からの帰途に創建。阪神タイガースの守護神として知られる。" },
+  { pref:"兵庫",    name:"出石神社",            tags:["meisha2","ichi"],       province:"但馬国",       lat:35.48164, lng:134.87038, deity:"天日槍命・但馬諸神", reason:"但馬国一宮。旧国幣中社。渡来神・天日槍命を祀る。但馬の国の神々を総括する古社。" },
+  { pref:"島根",    name:"物部神社",            tags:["meisha2","ichi"],       province:"石見国",       lat:35.15474, lng:132.51331, deity:"宇摩志麻遅命", reason:"石見国一宮。旧国幣大社。物部氏の祖神を祀る。出雲・石見の文化圏を代表する古社。" },
+  { pref:"岡山",    name:"吉備津神社",          tags:["meisha2","ichi"],       province:"備中国",       lat:34.67069, lng:133.85083, deity:"大吉備津彦命", reason:"備中国一宮。旧官幣中社。吉備津造（比翼入母屋造）の本殿は国宝。吉備の中山を神体とする。" },
+  { pref:"福岡",    name:"高良大社",            tags:["meisha2","taisha","ichi"], province:"筑後国",    lat:33.30158, lng:130.56548, deity:"高良玉垂命・八幡大神・住吉大神", reason:"筑後国一宮。旧官幣大社。九州屈指の大社。鎮座する高良山は筑後川流域を見渡す霊山。" },
+  { pref:"鹿児島",  name:"枚聞神社",            tags:["meisha2","ichi"],       province:"薩摩国",       lat:31.20795, lng:130.53963, deity:"大日孁貴命", reason:"薩摩国一宮（一説）。旧官幣中社。開聞岳を御神体とする。南九州の航海守護として崇められてきた。" },
+
+  // ══════════════════════════════════════════
+  // ── 名社３：地名を代表する神社 ──
+  // ══════════════════════════════════════════
+  { pref:"宮城",   name:"青葉神社",             tags:["meisha3"],       province:"陸奥国",       lat:38.28283, lng:140.86289, deity:"伊達政宗公", reason:"地名代表社。仙台の象徴・伊達政宗を祭神とする。仙台城下・青葉山に鎮座。明治7年創建。" },
+  { pref:"茨城",   name:"常盤神社",             tags:["meisha3"],       province:"常陸国",       lat:36.37460, lng:140.45600, deity:"徳川光圀・徳川斉昭", reason:"地名代表社。水戸黄門（徳川光圀）と烈公（徳川斉昭）を祀る。偕楽園に隣接し水戸の顔。" },
+  { pref:"千葉",   name:"千葉神社",             tags:["meisha3"],       province:"下総国",       lat:35.61181, lng:140.12383, deity:"天之御中主神（妙見菩薩）", reason:"地名代表社。千葉氏の守護神・妙見信仰の総本山。北辰（北極星）を祀る全国唯一の格式。" },
+  { pref:"埼玉",   name:"秩父神社",             tags:["meisha3"],       province:"武蔵国",       lat:35.99788, lng:139.08400, deity:"八意思兼命・知知夫彦命・天之御中主神・秩父宮雍仁親王", reason:"地名代表社。秩父三社のひとつ。2,100年以上の歴史。秩父夜祭（国重要無形民俗文化財）で著名。" },
+  { pref:"神奈川", name:"伊勢山皇大神宮",       tags:["meisha3"],       province:"相模国",       lat:35.45028, lng:139.62611, deity:"天照大御神", reason:"地名代表社。横浜の総鎮守。関東のお伊勢さんとも称される。幕末・明治に横浜が開港した地に鎮座。" },
+  { pref:"石川",   name:"尾山神社",             tags:["meisha3"],       province:"加賀国",       lat:36.56639, lng:136.65528, deity:"前田利家・芳春院", reason:"地名代表社。加賀百万石の祖・前田利家を祀る。和漢洋折衷の神門（重文）がシンボル。金沢の歴史の象徴。" },
+  { pref:"大阪",   name:"大阪天満宮",           tags:["meisha3"],       province:"摂津国",       lat:34.69602, lng:135.51262, deity:"菅原道真", reason:"地名代表社。大阪の天神さん。天神祭（日本三大祭）で著名。学問の神として多くの受験生が参拝。" },
+  { pref:"福岡",   name:"香椎宮",               tags:["meisha3"],       province:"筑前国",       lat:33.65349, lng:130.45266, deity:"仲哀天皇・神功皇后", reason:"地名代表社。旧官幣大社・勅祭社。独自の神体「香椎造」を持つ。神功皇后の三韓征伐ゆかりの地。" },
+  { pref:"長崎",   name:"長崎諏訪神社",         tags:["meisha3"],       province:"肥前国",       lat:32.75438, lng:129.88177, deity:"諏訪大神・森大神・住吉大神", reason:"地名代表社。お諏訪さん。長崎くんち（国重要無形民俗文化財）で全国的に知られる。" },
+  { pref:"熊本",   name:"加藤神社",             tags:["meisha3"],       province:"肥後国",       lat:32.80371, lng:130.70673, deity:"加藤清正", reason:"地名代表社。熊本城の守護神・加藤清正を祀る。熊本城本丸に鎮座し熊本の象徴的存在。" },
+  { pref:"宮崎",   name:"宮崎神宮",             tags:["meisha3","jingu"], province:"日向国",     lat:31.93861, lng:131.42333, deity:"神武天皇・鵜草葺不合命・玉依姫命", reason:"地名代表社・神宮。初代天皇・神武天皇を祀る。旧官幣大社。宮崎の地名の由来とも言われる。" },
+
+  // ── 名社３：浅間神社系の有名どころ ──
+  { pref:"山梨",   name:"北口本宮冨士浅間神社", tags:["meisha3"],       province:"甲斐国",       lat:35.47075, lng:138.79242, deity:"木花開耶姫命・彦火瓊瓊杵命・大山祇神", reason:"浅間神社系。富士山北口登山道の起点。日本最大の木造鳥居が有名。世界文化遺産・富士山の構成資産。" },
+  { pref:"静岡",   name:"静岡浅間神社",         tags:["meisha3"],       province:"駿河国",       lat:34.98361, lng:138.37528, deity:"木花之佐久夜毘売命・大山祇神・瓊瓊杵尊", reason:"浅間神社系。駿府城の総鎮守。神部神社・浅間神社・大歳御祖神社の三社の総称。壮大な廊下門（重文）が著名。" },
+  { pref:"山梨",   name:"河口浅間神社",         tags:["meisha3"],       province:"甲斐国",       lat:35.53106, lng:138.77494, deity:"木花開耶姫命", reason:"浅間神社系。富士山北麓・河口湖畔に鎮座。世界文化遺産・富士山の構成資産。樹齢1,200年の大杉が御神木。" },
+  { pref:"静岡",   name:"山宮浅間神社",         tags:["meisha3"],       province:"駿河国",       lat:35.27124, lng:138.63706, deity:"木花之佐久夜毘売命", reason:"浅間神社系。富士山本宮浅間大社の前身・元宮。本殿を持たず富士山を直接拝む最古の形式。世界文化遺産構成資産。" },
+  { pref:"静岡",   name:"東口本宮冨士浅間神社", tags:["meisha3"],       province:"駿河国",       lat:35.36265, lng:138.86340, deity:"木花開耶姫命", reason:"浅間神社系。富士山東口登山道の起点。小山町に鎮座。世界文化遺産・富士山の構成資産のひとつ。" },
+  { pref:"静岡",   name:"村山浅間神社",         tags:["meisha3"],       province:"駿河国",       lat:35.26144, lng:138.66614, deity:"木花開耶姫命・大山祇命・瓊々杵尊", reason:"浅間神社系。富士山表口・村山口登山道の起点。修験道の聖地として中世以来の歴史を誇る。世界文化遺産構成資産。" },
+
+  // ══════════════════════════════════════════
+  // ── 南関東・甲信越・静岡 追加30社 ──
+  // ══════════════════════════════════════════
+
+  // ── 東京 ──
+  { pref:"東京", name:"浅草神社",           tags:["meisha"],  province:"武蔵国", lat:35.71514, lng:139.79744, deity:"土師真中知命・桧前浜成命・桧前竹成命", reason:"三社様。浅草三社祭（江戸三大祭）で著名。浅草寺の隣に鎮座し年間多数の参拝者が訪れる旧府社。" },
+  { pref:"東京", name:"湯島天満宮",         tags:["meisha"],  province:"武蔵国", lat:35.70777, lng:139.76823, deity:"天之手力雄命・菅原道真公",            reason:"通称・湯島天神。関東屈指の学問の神。合格祈願の絵馬が境内を埋め尽くす。梅まつりも有名。" },
+  { pref:"東京", name:"根津神社",           tags:["meisha"],  province:"武蔵国", lat:35.72023, lng:139.76072, deity:"須佐之男命・大山咋命・誉田別命",       reason:"東京十社のひとつ。国重要文化財の権現造社殿。つつじ苑（約3,000株）と千本鳥居が名所。" },
+  { pref:"東京", name:"亀戸天神社",         tags:["meisha3"], province:"武蔵国", lat:35.70278, lng:139.82083, deity:"天満大神・天菩日命",                  reason:"地名代表社。東の太宰府とも呼ばれる。藤まつりとスカイツリーの競演が絶景。梅まつりでも有名。" },
+  { pref:"東京", name:"品川神社",           tags:["meisha3"], province:"武蔵国", lat:35.61847, lng:139.73964, deity:"天比理刀咩命・素戔嗚尊・宇賀之売命",  reason:"東京十社のひとつ。品川宿の総鎮守。富士塚（品川富士）が境内にあり関東大繁盛の開運神社。" },
+
+  // ── 神奈川 ──
+  { pref:"神奈川", name:"箱根神社",         tags:["meisha"],  province:"相模国", lat:35.20389, lng:139.02556, deity:"瓊瓊杵尊・木花咲耶姫命・彦火火出見尊", reason:"関東総鎮守。旧国幣中社。芦ノ湖に立つ水中鳥居が絶景。源頼朝・徳川家ゆかりの武家の守護神。" },
+  { pref:"神奈川", name:"江島神社",         tags:["meisha"],  province:"相模国", lat:35.30036, lng:139.47961, deity:"田寸津比売命・市寸島比売命・多紀理比女命", reason:"日本三大弁財天のひとつ。江の島全体を御神体とする海の神。旧国幣中社。縁結びでも著名。" },
+  { pref:"神奈川", name:"大山阿夫利神社",   tags:["meisha"],  province:"相模国", lat:35.43213, lng:139.23807, deity:"大山祇大神・雷神・高龗神",             reason:"大山信仰の総本社。雨降山とも呼ばれ水・農業の神。江戸時代に「大山詣り」で大流行した山岳霊場。" },
+  { pref:"神奈川", name:"荏柄天神社",       tags:["meisha"],  province:"相模国", lat:35.32585, lng:139.56430, deity:"菅原道真",                            reason:"関東最古の天神社（1104年創建）。鶴岡八幡宮境内の森に鎮座。絵筆塚など文化人の信仰が厚い。" },
+
+  // ── 埼玉 ──
+  { pref:"埼玉", name:"宝登山神社",         tags:["meisha3"], province:"武蔵国", lat:36.09322, lng:139.10310, deity:"神日本磐余彦尊・大山祇神・火産霊神",   reason:"秩父三社のひとつ。宝登山山頂の奥社が本社。蝋梅の名所。長瀞の自然と一体となった霊山。" },
+  { pref:"埼玉", name:"高麗神社",           tags:["meisha"],  province:"武蔵国", lat:35.89858, lng:139.32281, deity:"高麗王若光・猿田彦命・武内宿禰命",     reason:"渡来人・高麗王若光を祀る。歴代内閣総理大臣が参拝後に就任したとされる開運出世の神社。" },
+  { pref:"埼玉", name:"調神社",             tags:["meisha3"], province:"武蔵国", lat:35.85363, lng:139.65557, deity:"天照大御神・豊宇気毘売神・素戔嗚尊",   reason:"浦和の「つきのみや」。狛犬の代わりに兎が置かれた珍しい神社。月の神として古くから信仰される。" },
+
+  // ── 山梨 ──
+  { pref:"山梨", name:"武田神社",           tags:["meisha3"], province:"甲斐国", lat:35.68667, lng:138.57750, deity:"武田晴信（武田信玄）",                 reason:"甲斐の虎・武田信玄を祀る。躑躅ヶ崎館跡に鎮座する甲府市の総鎮守。甲斐武田氏ゆかりの武家文化の象徴。" },
+  { pref:"山梨", name:"甲斐国一宮浅間神社", tags:["meisha2","ichi"], province:"甲斐国", lat:35.64776, lng:138.69744, deity:"浅間大神（木花開耶姫命）",             reason:"甲斐国一宮（一説）。旧郷社。富士吉田とは別系統の甲府盆地における浅間信仰の中心。" },
+  { pref:"山梨", name:"小室浅間神社",       tags:["meisha3"], province:"甲斐国", lat:35.48417, lng:138.81903, deity:"木花咲耶姫命",                        reason:"浅間神社系。山中湖湖畔に鎮座。富士山信仰・山中湖を御神体とする古社。世界文化遺産構成資産。" },
+
+  // ── 長野 ──
+  { pref:"長野", name:"穂高神社",           tags:["meisha"],  province:"信濃国", lat:36.33889, lng:137.88428, deity:"穂高見命・綿津見命・瓊々杵尊",         reason:"日本アルプスの総鎮守。旧国幣中社。奥宮は上高地に鎮座。穂高連峰・奥穂高岳を御神体とする。" },
+  { pref:"長野", name:"生島足島神社",       tags:["meisha"],  province:"信濃国", lat:36.36052, lng:138.21803, deity:"生島大神・足島大神",                  reason:"旧国幣中社。武田信玄と上杉謙信の起請文（重文）が伝わる。島に神が宿る独島形式の古社。" },
+  { pref:"長野", name:"仁科神明宮",         tags:["meisha"],  province:"信濃国", lat:36.44994, lng:137.87903, deity:"天照大御神",                          reason:"国宝社殿。日本最古の神明造建築。20年ごとの式年遷宮を伊勢神宮と同様に行う古社。旧国幣小社。" },
+  { pref:"長野", name:"諏訪大社前宮",       tags:["meisha"],  province:"信濃国", lat:35.99114, lng:138.13339, deity:"建御名方神",                          reason:"諏訪大社四社のひとつ。大祝（おおほうり）が座した諏訪大社発祥の最古の社地とされる。" },
+  { pref:"長野", name:"諏訪大社下社秋宮",   tags:["meisha"],  province:"信濃国", lat:36.07536, lng:138.09124, deity:"建御名方神・八坂刀売神",               reason:"諏訪大社四社のひとつ。下社の秋の宮。幣拝殿（重文）と根入りの杉が有名。全国最大の御柱祭を行う。" },
+  { pref:"長野", name:"飯縄大社",           tags:["meisha"],  province:"信濃国", lat:36.68079, lng:138.16856, deity:"飯縄大明神（倉稲魂命・宇気母智命）",  reason:"飯縄山に鎮座。武田信玄・上杉謙信が篤く信仰した軍神。全国愛宕神社・秋葉神社と並ぶ火防の神。" },
+
+  // ── 新潟 ──
+  { pref:"新潟", name:"春日山神社",         tags:["meisha3"], province:"越後国", lat:37.14747, lng:138.20889, deity:"上杉謙信公",                          reason:"越後の龍・上杉謙信を祀る。春日山城跡に鎮座。義の武将として現代も武士道精神の象徴。" },
+  { pref:"新潟", name:"白山神社",           tags:["meisha3"], province:"越後国", lat:37.91561, lng:139.03733, deity:"菊理媛大神・伊弉諾尊・伊弉冉尊",       reason:"新潟市の総鎮守。全国白山神社の本社格とされる。新潟まつりの中心地。市民に「白山さん」と親しまれる。" },
+
+  // ── 静岡 ──
+  { pref:"静岡", name:"伊豆山神社",         tags:["meisha"],  province:"伊豆国", lat:35.11545, lng:139.08256, deity:"火牟須比命（走湯大権現）",             reason:"日本三大縁結びの一。源頼朝と北条政子が結ばれた縁結びの聖地。走湯信仰の最古の社。" },
+  { pref:"静岡", name:"来宮神社",           tags:["meisha3"], province:"伊豆国", lat:35.10050, lng:139.06781, deity:"日本武尊・五十猛命・大己貴命",         reason:"樹齢2,000年超の大楠（国天然記念物）が御神木。縁起・縁結びのパワースポットとして現代的人気も高い熱海の古社。" },
+  { pref:"静岡", name:"秋葉山本宮秋葉神社", tags:["meisha"],  province:"遠江国", lat:34.98123, lng:137.86578, deity:"火之迦具土大神",                      reason:"全国4,000社の秋葉神社の総本社。火防・防火の神として全国的信仰。海抜866mの山頂に鎮座する上社が有名。" },
+  { pref:"静岡", name:"事任八幡宮",         tags:["meisha2","ichi","hachiman"], province:"遠江国", lat:34.79840, lng:138.07548, deity:"己等乃麻知比売命・誉田別命ほか",       reason:"遠江国一宮（一説）。「ことのまま」の言霊信仰で願い事が叶う縁結びの社。枕草子にも記される古社。" },
+  { pref:"千葉", name:"高家神社",           tags:["meisha"],  province:"安房国", lat:34.96257, lng:139.94965, deity:"磐鹿六雁命",                          reason:"全国唯一の料理・調理の神を祀る神社。千葉県南房総市千倉町に鎮座。日本料理・調理師・食品業界の守護神として料理人の参拝が絶えない。" },
+  { pref:"静岡", name:"富知六所浅間神社",   tags:["meisha3"], province:"駿河国", lat:35.16713, lng:138.67581, deity:"木花咲耶姫命・大山祇命ほか",           reason:"浅間神社系。富士市の総鎮守。旧県社。富士山信仰の拠点として地域に根ざした古社。" },
+  { pref:"静岡", name:"草薙神社",           tags:["meisha"],  province:"駿河国", lat:34.99456, lng:138.45290, deity:"日本武尊",                            reason:"草薙（くさなぎ）という地名の由来。日本武尊の草薙の剣伝説ゆかりの地。旧官幣中社。清水区の鎮守。" },
+
+  // ── 追加：東京 ──
+  { pref:"東京", name:"武蔵御嶽神社",     tags:["meisha"],  province:"武蔵国", lat:35.78311, lng:139.15008, deity:"櫛真智命・大己貴命・少彦名命・日本武尊", reason:"御岳山（標高929m）山頂に鎮座。関東一円の山岳信仰の中心。奥多摩随一の霊峰として全国から参拝者が訪れる古社。旧国幣小社。" },
+  { pref:"東京", name:"東京大神宮",       tags:["meisha2"], province:"武蔵国", lat:35.69998, lng:139.74687, deity:"天照皇大神・豊受大神・造化三神・倭大国魂神", reason:"東京のお伊勢さま。日本初の神前結婚式を行った縁結びの聖地。明治時代に伊勢両宮を遥拝する神社として創建。" },
+  { pref:"東京", name:"芝大神宮",         tags:["meisha3"], province:"武蔵国", lat:35.65764, lng:139.75306, deity:"天照大御神・豊受大神",                     reason:"関東のお伊勢さま。1005年創建の都内最古級の神社のひとつ。だらだら祭り（生姜市）が有名。旧府社。" },
+  { pref:"東京", name:"王子神社",         tags:["meisha3"], province:"武蔵国", lat:35.75328, lng:139.73592, deity:"天児屋根命・伊波比主命・毘沙門天",         reason:"北区の総鎮守。関東諸国の十二社の一。江戸時代から北区王子の氏神として広く信仰されてきた名社。旧府社。" },
+  { pref:"東京", name:"小網神社",         tags:["meisha3"], province:"武蔵国", lat:35.68417, lng:139.78047, deity:"倉稲魂神・市杵島姫神",                     reason:"強運厄除・商売繁盛の神として金運パワースポットとして人気急上昇。戦時中の参拝者全員生還の逸話が有名な日本橋の古社。" },
+
+  // ── 追加：埼玉 ──
+  { pref:"埼玉", name:"氷川女體神社",     tags:["meisha3"], province:"武蔵国", lat:35.88691, lng:139.69377, deity:"奇稲田姫命・大己貴命・三穂津姫命",         reason:"武蔵国二宮の一説。氷川神社の女神・奇稲田姫命を専ら祀る。見沼（みぬま）一帯の水神として古くから信仰される。" },
+  { pref:"埼玉", name:"鷲宮神社",         tags:["meisha"],  province:"武蔵国", lat:36.05053, lng:139.65286, deity:"天穗日命・武夷鳥命・大己貴命",             reason:"関東最古の大社と称される。毎年の「お酉様」や県内有数の初詣参拝者数を誇る。久喜市に鎮座する式内社。" },
+  { pref:"埼玉", name:"川越氷川神社",     tags:["meisha2"], province:"武蔵国", lat:35.92759, lng:139.48853, deity:"素戔嗚尊・奇稲田姫命・大己貴命・脚摩乳命・手摩乳命", reason:"縁結びの神として全国的人気。「縁むすび風鈴」など季節の祭事が人気。川越城主・太田道灌が崇敬した古社。" },
+  { pref:"埼玉", name:"久伊豆神社",       tags:["meisha3"], province:"武蔵国", lat:35.92744, lng:139.77472, deity:"大己貴命",                                 reason:"武蔵国式内社。越谷市に鎮座する旧郷社。孔雀の放し飼いで有名。埼玉東部に多い久伊豆神社の代表格。" },
+  { pref:"埼玉", name:"玉敷神社",         tags:["meisha3"], province:"武蔵国", lat:36.10736, lng:139.56967, deity:"大己貴命",                                 reason:"武蔵国式内社。加須市騎西に鎮座。旧郷社。樹齢600年超のフジが名物。武蔵国の式内社として数少ない大社格の古社。" },
+
+  // ── 追加：千葉 ──
+  { pref:"千葉", name:"洲崎神社",         tags:["meisha3"], province:"安房国", lat:34.96812, lng:139.75831, deity:"天比理乃咩命",                             reason:"安房国一宮の一説。館山市洲崎の断崖に鎮座し太平洋を望む絶景の社。天の羽衣伝説を持ち海上守護の神として信仰。" },
+  { pref:"千葉", name:"麻賀多神社",       tags:["meisha3"], province:"下総国", lat:35.72429, lng:140.31145, deity:"稚日霊命・経津主命",                       reason:"下総国の古社。成田市台方に鎮座。境内の大杉（国指定天然記念物・樹齢1,200年）が御神木。旧郷社。" },
+  { pref:"千葉", name:"飯香岡八幡宮",     tags:["meisha3","hachiman"], province:"上総国", lat:35.53753, lng:140.11767, deity:"誉田別命・息長帯比売命・姫大神",             reason:"上総国総社の格を持つ。市原市八幡に鎮座。旧郷社。平安時代以来の歴史を誇り上総国の総鎮守として信仰された。" },
+  { pref:"千葉", name:"意富比神社",       tags:["meisha3"], province:"下総国", lat:35.69637, lng:139.99288, deity:"天照大御神・豊受大神",                     reason:"船橋大神宮の通称で知られる。下総国の伊勢遥拝社。旧県社。徳川家康・秀忠・家光の三代将軍が参拝したと伝わる。" },
+  { pref:"千葉", name:"二宮神社（多古）", tags:["meisha3"], province:"下総国", lat:35.80853, lng:140.28810, deity:"瓊瓊杵尊・木花開耶媛命・彦火火出見尊",     reason:"下総国二宮。香取郡多古町に鎮座。旧郷社。天孫降臨の神を祀る古社で、多古町の総鎮守として地域に根ざす。" },
+
+  // ── 追加：神奈川 ──
+  { pref:"神奈川", name:"比々多神社",     tags:["meisha3"], province:"相模国", lat:35.40131, lng:139.28394, deity:"天利剣神・大日孁貴神・素戔嗚尊・天忍穗耳尊", reason:"相模国三宮。伊勢原市三ノ宮に鎮座。延喜式名神大社。縄文時代から続く相模の古社で関東最古の式内大社のひとつ。" },
+  { pref:"神奈川", name:"前鳥神社",       tags:["meisha3"], province:"相模国", lat:35.35713, lng:139.36466, deity:"菟道稚郎子命・仁徳天皇・応神天皇",         reason:"相模国四宮。平塚市四之宮に鎮座。学問の神・菟道稚郎子命を祀り受験合格の神として知られる。延喜式内社。" },
+  { pref:"神奈川", name:"師岡熊野神社",   tags:["meisha3"], province:"武蔵国", lat:35.52417, lng:139.63556, deity:"伊弉册尊・速玉男尊・事解男尊",             reason:"横浜市港北区に鎮座する武蔵国式内社。創建不詳の古社。東急東横線近くに鎮座し横浜北部の総鎮守として信仰される。" },
+  { pref:"神奈川", name:"白笹稲荷神社",   tags:["meisha2","inari"], province:"相模国", lat:35.36508, lng:139.21639, deity:"宇迦之御魂大神・佐田彦大神・大宮能売大神", reason:"関東三大稲荷のひとつ。秦野市に鎮座。毎年2月の初午大祭には多くの参拝者が訪れる。旧郷社。商売繁盛・五穀豊穣の神。" },
+  { pref:"神奈川", name:"鎌倉宮",         tags:["meisha3"], province:"相模国", lat:35.32611, lng:139.56666, deity:"護良親王",                                 reason:"後醍醐天皇の皇子・護良親王（大塔宮）を祀る。明治天皇の勅命で創建。鎌倉の紅葉名所としても有名。旧官幣中社。" },
+
+  // ── 追加：山梨 ──
+  { pref:"山梨", name:"新屋山神社",       tags:["meisha3"], province:"甲斐国", lat:35.46675, lng:138.79731, deity:"大山祇命",                                 reason:"日本三大金運神社のひとつ。富士吉田市に鎮座。奥宮（富士山2合目）への参拝が特に金運を高めるとして人気急上昇。" },
+  { pref:"山梨", name:"金桜神社",         tags:["meisha"],  province:"甲斐国", lat:35.69038, lng:138.66322, deity:"少彦名命・大己貴命・須佐之男命・日本武尊・櫛稲田姫命", reason:"甲斐国総社の格を持つ延喜式内大社。昇仙峡上流に鎮座する山岳霊場。水晶発祥の地とも伝わる甲斐の名社。" },
+  { pref:"山梨", name:"玉諸神社",         tags:["meisha3"], province:"甲斐国", lat:35.65288, lng:138.59839, deity:"大国主命",                                 reason:"甲斐国総社。甲府市国母に鎮座。延喜式内社。かつては甲斐国の政治・祭祀の中心として機能した古社。旧郷社。" },
+  { pref:"山梨", name:"山梨岡神社",       tags:["meisha3"], province:"甲斐国", lat:35.66461, lng:138.63875, deity:"山梨岡大神（大山祇命）",                   reason:"延喜式内名神大社。笛吹市春日居町に鎮座。甲斐国最古の神社のひとつとされ、甲斐国内随一の古格を持つ名神大社。" },
+  { pref:"山梨", name:"穴切大神社",       tags:["meisha3"], province:"甲斐国", lat:35.66264, lng:138.56100, deity:"大穴牟遅神・事代主神",                     reason:"甲府市の総鎮守。旧県社。甲府城下の西方に鎮座し、甲府盆地の農業・縁結びの神として地元に根強い信仰を持つ。" },
+
+  // ── 追加：静岡 ──
+  { pref:"静岡", name:"富士山本宮浅間大社", tags:["meisha","taisha","ichi"], province:"駿河国", lat:35.22740, lng:138.61017, deity:"木花之佐久夜毘売命",              reason:"全国約1,300社の浅間神社の総本社。旧官幣大社・国幣大社。富士山を御神体とし、流鏑馬や富士山世界文化遺産の構成資産。日本随一の縁結び・安産の神。" },
+  { pref:"静岡", name:"焼津神社",         tags:["meisha3"], province:"駿河国", lat:34.86495, lng:138.31372, deity:"日本武尊・吉備武彦命・大伴武日連命・七束脛命", reason:"焼津という地名の由来。日本武尊が東征の際に野火から救われた故事に基づく。旧郷社。全国唯一の日本武尊一行を祀る神社。" },
+  { pref:"静岡", name:"阿波々神社",       tags:["meisha3"], province:"遠江国", lat:34.84148, lng:138.06764, deity:"阿波々姫命（猿田彦命）",                   reason:"遠江国の古社。周智郡森町に鎮座。遠江国式内社。愛宕山（標高524m）山頂近くに鎮座する山岳霊場。古くから道の神として信仰。" },
+  { pref:"静岡", name:"見付天神（矢奈比賣神社）", tags:["meisha3"], province:"遠江国", lat:34.73000, lng:137.86415, deity:"矢奈比賣命・菅原道真・武速須佐之男命", reason:"遠江国式内社。磐田市見付に鎮座。遠江の天神として名高く、菅原道真を合祀。見付宿の総鎮守として東海道の旅人に親しまれた。" },
+  { pref:"静岡", name:"浜松八幡宮",       tags:["meisha3","hachiman"], province:"遠江国", lat:34.71580, lng:137.73674, deity:"誉田別命・息長帯姫命・比売大神",             reason:"浜松市の総鎮守。旧郷社。徳川家康が浜松城在城中に崇敬した八幡宮。三方ヶ原の戦いに際し家康が逃げ込んだと伝わる縁切り楠が有名。" },
+  // ===== 金運 =====
+  { pref:"神奈川", name:"銭洗弁財天宇賀福神社",   tags:["kinun"], province:"相模国", lat:35.32580, lng:139.54200, deity:"宇賀福神・弁財天",                    reason:"銭洗い金運の代名詞。鎌倉市佐助の洞窟に鎮座。清水でお金を洗うと何倍にも増えるとされ、全国有数の金運スポットとして年間多数の参拝者が訪れる。" },
+  { pref:"東京",   name:"虎ノ門金刀比羅宮",        tags:["kinun"], province:"武蔵国", lat:35.66961, lng:139.74800, deity:"大物主神・崇徳天皇",                   reason:"讃岐・金刀比羅宮の江戸幕府公認の出張所。港区虎ノ門に鎮座。金運・商売繁盛の神として江戸時代より信仰を集める都内屈指の金運神社。" },
+  { pref:"埼玉",   name:"聖神社",                  tags:["kinun"], province:"武蔵国", lat:36.05008, lng:139.10258, deity:"天照大御神・豊受大御神ほか",            reason:"日本最古の鋳銭地・和銅採掘遺跡に隣接。和同開珎（708年）発祥の地として金運の聖地。秩父市黒谷に所在し、日本の貨幣文化の起源を伝える。" },
+  { pref:"東京",   name:"穴守稲荷神社",            tags:["kinun","inari"], province:"武蔵国", lat:35.55039, lng:139.74964, deity:"豊受姫命（宇加之御魂神）",              reason:"羽田の守り神。大田区羽田に鎮座。江戸時代より海上安全・商売繁盛の稲荷として信仰。金運・開運のパワースポットとして現代でも参拝者が絶えない。" },
+  { pref:"東京",   name:"田無神社",                tags:["kinun"], province:"武蔵国", lat:35.72990, lng:139.54405, deity:"級長津彦命・級長戸辺命ほか",            reason:"五龍神を祀る都内屈指の金運神社。西東京市に鎮座。金龍（金運）・白龍（出世）・青龍（仕事）・黒龍・赤龍の五色の龍神が金運・開運をもたらすとして人気急上昇。" },
+  { pref:"東京",   name:"水天宮",                  tags:["kinun"], province:"武蔵国", lat:35.68360, lng:139.78500, deity:"天御中主神・安徳天皇・高倉平中宮ほか",  reason:"中央区日本橋に鎮座する財運・安産の神。江戸時代より金融・商業の中心地日本橋の守護神として信仰。毎月5日の縁日は賑わいを見せる。" },
+  { pref:"栃木",   name:"大前神社",                tags:["kinun"], province:"下野国", lat:36.44939, lng:140.02600, deity:"大己貴命・事代主命",                    reason:"日本最大の恵比寿像で著名。真岡市に鎮座。商売繁盛・金運の神様「えびすさま」を祀る関東随一の商売繁盛の聖地とされ、全国から参拝者が訪れる。" },
+  { pref:"東京",   name:"福徳神社",                tags:["kinun"], province:"武蔵国", lat:35.68731, lng:139.77444, deity:"倉稲魂命・天穂日命ほか",                reason:"富くじ発祥の神社。中央区日本橋室町に鎮座。江戸時代に幕府公認の富くじ（宝くじ）が行われた地。商売繁盛・金運・開運の神として信仰が厚い。" },
+  { pref:"東京",   name:"鷲神社",                  tags:["kinun"], province:"武蔵国", lat:35.72257, lng:139.79189, deity:"天日鷲命・日本武尊",                    reason:"酉の市の発祥地。台東区千束に鎮座。熊手（開運かきこめ）で商売繁盛・金運アップを祈る酉の市は江戸三大祭りのひとつ。商人の聖地として全国的に有名。" },
+  { pref:"東京",   name:"烏森神社",                tags:["kinun"], province:"武蔵国", lat:35.66678, lng:139.75679, deity:"倉稲魂神・天鈿女命・瓊々杵尊",          reason:"港区新橋に鎮座。心願成就・金運・開運で知られるサラリーマンの聖地。カラフルな御朱印が話題を呼び、若い世代からも人気の金運パワースポット。" },
+  { pref:"岐阜",   name:"金神社",                  tags:["kinun"], province:"美濃国", lat:35.41680, lng:136.75700, deity:"金大神（渟熨斗姫命・市隼雄命）",        reason:"岐阜市に鎮座する金運専門の神社。御祭神「金大神」の名が示す通り財運・金運の神として全国的に有名。金色に輝く社殿が印象的で年間多数の参拝者が訪れる。" },
+  { pref:"京都",   name:"御金神社",                tags:["kinun"], province:"山城国", lat:35.01183, lng:135.75497, deity:"金山毘古神",                            reason:"京都市中京区に鎮座する金運専門神社。黄金色の鳥居が印象的。宝くじ・株・不動産など財運全般に霊験あらたかとされ、金運を求めて全国から参拝者が集まる。" },
+  { pref:"宮城",   name:"金蛇水神社",              tags:["kinun"], province:"陸奥国", lat:38.11969, lng:140.83794, deity:"金蛇大神",                              reason:"岩沼市に鎮座。蛇神＝金運の象徴として財運・商売繁盛に霊験あらたか。4月の金蛇大祭・牡丹祭は東北有数の名物行事。金運スポットとして全国から参拝者が訪れる。" },
+  { pref:"宮城",   name:"黄金山神社",              tags:["kinun"], province:"陸奥国", lat:38.55983, lng:141.13915, deity:"金山毘古神・金山毘売神",                 reason:"涌谷町に鎮座。日本で最初に砂金が産出された地（749年）に建立された金運の神社。聖武天皇に砂金を献上した歴史が金運の由来となっている最古の金運聖地。" },
+  { pref:"佐賀",   name:"宝当神社",                tags:["kinun"], province:"肥前国", lat:33.47389, lng:129.98806, deity:"野崎隠岐守綱吉（野崎大明神）",           reason:"唐津市高島に鎮座。宝くじ当選祈願の神社として全国的に有名。「宝当」の名の通り財運が授かるとされ、抽選日前には島への連絡船が満員になる全国屈指の金運社。" },
+  { pref:"大阪",   name:"今宮戎神社",              tags:["kinun"], province:"摂津国", lat:34.65533, lng:135.50247, deity:"事代主命（えびす神）",                   reason:"商売繁盛の象徴「十日戎」の総本社的存在。大阪市浪速区に鎮座。毎年1月9〜11日の十日戎には100万人以上が参拝し、商人の町大阪の金運・商売繁盛の守護神として君臨。" },
+  { pref:"兵庫",   name:"西宮神社",                tags:["kinun"], province:"摂津国", lat:34.73573, lng:135.33458, deity:"蛭児大神（えびす神）",                   reason:"全国3,500社えびす神社の総本社。西宮市に鎮座。毎年1月10日の「十日えびす」で行われる福男選びは全国に中継される。商売繁盛・金運の神として日本随一の知名度を誇る。" },
+  { pref:"島根",   name:"美保神社",                tags:["kinun"], province:"出雲国", lat:35.56231, lng:133.30605, deity:"三穂津姫命・事代主神",                   reason:"えびす神（事代主神）の総本社。松江市美保関に鎮座。商売繁盛・漁業・金運の神。出雲大社（大国主命）とともに「えびす・大黒」両参りが有名。旧国幣中社。" },
+  { pref:"神奈川", name:"叶神社（東叶神社）",      tags:["kinun"], province:"相模国", lat:35.24194, lng:139.71806, deity:"誉田別命（応神天皇）",                   reason:"横須賀市東浦賀に鎮座。「願いが叶う」神社で対岸の西叶神社と合わせて参拝するのが習わし。金運・開運・勝運で信仰を集め、浦賀水道を望む景勝地にある古社。" },
+  { pref:"群馬",   name:"冠稲荷神社",              tags:["kinun","inari"], province:"上野国", lat:36.26881, lng:139.35153, deity:"保食神・宇迦御魂神ほか",                 reason:"太田市に鎮座。関東屈指の金運稲荷神社として商売繁盛・金運上昇のご利益で有名。「冠」の名は源義家が兜に稲荷神を勧請した故事に由来。縁日・狐の嫁入り行列でも著名。" },
+
+  // ===== 開運 =====
+  { pref:"栃木",   name:"太平山神社",              tags:["kaiun"], province:"下野国", lat:36.36278, lng:139.69278, deity:"神日本磐余彦尊・天照皇大御神・豊城入彦命", reason:"関東三大縁起（初山詣）のひとつ。栃木市太平山に鎮座。開運・縁起の神として古来より信仰。頂上からの眺望は絶景で、桜・あじさい・紅葉の名所としても名高い山岳社。" },
+  { pref:"埼玉",   name:"箭弓稲荷神社",            tags:["kaiun","inari"], province:"武蔵国", lat:36.03444, lng:139.39861, deity:"倉稲魂命",                              reason:"東松山市に鎮座。開運・出世の稲荷神社として関東随一の格式を誇る。源義家が戦勝祈願した故事から「矢を弓につがえた如く願いが叶う」の信仰が千年続く霊社。" },
+  { pref:"東京",   name:"花園神社",                tags:["kaiun"], province:"武蔵国", lat:35.69355, lng:139.70518, deity:"倉稲魂命・日本武尊・稲荷大神",            reason:"新宿の総鎮守。新宿区に鎮座。商業・芸能・開運のご利益で有名。毎年11月の酉の市は新宿の風物詩として多くの熊手商が並ぶ。歌舞伎町に隣接する繁華街の守護神。" },
+  { pref:"東京",   name:"谷保天満宮",              tags:["kaiun"], province:"武蔵国", lat:35.68045, lng:139.44444, deity:"菅原道真・菅原道武",                       reason:"関東三大天神のひとつ（湯島・亀戸と並ぶ）。国立市に鎮座。開運・合格・縁結びの神。梅の名所としても有名で、道真公ゆかりの梅が満開を迎えると多くの参拝者が訪れる。" },
+  { pref:"東京",   name:"牛嶋神社",                tags:["kaiun"], province:"武蔵国", lat:35.71292, lng:139.80472, deity:"須佐之男命・天之穂日命・貞辰親王命",       reason:"全国の撫牛信仰の発祥地。墨田区向島に鎮座。撫牛（なでうし）を撫でると病気平癒・厄除け開運のご利益があるとされ、隅田川流域の人々に親しまれる古社。" },
+  { pref:"東京",   name:"赤坂氷川神社",            tags:["kaiun"], province:"武蔵国", lat:35.66821, lng:139.73556, deity:"素戔嗚尊・奇稲田姫命・大己貴命",           reason:"港区赤坂に鎮座する縁結び・厄除けのパワースポット。東京十社のひとつ。8代将軍吉宗が再建した都内屈指の格式ある社殿。縁結び・開運の霊験で現代でも人気が高い。" },
+  { pref:"神奈川", name:"走水神社",                tags:["kaiun"], province:"相模国", lat:35.26144, lng:139.73092, deity:"日本武尊・弟橘媛命",                       reason:"横須賀市走水に鎮座。日本武尊の東征ゆかりの地。浦賀水道を望む海岸に建つ勝運・開運・航海安全の神。清々しいロケーションのパワースポットとして信仰が深い。" },
+  { pref:"群馬",   name:"妙義神社",                tags:["kaiun"], province:"上野国", lat:36.30047, lng:138.76239, deity:"日本武尊・豊受大神・菅原道真ほか",          reason:"日本三大奇景・妙義山に鎮座する開運の名社。富岡市に所在。奇岩絶壁を御神体とし強力なパワースポットとして知られる。旧県社。関東地方屈指の山岳信仰の霊地。" },
+  { pref:"山梨",   name:"小御嶽神社",              tags:["kaiun"], province:"甲斐国", lat:35.39436, lng:138.73348, deity:"磐長姫命・石動彦命",                       reason:"富士山五合目（吉田口）に鎮座。標高2,305mの境内は富士登山の出発点。富士山信仰と一体となった開運の神社で、縁結び・長寿・運気上昇を祈る参拝者が訪れる。" },
+  { pref:"静岡",   name:"白浜神社",                tags:["kaiun"], province:"伊豆国", lat:34.69405, lng:138.97361, deity:"伊古奈比咩命・三嶋溝咋耳神",               reason:"伊豆最古の神社。下田市白浜の海岸に鎮座。旧国幣中社。縁結び・開運・航海安全の神として古来より信仰が深く、白砂青松の境内は「縁起の良い」パワースポット。" },
+  { pref:"茨城",   name:"大洗磯前神社",            tags:["kaiun"], province:"常陸国", lat:36.31591, lng:140.58722, deity:"大己貴命・少彦名命",                       reason:"大洗町の海岸に鎮座。大化の改新後に「よみがえった国造りの神」として復活した開運の神。海中の岩礁に立つ「神磯の鳥居」が絶景で、朝日との景観は全国的に有名。" },
+  { pref:"宮崎",   name:"天岩戸神社",              tags:["kaiun"], province:"日向国", lat:32.73444, lng:131.35056, deity:"天照大御神",                               reason:"「岩戸開き」発祥の地。高千穂町岩戸に鎮座。天照大御神が身を隠した天岩戸を御神体とする。御神体の洞窟を直接拝める遥拝所は日本の開運信仰の原点とも言える聖地。" },
+  { pref:"京都",   name:"元伊勢皇大神社",          tags:["kaiun"], province:"丹後国", lat:35.43014, lng:135.15450, deity:"天照大御神",                               reason:"伊勢神宮の天照大御神が伊勢へ遷座する前に祀られた「元伊勢」の内宮。福知山市大江町に鎮座。万願成就・開運・縁結びのご利益で知られる山深い霊地。旧村社。" },
+  { pref:"鳥取",   name:"白兎神社",                tags:["kaiun"], province:"因幡国", lat:35.52417, lng:134.11556, deity:"白兎神",                                   reason:"因幡の白兎伝説ゆかりの神社。鳥取市白浜海岸に鎮座。大国主命と縁を結んだ白兎神が御祭神。縁結び・開運・皮膚病平癒のご利益で有名。日本神話最古の縁起話の舞台。" },
+  { pref:"宮崎",   name:"生目神社",                tags:["kaiun"], province:"日向国", lat:31.91828, lng:131.37678, deity:"応神天皇・仁徳天皇・武内宿禰",              reason:"宮崎市に鎮座。目の神様として全国から参拝者が訪れる。開運・商売繁盛・勝運でも名高く、南九州最大の社叢を誇る。地元では「生目さん」として古来より親しまれる古社。" },
+  { pref:"山形",   name:"出羽三山神社",            tags:["kaiun"], province:"出羽国", lat:38.70255, lng:139.98135, deity:"倉稲魂命・月山神・大山祇命ほか",            reason:"月山・羽黒山・湯殿山の三山を総称。鶴岡市羽黒町に鎮座。1,400年以上の歴史を誇る東北最大の修験道の聖地。「死と再生・生まれ変わり」の祈りで知られる開運の霊地。" },
+  { pref:"和歌山", name:"飛瀧神社",                tags:["kaiun"], province:"紀伊国", lat:33.67428, lng:135.88744, deity:"大己貴命（那智大滝を御神体）",              reason:"落差133mの那智大滝そのものを御神体とする神社。熊野那智大社の別宮。東牟婁郡那智勝浦町に鎮座。世界遺産の滝のそばで開運・運気上昇を祈る聖地として名高い。" },
+  { pref:"島根",   name:"八重垣神社",              tags:["kaiun"], province:"出雲国", lat:35.42903, lng:133.07369, deity:"素戔嗚尊・稲田姫命・大国主命ほか",          reason:"松江市に鎮座する縁結び・開運の名社。境内の「鏡の池」に紙を浮かべて縁を占う習わしが有名。素戔嗚尊が稲田姫を守った故事ゆかりのパワースポット。" },
+  { pref:"福岡",   name:"宮地嶽神社",              tags:["kaiun"], province:"筑前国", lat:33.77972, lng:130.48611, deity:"神功皇后・勝村大神・勝頼大神",              reason:"福津市に鎮座。「何事も必ず成し遂げられる」開運神社として全国的に有名。年2回、参道に夕日が沈む「光の道」の絶景が話題。日本一の大鈴・大太鼓・大鳥居を誇る。" },
+  { pref:"佐賀",   name:"武雄神社",                tags:["kaiun"], province:"肥前国", lat:33.18817, lng:130.02094, deity:"武雄大神（五十猛命）",                      reason:"武雄市に鎮座。樹齢3,000年以上の大楠（国指定天然記念物）が御神木のパワースポット。縁結び・長寿・開運のご利益で知られ、武雄温泉に隣接する九州有数の霊気漂う古社。" },
+
+  // ── 一宮 網羅補完（2026-07-21・志摩国/若狭国/隠岐国/壱岐国） ──
+  { pref:"三重",   name:"伊雑宮",                  tags:["ichi"], province:"志摩国", lat:34.38029, lng:136.80907, deity:"天照坐皇大御神御魂" },
+  { pref:"三重",   name:"伊射波神社",              tags:["ichi"], province:"志摩国", lat:34.47330, lng:136.87548, deity:"稚日女尊・伊佐波登美命・玉柱屋姫命・狭依姫命" },
+  { pref:"福井",   name:"若狭彦神社",              tags:["ichi"], province:"若狭国", lat:35.46608, lng:135.77847, deity:"若狭彦大神（彦火火出見尊）" },
+  { pref:"島根",   name:"水若酢神社",              tags:["ichi"], province:"隠岐国", lat:36.28013, lng:133.24899, deity:"水若酢命" },
+  { pref:"島根",   name:"由良比女神社",            tags:["ichi"], province:"隠岐国", lat:36.09203, lng:132.98787, deity:"由良比女命" },
+  { pref:"長崎",   name:"天手長男神社",            tags:["ichi"], province:"壱岐国", lat:33.76394, lng:129.70239, deity:"天手長男命" },
+  { pref:"長崎",   name:"興神社",                  tags:["ichi"], province:"壱岐国", lat:33.76969, lng:129.73173, deity:"足仲彦命（仲哀天皇）・気長足姫命（神功皇后）ほか" },
+
+
+  // ── 著名神社追加分（2026-07-21・別表神社カテゴリより厳選98社） ──
+  { pref:"大阪", name:"生國魂神社", tags:["meisha2"], province:"摂津国", lat:34.66511, lng:135.51299, deity:"生島大神・足島大神" },
+  { pref:"大阪", name:"坐摩神社", tags:["meisha2"], province:"摂津国", lat:34.68094, lng:135.49877, deity:"座摩神" },
+  { pref:"奈良", name:"大和神社", tags:["meisha2"], province:"大和国", lat:34.57125, lng:135.83794, deity:"倭大国魂神・大国主神・年神" },
+  { pref:"奈良", name:"談山神社", tags:["meisha2"], province:"大和国", lat:34.46581, lng:135.86165, deity:"藤原鎌足" },
+  { pref:"奈良", name:"龍田大社", tags:["meisha2"], province:"大和国", lat:34.59313, lng:135.68727, deity:"シナツヒコ" },
+  { pref:"奈良", name:"廣瀬大社", tags:["meisha2"], province:"大和国", lat:34.59154, lng:135.74833, deity:"若宇加能売命" },
+  { pref:"京都", name:"平野神社", tags:["meisha2"], province:"山城国", lat:35.03245, lng:135.73227, deity:"今木皇大神・久度大神・古開大神・比売大神" },
+  { pref:"京都", name:"大原野神社", tags:["meisha2"], province:"山城国", lat:34.96028, lng:135.65611, deity:"タケミカヅチ" },
+  { pref:"京都", name:"護王神社", tags:["meisha2"], province:"山城国", lat:35.02194, lng:135.765, deity:"和気広虫・和気清麻呂" },
+  { pref:"京都", name:"白峯神宮", tags:["meisha2"], province:"山城国", lat:35.0303, lng:135.753, deity:"崇徳天皇・淳仁天皇" },
+  { pref:"京都", name:"吉田神社", tags:["meisha2"], province:"山城国", lat:35.02535, lng:135.78463, deity:"春日神" },
+  { pref:"兵庫", name:"広峯神社", tags:["meisha2"], province:"播磨国", lat:34.87378, lng:134.70033, deity:"五十猛神・素戔嗚尊" },
+  { pref:"兵庫", name:"湊川神社", tags:["meisha3"], province:"摂津国", lat:34.68136, lng:135.17544, deity:"楠木正成" },
+  { pref:"大阪", name:"水無瀬神宮", tags:["meisha3"], province:"摂津国", lat:34.8849, lng:135.673, deity:"土御門天皇・後鳥羽天皇・順徳天皇" },
+  { pref:"滋賀", name:"御上神社", tags:["meisha2"], province:"近江国", lat:35.04981, lng:136.02739, deity:"天之御影神" },
+  { pref:"兵庫", name:"長田神社", tags:["meisha2"], province:"摂津国", lat:34.6712, lng:135.147, deity:"事代主神" },
+  { pref:"和歌山", name:"丹生都比売神社", tags:["meisha2","ichi"], province:"紀伊国", lat:34.26289, lng:135.52185, deity:"丹生都比売大神・高野御子大神ほか" },
+  { pref:"大阪", name:"高津宮", tags:["meisha2"], province:"摂津国", lat:34.66886, lng:135.51386, deity:"仁徳天皇" },
+  { pref:"兵庫", name:"大石神社", tags:["meisha2"], province:"播磨国", lat:34.74917, lng:134.38861, deity:"萱野重実・赤穂浪士" },
+  { pref:"静岡", name:"井伊谷宮", tags:["meisha3"], province:"遠江国", lat:34.8292, lng:137.668, deity:"宗良親王" },
+  { pref:"熊本", name:"八代宮", tags:["meisha3"], province:"肥後国", lat:32.5077, lng:130.6, deity:"懐良親王" },
+  { pref:"福井", name:"金崎宮", tags:["meisha3"], province:"越前国", lat:35.6645, lng:136.074, deity:"尊良親王・恒良親王" },
+  { pref:"三重", name:"北畠神社", tags:["meisha3"], province:"伊勢国", lat:34.5186, lng:136.299, deity:"北畠顕能" },
+  { pref:"大阪", name:"阿部野神社", tags:["meisha3"], province:"摂津国", lat:34.6283, lng:135.5, deity:"北畠顕家" },
+  { pref:"熊本", name:"菊池神社", tags:["meisha3"], province:"肥後国", lat:32.98778, lng:130.81611, deity:"菊池武時" },
+  { pref:"大阪", name:"四條畷神社", tags:["meisha3"], province:"河内国", lat:34.7324, lng:135.649, deity:"楠木正行" },
+  { pref:"鳥取", name:"名和神社", tags:["meisha3"], province:"伯耆国", lat:35.50444, lng:133.495, deity:"名和長年" },
+  { pref:"福島", name:"霊山神社", tags:["meisha3"], province:"岩代国", lat:37.799, lng:140.64647, deity:"北畠守親・北畠親房・北畠顕信" },
+  { pref:"福井", name:"藤島神社", tags:["meisha3"], province:"越前国", lat:36.05642, lng:136.21096, deity:"新田義貞" },
+  { pref:"千葉", name:"小御門神社", tags:["meisha3"], province:"下総国", lat:35.8558, lng:140.359, deity:"花山院師賢" },
+  { pref:"東京", name:"乃木神社", tags:["meisha2"], province:"武蔵国", lat:35.66889, lng:139.72806, deity:"乃木希典命・乃木静子命" },
+  { pref:"東京", name:"東郷神社", tags:["meisha2"], province:"武蔵国", lat:35.67181, lng:139.70592, deity:"東郷平八郎命" },
+  { pref:"神奈川", name:"稲毛神社", tags:["meisha2"], province:"武蔵国", lat:35.53083, lng:139.70444, deity:"タケミカヅチ" },
+  { pref:"東京", name:"井草八幡宮", tags:["meisha2","hachiman"], province:"武蔵国", lat:35.71603, lng:139.59506, deity:"八幡神" },
+  { pref:"福岡", name:"竈門神社", tags:["meisha2"], province:"筑前国", lat:33.5398, lng:130.56912, deity:"玉依姫" },
+  { pref:"福岡", name:"櫛田神社", tags:["meisha2"], province:"筑前国", lat:33.59311, lng:130.41069, deity:"大幡主命・天照大神・素盞嗚尊" },
+  { pref:"福岡", name:"英彦山神宮", tags:["meisha2"], province:"豊前国", lat:33.48017, lng:130.92622, deity:"正哉吾勝勝速日天忍穂耳尊" },
+  { pref:"福岡", name:"宇美八幡宮", tags:["meisha2","hachiman"], province:"筑前国", lat:33.57028, lng:130.50889, deity:"八幡神・応神天皇" },
+  { pref:"福岡", name:"藤崎八旛宮", tags:["meisha2"], province:"筑前国", lat:32.80833, lng:130.71861, deity:"八幡神・応神天皇" },
+  { pref:"福岡", name:"十日恵比須神社", tags:["meisha2"], province:"筑前国", lat:33.60389, lng:130.41861, deity:"事代主神・大国主神" },
+  { pref:"福岡", name:"甲宗八幡神社", tags:["meisha2","hachiman"], province:"豊前国", lat:33.95278, lng:130.96778, deity:"八幡神・宗像三女神・応神天皇" },
+  { pref:"福岡", name:"志賀海神社", tags:["meisha2"], province:"筑前国", lat:33.66789, lng:130.31319, deity:"海神" },
+  { pref:"宮崎", name:"鵜戸神宮", tags:["meisha2"], province:"日向国", lat:31.65028, lng:131.46667, deity:"彦波瀲武鸕鶿草葺不合尊" },
+  { pref:"熊本", name:"青井阿蘇神社", tags:["meisha2"], province:"肥後国", lat:32.21333, lng:130.75278, deity:"健磐竜命" },
+  { pref:"鹿児島", name:"照国神社", tags:["meisha2"], province:"薩摩国", lat:31.59481, lng:130.55008, deity:"島津斉彬" },
+  { pref:"島根", name:"太皷谷稲成神社", tags:["meisha2","inari"], province:"石見国", lat:34.46542, lng:131.76917, deity:"宇迦之御魂神（京都・伏見稲荷より勧請）" },
+  { pref:"愛媛", name:"石鎚神社", tags:["meisha2"], province:"伊予国", lat:33.88981, lng:133.1555, deity:"石鎚大神" },
+  { pref:"愛媛", name:"伊曽乃神社", tags:["meisha2"], province:"伊予国", lat:33.89272, lng:133.18708, deity:"天照大神" },
+  { pref:"愛媛", name:"和霊神社", tags:["meisha2"], province:"伊予国", lat:33.22972, lng:132.56528, deity:"山家公頼" },
+  { pref:"愛媛", name:"伊豫豆比古命神社", tags:["meisha2"], province:"伊予国", lat:33.80931, lng:132.77097, deity:"伊豫豆比古命・伊豫豆比売命ほか" },
+  { pref:"島根", name:"日御碕神社", tags:["meisha2"], province:"出雲国", lat:35.42958, lng:132.62936, deity:"天照大神" },
+  { pref:"山口", name:"防府天満宮", tags:["meisha2"], province:"周防国", lat:34.06328, lng:131.57406, deity:"天満大自在天神・菅原道真" },
+  { pref:"山口", name:"忌宮神社", tags:["meisha2"], province:"長門国", lat:33.99926, lng:130.98745, deity:"仲哀天皇・応神天皇・神功皇后" },
+  { pref:"山口", name:"赤間神宮", tags:["meisha2"], province:"長門国", lat:33.95972, lng:130.94847, deity:"安徳天皇" },
+  { pref:"和歌山", name:"鬪雞神社", tags:["meisha2"], province:"紀伊国", lat:33.7297, lng:135.38391, deity:"家都御子神ほか熊野権現" },
+  { pref:"山形", name:"出羽神社", tags:["meisha2"], province:"出羽国", lat:38.70255, lng:139.98135, deity:"伊氐波神・稲倉魂命" },
+  { pref:"山形", name:"湯殿山神社", tags:["meisha2"], province:"出羽国", lat:38.54156, lng:139.98609, deity:"オオヤマツミ" },
+  { pref:"山形", name:"上杉神社", tags:["meisha2"], province:"出羽国", lat:37.90931, lng:140.10408, deity:"上杉謙信" },
+  { pref:"栃木", name:"唐沢山神社", tags:["meisha2"], province:"下野国", lat:36.35378, lng:139.60085, deity:"藤原秀郷" },
+  { pref:"青森", name:"猿賀神社", tags:["meisha2"], province:"陸奥国", lat:40.61694, lng:140.56306, deity:"上毛野田道" },
+  { pref:"茨城", name:"常磐神社", tags:["meisha2"], province:"常陸国", lat:36.3746, lng:140.456, deity:"徳川光圀・徳川斉昭" },
+  { pref:"北海道", name:"上川神社", tags:["meisha2"], province:"蝦夷", lat:43.75242, lng:142.36473, deity:"スクナビコナ・大国主神・天照大神" },
+  { pref:"北海道", name:"樽前山神社", tags:["meisha2"], province:"蝦夷", lat:42.66089, lng:141.60411, deity:"オオヤマツミ・カヤノヒメ・ククノチ" },
+  { pref:"北海道", name:"函館八幡宮", tags:["meisha2","hachiman"], province:"蝦夷", lat:41.7539, lng:140.71, deity:"八幡神" },
+  { pref:"徳島", name:"忌部神社", tags:["meisha2"], province:"阿波国", lat:34.06028, lng:134.54556, deity:"天日鷲神" },
+  { pref:"長野", name:"四柱神社", tags:["meisha2"], province:"信濃国", lat:36.23497, lng:137.97039, deity:"天之御中主神・天照大神・神皇産霊尊" },
+  { pref:"長野", name:"深志神社", tags:["meisha2"], province:"信濃国", lat:36.23, lng:137.97389, deity:"天満大自在天神・建御名方神" },
+  { pref:"茨城", name:"筑波山神社", tags:["meisha2"], province:"常陸国", lat:36.21377, lng:140.10144, deity:"イザナギ・イザナミ" },
+  { pref:"滋賀", name:"日吉大社", tags:["meisha2","ni"], province:"近江国", lat:35.07152, lng:135.86222, deity:"大山咋神・大物主神" },
+  { pref:"愛知", name:"津島神社", tags:["meisha2"], province:"尾張国", lat:35.17833, lng:136.71861, deity:"牛頭天王・素戔嗚尊" },
+  { pref:"三重", name:"二見興玉神社", tags:["meisha2"], province:"伊勢国", lat:34.50895, lng:136.78782, deity:"興玉神" },
+  { pref:"静岡", name:"伊古奈比咩命神社", tags:["meisha2"], province:"伊豆国", lat:34.69405, lng:138.97361, deity:"伊古奈比咩命" },
+  { pref:"愛知", name:"知立神社", tags:["meisha2","ni"], province:"三河国", lat:35.01277, lng:137.04072, deity:"彦波瀲武鸕鶿草葺不合尊・神武天皇" },
+  { pref:"鳥取", name:"大神山神社", tags:["meisha2","ni"], province:"伯耆国", lat:35.41804, lng:133.40599, deity:"大国主神" },
+  { pref:"福島", name:"馬場都々古別神社", tags:["meisha2","ichi"], province:"岩代国", lat:37.0322, lng:140.37607, deity:"味耜高彦根神" },
+  { pref:"福岡", name:"光雲神社", tags:["meisha2"], province:"筑前国", lat:33.59749, lng:130.37654, deity:"黒田孝高・黒田長政" },
+  { pref:"滋賀", name:"日牟禮八幡宮", tags:["meisha2","hachiman"], province:"近江国", lat:35.14077, lng:136.08949, deity:"八幡神・宗像三女神・応神天皇" },
+  { pref:"岐阜", name:"桜山八幡宮", tags:["meisha2","hachiman"], province:"飛騨国", lat:36.14825, lng:137.26044, deity:"八幡神・応神天皇" },
+  { pref:"宮崎", name:"狭野神社", tags:["meisha2"], province:"日向国", lat:31.90833, lng:130.96972, deity:"神武天皇" },
+  { pref:"三重", name:"猿田彦神社", tags:["meisha2"], province:"伊勢国", lat:34.46694, lng:136.72014, deity:"猿田彦神" },
+  { pref:"長崎", name:"鎮西大社諏訪神社", tags:["meisha2"], province:"肥前国", lat:32.75438, lng:129.88177, deity:"イザナギ・イザナミ・住吉三神・八坂刀売神" },
+  { pref:"兵庫", name:"海神社", tags:["meisha2"], province:"播磨国", lat:34.62872, lng:135.05426, deity:"綿津見三神" },
+  { pref:"東京", name:"富岡八幡宮", tags:["meisha2","hachiman"], province:"武蔵国", lat:35.67175, lng:139.79958, deity:"八幡神" },
+  { pref:"大分", name:"柞原八幡宮", tags:["meisha2","hachiman","ichi"], province:"豊後国", lat:33.2384, lng:131.551, deity:"仲哀天皇・八幡神" },
+  { pref:"石川", name:"菅生石部神社", tags:["meisha2","ni"], province:"加賀国", lat:36.31278, lng:136.3209, deity:"菅生石部神" },
+  { pref:"愛知", name:"尾張大国霊神社", tags:["meisha2"], province:"尾張国", lat:35.25594, lng:136.80562, deity:"尾張大国霊神" },
+  { pref:"茨城", name:"大杉神社", tags:["meisha2"], province:"常陸国", lat:35.95225, lng:140.38272, deity:"大物主神" },
+  { pref:"佐賀", name:"田島神社", tags:["meisha2"], province:"肥前国", lat:33.55592, lng:129.89035, deity:"田心姫" },
+  { pref:"広島", name:"沼名前神社", tags:["meisha2"], province:"備後国", lat:34.38619, lng:133.37856, deity:"海神・素戔嗚尊" },
+  { pref:"福岡", name:"風浪宮", tags:["meisha2"], province:"筑後国", lat:33.21122, lng:130.38672, deity:"海神" },
+  { pref:"高知", name:"潮江天満宮", tags:["meisha2"], province:"土佐国", lat:33.55321, lng:133.53451, deity:"天満大自在天神・菅原道真" },
+  { pref:"静岡", name:"大井神社", tags:["meisha2"], province:"遠江国", lat:34.83366, lng:138.17178, deity:"ハニヤス・ミヅハノメ・天照大神" },
+  { pref:"宮崎", name:"神柱宮", tags:["meisha2"], province:"日向国", lat:31.73239, lng:131.07203, deity:"天照大神" },
+  { pref:"静岡", name:"五社神社・諏訪神社", tags:["meisha2"], province:"遠江国", lat:34.70641, lng:137.72496, deity:"太玉命ほか（五社神社）・建御名方命ほか（諏訪神社）" },
+  { pref:"愛知", name:"若宮八幡社", tags:["meisha2","hachiman"], province:"尾張国", lat:35.10856, lng:136.90938, deity:"仁徳天皇" },
+  { pref:"神奈川", name:"平塚八幡宮", tags:["meisha2","hachiman"], province:"相模国", lat:35.33395, lng:139.34912, deity:"八幡神・応神天皇・武内宿禰" },
+  { pref:"熊本", name:"高橋稲荷神社", tags:["meisha2","inari"], province:"肥後国", lat:32.7829, lng:130.659, deity:"ウカノミタマ・稲荷神" },
+  { pref:"茨城", name:"水戸東照宮", tags:["meisha2"], province:"常陸国", lat:36.3725, lng:140.47333, deity:"徳川家康" },
+
+];
+
+// ===== 設定 =====
+const TAG_CONFIG = {
+  jingu:  { label:"神宮", char:"神", color:"#c47a08", glow:"rgba(196,122,8,0.65)",   border:"#f5c842", bg:"rgba(212,134,10,0.18)" },
+  taisha: { label:"大社", char:"大", color:"#6d28d9", glow:"rgba(109,40,217,0.65)",  border:"#c4a8ff", bg:"rgba(124,58,237,0.18)" },
+  ichi:   { label:"一宮", char:"一", color:"#c41810", glow:"rgba(196,24,16,0.65)",   border:"#ff9a8a", bg:"rgba(232,48,32,0.18)"  },
+  ni:     { label:"二宮", char:"二", color:"#1540c0", glow:"rgba(21,64,192,0.65)",   border:"#88b4ff", bg:"rgba(26,80,216,0.18)"  },
+  meisha:  { label:"名社１", char:"名", color:"#047857", glow:"rgba(4,120,87,0.65)",   border:"#6ee7b7", bg:"rgba(5,150,105,0.18)"  },
+  meisha2: { label:"名社２", char:"社", color:"#0369a1", glow:"rgba(3,105,161,0.65)",  border:"#7dd3fc", bg:"rgba(2,132,199,0.18)"  },
+  meisha3: { label:"名社３", char:"奉", color:"#92400e", glow:"rgba(146,64,14,0.65)",  border:"#fcd34d", bg:"rgba(180,83,9,0.18)"   },
+  hachiman:{ label:"八幡",   char:"八", color:"#be185d", glow:"rgba(190,24,93,0.65)",  border:"#f9a8d4", bg:"rgba(190,24,93,0.18)" },
+  inari:   { label:"稲荷",   char:"稲", color:"#0d9488", glow:"rgba(13,148,136,0.65)", border:"#5eead4", bg:"rgba(13,148,136,0.18)" },
+  kinun:   { label:"金運",   char:"金", color:"#b8860b", glow:"rgba(184,134,11,0.65)", border:"#ffd700", bg:"rgba(184,134,11,0.18)" },
+  kaiun:   { label:"開運",   char:"開", color:"#c03808", glow:"rgba(192,56,8,0.65)",   border:"#ff7a3e", bg:"rgba(220,80,20,0.18)"  },
+};
+const SANPAI_CONFIG = { label:"参拝済み", char:"参", color:"#c8a860", glow:"rgba(245,208,138,0.7)", border:"#f5d08a", bg:"rgba(245,208,138,0.18)" };
+
+function topTag(tags) {
+  return tags.reduce((b,t) => PRIORITY[t] > PRIORITY[b] ? t : b, tags[0]);
+}
+
+// ===== 地図 =====
+const map = L.map('map', { center:[36.0,136.5], zoom:6 });
+// 地図タイル：地理院タイル（淡色地図）— 申請不要・出典明記のみ・商用可
+L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+  attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>',
+  maxZoom: 18
+}).addTo(map);
+
+// ===== アイコン =====
+const iconCache = {};
+function getIcon(tag, visited) {
+  const key = tag + (visited ? '_v' : '');
+  if (iconCache[key]) return iconCache[key];
+  const c = TAG_CONFIG[tag];
+  const badge = visited ? `
+    <circle cx="27" cy="9" r="7" fill="#1a1209" stroke="#f5d08a" stroke-width="1.5"/>
+    <text x="27" y="12.5" text-anchor="middle" font-size="9" font-weight="bold" fill="#f5d08a">✓</text>` : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="42" viewBox="0 0 34 42">
+    <defs><filter id="g${key}"><feGaussianBlur stdDeviation="1.8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+    <path d="M17 2C9 2 2 9 2 17c0 10 15 23 15 23S32 27 32 17C32 9 25 2 17 2z"
+          fill="${c.color}" fill-opacity="0.9" stroke="${c.border}" stroke-width="1.5"
+          filter="url(#g${key})"/>
+    <circle cx="17" cy="17" r="9" fill="rgba(255,255,255,0.13)"/>
+    <text x="17" y="22" text-anchor="middle"
+          font-family="'Hiragino Mincho ProN','Yu Mincho',serif"
+          font-size="12" font-weight="bold" fill="white">${c.char}</text>
+    ${badge}
+  </svg>`;
+  iconCache[key] = L.divIcon({ html:svg, className:'', iconSize:[34,42], iconAnchor:[17,40], popupAnchor:[0,-42] });
+  return iconCache[key];
+}
+
+// ===== 参拝済み記録（localStorage） =====
+const VISIT_KEY = 'shrineMapVisits_v1';
+function loadVisits() {
+  try { return JSON.parse(localStorage.getItem(VISIT_KEY)) || {}; } catch(e) { return {}; }
+}
+const visits = loadVisits();
+function saveVisits() {
+  try { localStorage.setItem(VISIT_KEY, JSON.stringify(visits)); } catch(e) {}
+}
+function visitKey(s) { return s.pref + '|' + s.name; }
+function isVisited(s) { return !!visits[visitKey(s)]; }
+function getVisitDate(s) { const v = visits[visitKey(s)]; return (v && v.date) ? v.date : ''; }
+
+function toggleVisited(idx) {
+  const { shrine, marker } = markerList[idx];
+  const key = visitKey(shrine);
+  if (visits[key]) delete visits[key];
+  else visits[key] = { date: '' };
+  saveVisits();
+  marker.setIcon(getIcon(topTag(shrine.tags), isVisited(shrine)));
+  if (marker.isPopupOpen()) {
+    marker.getPopup().setContent(buildPopupContent(shrine, idx));
+    bindPopupVisitEvents(marker, idx);
+  }
+  redrawMarkers();
+}
+function setVisitDate(idx, dateStr) {
+  const { shrine } = markerList[idx];
+  const key = visitKey(shrine);
+  if (!visits[key]) visits[key] = {};
+  visits[key].date = dateStr;
+  saveVisits();
+}
+
+// ===== フィルター状態（localStorage・前回選択を復元／初回は神宮・一宮のみ） =====
+const FILTER_KEY = 'shrineMapFilters_v1';
+function readSavedFilters() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(FILTER_KEY));
+    return Array.isArray(arr) ? arr : null;
+  } catch(e) { return null; }
+}
+function persistFilters() {
+  try { localStorage.setItem(FILTER_KEY, JSON.stringify([...activeFilters])); } catch(e) {}
+}
+
+// ===== マーカー描画 =====
+const _savedFilters = readSavedFilters();
+const activeFilters = new Set(_savedFilters || ['jingu', 'ichi']);
+const markerList = [];
+
+// このシャインがどれかの表示条件を満たすか（分類タグ or 参拝済みフィルタ）
+function passesFilter(shrine) {
+  return shrine.tags.some(t => activeFilters.has(t)) || (activeFilters.has('sanpai') && isVisited(shrine));
+}
+
+// サイドバーでの振り分け先：有効フィルタの中で最優先のタグ（非表示タグに埋もれて
+// リストから消えるのを防ぐため、topTag()とは別に「今表示中のタグ」だけで判定する）
+function displayTag(shrine) {
+  const activeTags = shrine.tags.filter(t => activeFilters.has(t));
+  if (activeTags.length === 0) return null;
+  return activeTags.reduce((b,t) => PRIORITY[t] > PRIORITY[b] ? t : b, activeTags[0]);
+}
+
+// 選択中のリストアイテムと演出レイヤー
+let selectedListItem = null;
+let flashLayer = null;
+
+// ポップアップの中身を組み立てる（参拝済み状態が変わるたびに作り直す）
+function buildPopupContent(s, idx) {
+  const badges = s.tags.slice()
+    .sort((a,b) => PRIORITY[b]-PRIORITY[a])
+    .map(t => `<span class="popup-badge ${t}">${TAG_CONFIG[t].label}</span>`)
+    .join('') + (isVisited(s) ? `<span class="popup-badge sanpai">参拝済み</span>` : '');
+  const reasonHtml = s.reason
+    ? `<div class="popup-reason">${s.reason}</div>`
+    : '';
+  const gmapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(s.name)}`;
+  const visited = isVisited(s);
+  const date = getVisitDate(s);
+
+  return `
+    <div class="popup-content">
+      <div class="popup-badges">${badges}</div>
+      <div class="popup-name">${s.name}</div>
+      <div class="popup-pref">${s.pref}</div>
+      <div class="popup-province">旧国：${s.province}</div>
+      ${reasonHtml}
+      <div class="popup-deity">祭神：${s.deity}</div>
+      <div class="popup-visit">
+        <div class="popup-visit-btn ${visited ? 'checked' : ''}" data-idx="${idx}">${visited ? '✓ 参拝済み' : '○ 参拝済みにする'}</div>
+        ${visited ? `<input type="date" class="popup-visit-date" value="${date}">` : ''}
+      </div>
+      <a href="${gmapsUrl}" target="_blank" rel="noopener" class="popup-gmaps">
+        <span class="popup-gmaps-icon">📍</span> Google マップで開く
+      </a>
+    </div>`;
+}
+
+// ポップアップ内の参拝済みボタン・日付欄にイベントを結びつける
+// （setContentで中身を作り直すたびにDOMが差し替わるので毎回呼び直す）
+function bindPopupVisitEvents(marker, idx) {
+  const el = marker.getPopup() && marker.getPopup().getElement();
+  if (!el) return;
+  const btn = el.querySelector('.popup-visit-btn');
+  if (btn) {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      toggleVisited(idx);
+      marker.getPopup().setContent(buildPopupContent(markerList[idx].shrine, idx));
+      bindPopupVisitEvents(marker, idx);
+    };
+  }
+  const dateInput = el.querySelector('.popup-visit-date');
+  if (dateInput) {
+    dateInput.onclick = (e) => e.stopPropagation();
+    dateInput.onchange = (e) => setVisitDate(idx, e.target.value);
+  }
+}
+
+shrines.forEach((s, idx) => {
+  const primary = topTag(s.tags);
+  const popup = L.popup({ className:'shrine-popup' }).setContent(buildPopupContent(s, idx));
+  const marker = L.marker([s.lat, s.lng], { icon: getIcon(primary, isVisited(s)) }).bindPopup(popup);
+
+  marker.on('popupopen', () => bindPopupVisitEvents(marker, idx));
+
+  // マーカークリック → リスト側をハイライト＆スクロール
+  marker.on('click', () => {
+    const el = document.querySelector(`.shrine-item[data-idx="${idx}"]`);
+    if (el) highlightListItem(el);
+  });
+
+  markerList.push({ marker, shrine:s, idx });
+  if (passesFilter(s)) marker.addTo(map);
+});
+
+// ===== サイドバー：リスト描画 =====
+const TAG_ORDER = ['jingu','taisha','ichi','ni','meisha','meisha2','hachiman','inari','meisha3','kinun','kaiun'];
+
+// 1件分のリストアイテムDOMを組み立てる（参拝済みチェック＋任意の日付つき）
+function buildShrineItem(shrine, sIdx, dotColor) {
+  const visited = isVisited(shrine);
+  const date = getVisitDate(shrine);
+  const item = document.createElement('div');
+  item.className = 'shrine-item' + (visited ? ' visited' : '');
+  item.dataset.idx = sIdx;
+  item.innerHTML = `
+    <div class="visit-check ${visited ? 'checked' : ''}" title="参拝済みにする">✓</div>
+    <div class="shrine-item-dot" style="background:${dotColor};box-shadow:0 0 5px ${dotColor}80;"></div>
+    <div class="shrine-item-main">
+      <div class="shrine-item-name">${shrine.name}</div>
+      ${visited ? `<input type="date" class="visit-date" value="${date}">` : ''}
+    </div>
+    <div class="shrine-item-pref">${shrine.pref}</div>`;
+
+  item.querySelector('.visit-check').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleVisited(sIdx);
+  });
+  const dateInput = item.querySelector('.visit-date');
+  if (dateInput) {
+    dateInput.addEventListener('click', (e) => e.stopPropagation());
+    dateInput.addEventListener('change', (e) => setVisitDate(sIdx, e.target.value));
+  }
+  item.addEventListener('click', () => focusShrine(sIdx, item));
+  return item;
+}
+
+function renderList() {
+  const list = document.getElementById('sidebar-list');
+  list.innerHTML = '';
+  let total = 0;
+
+  // ── 参拝済みセクション（フィルタON時のみ・全ての参拝済み社をまとめて表示）──
+  if (activeFilters.has('sanpai')) {
+    const visitedItems = markerList.filter(({shrine}) => isVisited(shrine));
+    if (visitedItems.length > 0) {
+      const sec = document.createElement('div');
+      sec.className = 'sidebar-section';
+      const title = document.createElement('div');
+      title.className = 'sidebar-section-title';
+      title.style.cssText = `background:${SANPAI_CONFIG.bg}; border-left:3px solid ${SANPAI_CONFIG.border}; color:${SANPAI_CONFIG.border};`;
+      title.innerHTML = `<span>${SANPAI_CONFIG.label}</span><span class="sidebar-section-count">${visitedItems.length}社</span>`;
+      sec.appendChild(title);
+      visitedItems.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, SANPAI_CONFIG.color)));
+      list.appendChild(sec);
+    }
+  }
+
+  TAG_ORDER.forEach(tag => {
+    if (!activeFilters.has(tag)) return;
+
+    // 「今表示中のタグの中での最優先」がこのタグのものだけ（重複防止）
+    const items = markerList.filter(({shrine}) => displayTag(shrine) === tag);
+    if (items.length === 0) return;
+
+    const cfg = TAG_CONFIG[tag];
+
+    // セクション見出し
+    const sec = document.createElement('div');
+    sec.className = 'sidebar-section';
+
+    const title = document.createElement('div');
+    title.className = 'sidebar-section-title';
+    title.style.cssText = `background:${cfg.bg}; border-left:3px solid ${cfg.border}; color:${cfg.border};`;
+    title.innerHTML = `<span>${cfg.label}</span><span class="sidebar-section-count">${items.length}社</span>`;
+    sec.appendChild(title);
+
+    items.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, cfg.color)));
+
+    list.appendChild(sec);
+    total += items.length;
+  });
+
+  document.getElementById('sidebar-count').textContent = `${total}社`;
+}
+
+// ===== リスト選択ハイライト =====
+function highlightListItem(el) {
+  if (selectedListItem) selectedListItem.classList.remove('selected');
+  el.classList.add('selected');
+  selectedListItem = el;
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ===== リストクリック → 地図フォーカス =====
+function focusShrine(idx, listItem) {
+  highlightListItem(listItem);
+
+  const { marker, shrine } = markerList[idx];
+
+  // 発光サークル演出
+  if (flashLayer) { map.removeLayer(flashLayer); flashLayer = null; }
+  flashLayer = L.circle([shrine.lat, shrine.lng], {
+    radius: 1200,
+    color: '#f5d08a', weight: 2, opacity: 0.9,
+    fillColor: '#f5c842', fillOpacity: 0.08
+  }).addTo(map);
+  setTimeout(() => { if (flashLayer) { map.removeLayer(flashLayer); flashLayer = null; } }, 2800);
+
+  // 地図をスムーズに移動してポップアップを開く
+  map.flyTo([shrine.lat, shrine.lng], Math.max(map.getZoom(), 11), { duration: 0.7 });
+  setTimeout(() => marker.openPopup(), 650);
+}
+
+// ===== マーカー表示切り替え =====
+function redrawMarkers() {
+  markerList.forEach(({ marker, shrine }) => {
+    const show = passesFilter(shrine);
+    if (show && !map.hasLayer(marker)) marker.addTo(map);
+    else if (!show && map.hasLayer(marker)) map.removeLayer(marker);
+  });
+  updateStats();
+  renderList();
+}
+
+function updateStats() {
+  const n = markerList.filter(({ shrine }) => passesFilter(shrine)).length;
+  document.getElementById('stats').textContent = `表示中 ${n} 社`;
+}
+
+function toggleFilter(type) {
+  activeFilters.has(type) ? activeFilters.delete(type) : activeFilters.add(type);
+  document.querySelector(`.filter-btn.${type}`).classList.toggle('active', activeFilters.has(type));
+  persistFilters();
+  redrawMarkers();
+}
+
+// ===== 全表示 / 全非表示 =====
+const ALL_TAGS = ['jingu','taisha','ichi','ni','meisha','meisha2','meisha3','hachiman','inari','kinun','kaiun','sanpai'];
+function showAll() {
+  ALL_TAGS.forEach(t => {
+    activeFilters.add(t);
+    document.querySelector(`.filter-btn.${t}`).classList.add('active');
+  });
+  persistFilters();
+  redrawMarkers();
+}
+function hideAll() {
+  ALL_TAGS.forEach(t => {
+    activeFilters.delete(t);
+    document.querySelector(`.filter-btn.${t}`).classList.remove('active');
+  });
+  persistFilters();
+  redrawMarkers();
+}
+
+// ===== フィルターボタンの初期状態を反映 =====
+function initFilterButtons() {
+  ALL_TAGS.forEach(t => {
+    const btn = document.querySelector(`.filter-btn.${t}`);
+    if (btn) btn.classList.toggle('active', activeFilters.has(t));
+  });
+}
+
+// ===== 「その他のタグ」展開パネル =====
+const EXPAND_KEY = 'shrineMapFiltersExpanded_v1';
+const EXTRA_TAGS = ['ni','meisha2','meisha3','hachiman','inari','kinun','kaiun'];
+let filtersExpanded = localStorage.getItem(EXPAND_KEY) === '1'
+  || EXTRA_TAGS.some(t => activeFilters.has(t)); // 前回そのタグが有効なら自動展開
+function applyExpandState() {
+  document.getElementById('more-filters').classList.toggle('expanded', filtersExpanded);
+  const btn = document.getElementById('more-toggle-btn');
+  btn.classList.toggle('expanded', filtersExpanded);
+  btn.textContent = filtersExpanded ? '▴ 閉じる' : '▾ その他のタグ';
+}
+function toggleMoreFilters() {
+  filtersExpanded = !filtersExpanded;
+  try { localStorage.setItem(EXPAND_KEY, filtersExpanded ? '1' : '0'); } catch(e) {}
+  applyExpandState();
+}
+
+// ===== サイドバー開閉 =====
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+  document.getElementById('sidebar-open-btn').classList.toggle('visible', !sidebarOpen);
+  setTimeout(() => map.invalidateSize(), 260);
+}
+
+applyExpandState();
+initFilterButtons();
+updateStats();
+renderList();
+</script>
+</body>
+</html>
