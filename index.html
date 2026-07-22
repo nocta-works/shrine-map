@@ -24,7 +24,7 @@
       padding: 10px 20px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px 14px;
       z-index: 1000;
       box-shadow: 0 2px 12px rgba(0,0,0,0.5);
       flex-wrap: wrap;
@@ -46,12 +46,19 @@
       margin-top: 2px;
     }
 
-    .controls {
+    /* 行1：タイトルと同じ行の右側＝常時表示タグ＋全表示/全非表示/達成状況/stats。
+       「その他のタグ」の開閉とは完全に独立しており、開閉してもこの行の並びは一切動かない */
+    .controls-row1 {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-left: auto;
       flex-wrap: wrap;
+      margin-left: auto;
+    }
+    /* 収納タグ（その他のタグ）：常に単独の行（幅100%で強制改行）。
+       行1の下に独立して現れる／消えるだけで、行1には触れない */
+    .more-filters {
+      width: 100%;
     }
 
     .filter-btn {
@@ -152,6 +159,17 @@
     }
     .achieve-close:hover { color: #f5d08a; background: rgba(245,208,138,0.1); }
 
+    .achieve-tabs {
+      display: flex; gap: 6px; padding: 12px 20px 0; flex-shrink: 0;
+    }
+    .achieve-tab {
+      padding: 6px 16px; border-radius: 16px; border: 1.5px solid #4a2a10;
+      background: transparent; color: #907050; font-family: inherit;
+      font-size: 12px; letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s;
+    }
+    .achieve-tab:hover { border-color: #6a4028; color: #d4b880; }
+    .achieve-tab.active { background: rgba(245,208,138,0.16); border-color: #f5d08a; color: #f5d08a; }
+
     .achieve-summary {
       padding: 16px 20px; border-bottom: 1px solid #3a2010; flex-shrink: 0;
     }
@@ -203,8 +221,12 @@
     }
     .filter-btn.more-toggle:hover { background: rgba(245,208,138,0.14); color: #d4b880; border-color: #8a6838; }
     .filter-btn.more-toggle.expanded { color: #f5d08a; border-color: #b08040; }
-    .more-filters { display: none; gap: 6px; }
-    .more-filters.expanded { display: contents; }
+    .more-filters {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      max-height: 0; opacity: 0; overflow: hidden;
+      transition: max-height 0.25s ease, opacity 0.2s ease;
+    }
+    .more-filters.expanded { max-height: 120px; opacity: 1; }
 
     .dot { width: 9px; height: 9px; border-radius: 50%; }
     .dot.gold    { background:#f5c842; box-shadow:0 0 5px #f5c842; }
@@ -506,11 +528,9 @@
     .torii-icon { font-size: 20px; }
     header h1 { font-size: 13px; white-space: normal; line-height: 1.3; }
     header p  { display: none; }
-    .title-full  { display: none; }
-    .title-short { display: inline; }
 
-    /* フィルターボタンを横スクロール一列に */
-    .controls {
+    /* フィルターボタンを横スクロール一列に（常時タグ行・収納タグ行とも） */
+    .controls-row1, .more-filters {
       margin-left: 0;
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -519,8 +539,10 @@
       padding-bottom: 3px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
+      width: 100%;
     }
-    .controls::-webkit-scrollbar { display: none; }
+    .controls-row1::-webkit-scrollbar, .more-filters::-webkit-scrollbar { display: none; }
+    .more-filters.expanded { max-height: none; }
     .ctrl-divider { display: none; }
     .stats { display: none; }
 
@@ -582,51 +604,46 @@
     .popup-reason  { font-size: 10px; line-height: 1.5; }
     .shrine-popup .leaflet-popup-content-wrapper { max-width: 82vw; }
   }
-
-  /* デスクトップ: title-short は非表示 */
-  @media (min-width: 701px) {
-    .title-short { display: none; }
-    .header-top  { display: contents; }
-  }
   </style>
 </head>
 <body>
 <header>
   <div class="header-top"><div class="torii-icon">⛩</div>
   <div>
-    <h1><span class="title-full">全国神社マップ — 神宮・大社・一宮・二宮・名社１〜３</span><span class="title-short">神社マップ</span></h1>
+    <h1>神社マップ</h1>
     <p>旧国・令制国を基準とした格式神社の分布</p>
   </div></div>
-  <div class="controls">
+  <div class="controls-row1">
     <button class="filter-btn sanpai" onclick="toggleFilter('sanpai')"><span class="dot" style="background:#f5d08a;box-shadow:0 0 5px #f5d08a"></span> 参拝済み</button>
     <button class="filter-btn jingu"  onclick="toggleFilter('jingu')" ><span class="dot gold"  ></span> 神宮</button>
     <button class="filter-btn taisha" onclick="toggleFilter('taisha')"><span class="dot purple"></span> 大社</button>
     <button class="filter-btn ichi"   onclick="toggleFilter('ichi')"  ><span class="dot red"   ></span> 一宮</button>
     <button class="filter-btn meisha" onclick="toggleFilter('meisha')" ><span class="dot green"></span> 名社１</button>
     <button class="filter-btn more-toggle" id="more-toggle-btn" onclick="toggleMoreFilters()">▾ その他のタグ</button>
-    <div id="more-filters" class="more-filters">
-      <button class="filter-btn ni" onclick="toggleFilter('ni')"><span class="dot blue"></span> 二宮</button>
-      <button class="filter-btn meisha2" onclick="toggleFilter('meisha2')"><span class="dot cyan"></span> 名社２</button>
-      <button class="filter-btn meisha3" onclick="toggleFilter('meisha3')"><span class="dot orange"></span> 名社３</button>
-      <button class="filter-btn hachiman" onclick="toggleFilter('hachiman')"><span class="dot" style="background:#be185d;box-shadow:0 0 5px #be185d"></span> 八幡</button>
-      <button class="filter-btn inari" onclick="toggleFilter('inari')"><span class="dot" style="background:#0d9488;box-shadow:0 0 5px #0d9488"></span> 稲荷</button>
-      <button class="filter-btn kinun" onclick="toggleFilter('kinun')" ><span class="dot" style="background:#ffd700;box-shadow:0 0 5px #ffd700"></span> 金運</button>
-      <button class="filter-btn kaiun" onclick="toggleFilter('kaiun')" ><span class="dot" style="background:#ff7a3e;box-shadow:0 0 5px #ff7a3e"></span> 開運</button>
-    </div>
     <div class="ctrl-divider"></div>
     <button class="filter-btn all-show" onclick="showAll()">全表示</button>
     <button class="filter-btn all-hide" onclick="hideAll()">全非表示</button>
-    <button class="filter-btn achieve" onclick="openAchieveModal()">⛩ 一宮巡り達成状況</button>
+    <button class="filter-btn achieve" onclick="openAchieveModal()">⛩ 巡り達成状況</button>
     <div class="stats" id="stats">読み込み中...</div>
+  </div>
+  <div id="more-filters" class="more-filters">
+    <button class="filter-btn ni" onclick="toggleFilter('ni')"><span class="dot blue"></span> 二宮</button>
+    <button class="filter-btn meisha2" onclick="toggleFilter('meisha2')"><span class="dot cyan"></span> 名社２</button>
+    <button class="filter-btn meisha3" onclick="toggleFilter('meisha3')"><span class="dot orange"></span> 名社３</button>
+    <button class="filter-btn hachiman" onclick="toggleFilter('hachiman')"><span class="dot" style="background:#be185d;box-shadow:0 0 5px #be185d"></span> 八幡</button>
+    <button class="filter-btn inari" onclick="toggleFilter('inari')"><span class="dot" style="background:#0d9488;box-shadow:0 0 5px #0d9488"></span> 稲荷</button>
+    <button class="filter-btn kinun" onclick="toggleFilter('kinun')" ><span class="dot" style="background:#ffd700;box-shadow:0 0 5px #ffd700"></span> 金運</button>
+    <button class="filter-btn kaiun" onclick="toggleFilter('kaiun')" ><span class="dot" style="background:#ff7a3e;box-shadow:0 0 5px #ff7a3e"></span> 開運</button>
   </div>
 </header>
 
 <div class="achieve-overlay" id="achieve-overlay" onclick="if(event.target===this) closeAchieveModal()">
   <div class="achieve-modal">
     <div class="achieve-header">
-      <span class="achieve-title">⛩ 一宮巡り達成状況</span>
+      <span class="achieve-title">⛩ 巡り達成状況</span>
       <span class="achieve-close" onclick="closeAchieveModal()">✕</span>
     </div>
+    <div class="achieve-tabs" id="achieve-tabs"></div>
     <div class="achieve-summary" id="achieve-summary"></div>
     <div class="achieve-body" id="achieve-body"></div>
   </div>
@@ -1496,72 +1513,56 @@ function toggleMoreFilters() {
   filtersExpanded = !filtersExpanded;
   try { localStorage.setItem(EXPAND_KEY, filtersExpanded ? '1' : '0'); } catch(e) {}
   applyExpandState();
+  // ヘッダーの高さが変わる（アニメーション分の遅延後に地図サイズを再計算）
+  setTimeout(() => map.invalidateSize(), 260);
 }
 
-// ===== 一宮巡り達成チェック =====
-// 令制国ごとに一宮(ichiタグ)の神社を集め、1社でも参拝済みならその国は「達成」
-function computeAchievement() {
-  const byProvince = {};
-  markerList.forEach(({ shrine, idx }) => {
-    if (!shrine.tags.includes('ichi')) return;
-    const prov = shrine.province;
-    if (!byProvince[prov]) byProvince[prov] = [];
-    byProvince[prov].push({ shrine, idx, visited: isVisited(shrine) });
-  });
-  return byProvince;
+// ===== 巡り達成チェック（一宮・神宮・大社） =====
+// 一宮＝令制国ごとに1社でも参拝済みなら「その国は達成」（一宮巡りの作法に合わせる）
+// 神宮・大社＝令制国と1:1対応しないので、1社ずつの単純な参拝チェックリスト
+const ACHIEVE_TAGS = [
+  { tag: 'ichi',   label: '一宮', mode: 'province', unit: '国' },
+  { tag: 'jingu',  label: '神宮', mode: 'flat',      unit: '社' },
+  { tag: 'taisha', label: '大社', mode: 'flat',      unit: '社' },
+];
+let currentAchieveTag = 'ichi';
+
+function computeAchieveItems(tag) {
+  return markerList
+    .filter(({ shrine }) => shrine.tags.includes(tag))
+    .map(({ shrine, idx }) => ({ shrine, idx, visited: isVisited(shrine) }));
 }
 
-function renderAchieveModal() {
-  const byProvince = computeAchievement();
-  const provinces = Object.keys(byProvince);
-  const doneCount = provinces.filter(p => byProvince[p].some(x => x.visited)).length;
-  const total = provinces.length;
-  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+function jumpToShrineFromAchieve(idx) {
+  closeAchieveModal();
+  focusShrine(idx, document.querySelector(`.shrine-item[data-idx="${idx}"]`));
+}
 
-  document.getElementById('achieve-summary').innerHTML = `
-    <span class="achieve-summary-num">${doneCount} / ${total} 国</span>
-    <span class="achieve-summary-label">の一宮を参拝済み（${pct}%）</span>
-    <div class="achieve-bar-track"><div class="achieve-bar-fill" style="width:${pct}%"></div></div>`;
-
-  // 地方ごとにグループ化
-  const byRegion = {};
-  provinces.forEach(prov => {
-    const region = PROVINCE_REGION[prov] || 'その他';
-    if (!byRegion[region]) byRegion[region] = [];
-    byRegion[region].push(prov);
-  });
-
+// 地方ごとにグループ化した .achieve-prov-grid セクション群を body に描画する共通処理
+// groups: [{ label, done, total, items: [{name, sub, done, idx}] }]
+function renderAchieveGroups(groups) {
   const body = document.getElementById('achieve-body');
   body.innerHTML = '';
-  REGION_ORDER.forEach(region => {
-    const provs = byRegion[region];
-    if (!provs || provs.length === 0) return;
-
+  groups.forEach(({ label, done, total, items }) => {
+    if (items.length === 0) return;
     const sec = document.createElement('div');
     sec.className = 'achieve-region';
     const title = document.createElement('div');
     title.className = 'achieve-region-title';
-    const regionDone = provs.filter(p => byProvince[p].some(x => x.visited)).length;
-    title.textContent = `${region}（${regionDone}/${provs.length}）`;
+    title.textContent = `${label}（${done}/${total}）`;
     sec.appendChild(title);
 
     const grid = document.createElement('div');
     grid.className = 'achieve-prov-grid';
-    provs.forEach(prov => {
-      const items = byProvince[prov];
-      const done = items.some(x => x.visited);
-      const names = items.map(x => x.shrine.name).join('・');
+    items.forEach(item => {
       const row = document.createElement('div');
-      row.className = 'achieve-prov' + (done ? ' done' : '');
-      row.title = names;
+      row.className = 'achieve-prov' + (item.done ? ' done' : '');
+      row.title = item.title || '';
       row.innerHTML = `
         <div class="achieve-prov-icon">✓</div>
-        <div class="achieve-prov-name">${prov}</div>
-        <div class="achieve-prov-count">${items.filter(x=>x.visited).length}/${items.length}</div>`;
-      row.addEventListener('click', () => {
-        closeAchieveModal();
-        focusShrine(items[0].idx, document.querySelector(`.shrine-item[data-idx="${items[0].idx}"]`));
-      });
+        <div class="achieve-prov-name">${item.name}</div>
+        <div class="achieve-prov-count">${item.sub}</div>`;
+      row.addEventListener('click', () => jumpToShrineFromAchieve(item.idx));
       grid.appendChild(row);
     });
     sec.appendChild(grid);
@@ -1569,8 +1570,110 @@ function renderAchieveModal() {
   });
 }
 
+function renderProvinceMode(cfg, items) {
+  const byProvince = {};
+  items.forEach(item => {
+    const prov = item.shrine.province;
+    if (!byProvince[prov]) byProvince[prov] = [];
+    byProvince[prov].push(item);
+  });
+  const provinces = Object.keys(byProvince);
+  const doneCount = provinces.filter(p => byProvince[p].some(x => x.visited)).length;
+  const total = provinces.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+  document.getElementById('achieve-summary').innerHTML = `
+    <span class="achieve-summary-num">${doneCount} / ${total} ${cfg.unit}</span>
+    <span class="achieve-summary-label">の${cfg.label}を参拝済み（${pct}%）</span>
+    <div class="achieve-bar-track"><div class="achieve-bar-fill" style="width:${pct}%"></div></div>`;
+
+  const byRegion = {};
+  provinces.forEach(prov => {
+    const region = PROVINCE_REGION[prov] || 'その他';
+    if (!byRegion[region]) byRegion[region] = [];
+    byRegion[region].push(prov);
+  });
+
+  const groups = REGION_ORDER.map(region => {
+    const provs = byRegion[region] || [];
+    return {
+      label: region,
+      done: provs.filter(p => byProvince[p].some(x => x.visited)).length,
+      total: provs.length,
+      items: provs.map(prov => {
+        const provItems = byProvince[prov];
+        return {
+          name: prov,
+          sub: `${provItems.filter(x=>x.visited).length}/${provItems.length}`,
+          done: provItems.some(x => x.visited),
+          idx: provItems[0].idx,
+          title: provItems.map(x => x.shrine.name).join('・'),
+        };
+      }),
+    };
+  });
+  renderAchieveGroups(groups);
+}
+
+function renderFlatMode(cfg, items) {
+  const doneCount = items.filter(x => x.visited).length;
+  const total = items.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+
+  document.getElementById('achieve-summary').innerHTML = `
+    <span class="achieve-summary-num">${doneCount} / ${total} ${cfg.unit}</span>
+    <span class="achieve-summary-label">の${cfg.label}を参拝済み（${pct}%）</span>
+    <div class="achieve-bar-track"><div class="achieve-bar-fill" style="width:${pct}%"></div></div>`;
+
+  const byRegion = {};
+  items.forEach(item => {
+    const region = PROVINCE_REGION[item.shrine.province] || 'その他';
+    if (!byRegion[region]) byRegion[region] = [];
+    byRegion[region].push(item);
+  });
+
+  const groups = REGION_ORDER.map(region => {
+    const regionItems = byRegion[region] || [];
+    return {
+      label: region,
+      done: regionItems.filter(x => x.visited).length,
+      total: regionItems.length,
+      items: regionItems.map(item => ({
+        name: item.shrine.name,
+        sub: item.shrine.pref,
+        done: item.visited,
+        idx: item.idx,
+        title: item.shrine.pref,
+      })),
+    };
+  });
+  renderAchieveGroups(groups);
+}
+
+function renderAchieveTabs() {
+  const tabs = document.getElementById('achieve-tabs');
+  tabs.innerHTML = ACHIEVE_TAGS.map(t =>
+    `<button class="achieve-tab ${t.tag === currentAchieveTag ? 'active' : ''}" data-tag="${t.tag}">${t.label}</button>`
+  ).join('');
+  tabs.querySelectorAll('.achieve-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentAchieveTag = btn.dataset.tag;
+      renderAchieveBody();
+    });
+  });
+}
+
+function renderAchieveBody() {
+  renderAchieveTabs();
+  const cfg = ACHIEVE_TAGS.find(t => t.tag === currentAchieveTag);
+  const items = computeAchieveItems(currentAchieveTag);
+  if (cfg.mode === 'province') renderProvinceMode(cfg, items);
+  else renderFlatMode(cfg, items);
+}
+
 function openAchieveModal() {
-  renderAchieveModal();
+  currentAchieveTag = 'ichi';
+  renderAchieveBody();
   document.getElementById('achieve-overlay').classList.add('open');
 }
 function closeAchieveModal() {
@@ -1590,6 +1693,9 @@ applyExpandState();
 initFilterButtons();
 updateStats();
 renderList();
+// 初期表示時点で「その他のタグ」が展開済み（前回状態を復元）だと地図の描画領域が
+// ヘッダー確定前のサイズで計算されてしまうため、レイアウト確定後に一度補正する
+setTimeout(() => map.invalidateSize(), 50);
 </script>
 </body>
 </html>
