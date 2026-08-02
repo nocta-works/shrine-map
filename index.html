@@ -209,19 +209,28 @@
       display: flex; align-items: center; gap: 8px;
       padding: 6px 8px; border-radius: 6px;
       background: rgba(255,255,255,0.02);
+      cursor: pointer; transition: background 0.15s;
     }
+    .achieve-prov:hover { background: rgba(255,255,255,0.07); }
     .achieve-prov.done { background: rgba(212,134,10,0.1); }
+    .achieve-prov.done:hover { background: rgba(212,134,10,0.18); }
     .achieve-prov-icon {
       width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; border: 1.5px solid #5a3a1a; color: transparent;
     }
+    .achieve-prov-icon.checkable { cursor: pointer; }
+    .achieve-prov-icon.checkable:hover { border-color: #f5d08a; background: rgba(245,208,138,0.12); }
     .achieve-prov.done .achieve-prov-icon {
       background: rgba(245,208,138,0.25); border-color: #f5d08a; color: #f5d08a;
     }
-    .achieve-prov-name { font-size: 12px; color: #ddd0a0; }
+    .achieve-prov-name { font-size: 12px; color: #ddd0a0; flex-shrink: 0; }
     .achieve-prov.done .achieve-prov-name { color: #f5d08a; }
-    .achieve-prov-count { font-size: 10px; color: #705030; margin-left: auto; }
+    .achieve-prov-shrine {
+      font-size: 10.5px; color: #705030; margin-left: auto;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right;
+    }
+    .achieve-prov.done .achieve-prov-shrine { color: #a88858; }
 
     @media (max-width: 640px) {
       .achieve-prov-grid { grid-template-columns: 1fr; }
@@ -1560,6 +1569,11 @@ function focusShrine(idx, listItem) {
 
   const { marker, shrine } = markerList[idx];
 
+  // 現在のフィルタでは非表示の社（達成状況からのジャンプ等）でも見えるようにする。
+  // これをしないと openPopup() が this._map 未設定のため黙って失敗し、
+  // 発光サークルだけ表示されて肝心のマーカー・ポップアップが出ない事態になる
+  if (!map.hasLayer(marker)) marker.addTo(map);
+
   // 発光サークル演出
   if (flashLayer) { map.removeLayer(flashLayer); flashLayer = null; }
   flashLayer = L.circle([shrine.lat, shrine.lng], {
@@ -1676,7 +1690,9 @@ function jumpToShrineFromAchieve(idx) {
 }
 
 // 地方ごとにグループ化した .achieve-prov-grid セクション群を body に描画する共通処理
-// groups: [{ label, done, total, items: [{name, sub, done, idx}] }]
+// groups: [{ label, done, total, items: [{name, sub, done, idx, checkIdx}] }]
+// checkIdx: 対応する神社が1件に確定している場合のみidxが入り、チェックマークから直接トグルできる
+// （一宮は論社＝候補が複数の旧国があるため、その場合はnullにして曖昧なトグルを避ける）
 function renderAchieveGroups(groups) {
   const body = document.getElementById('achieve-body');
   body.innerHTML = '';
@@ -1695,10 +1711,18 @@ function renderAchieveGroups(groups) {
       const row = document.createElement('div');
       row.className = 'achieve-prov' + (item.done ? ' done' : '');
       row.title = item.title || '';
+      const checkable = item.checkIdx != null;
       row.innerHTML = `
-        <div class="achieve-prov-icon">✓</div>
+        <div class="achieve-prov-icon${checkable ? ' checkable' : ''}">✓</div>
         <div class="achieve-prov-name">${item.name}</div>
-        <div class="achieve-prov-count">${item.sub}</div>`;
+        <div class="achieve-prov-shrine">${item.sub}</div>`;
+      if (checkable) {
+        row.querySelector('.achieve-prov-icon').addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleVisited(item.checkIdx);
+          renderAchieveBody();
+        });
+      }
       row.addEventListener('click', () => jumpToShrineFromAchieve(item.idx));
       grid.appendChild(row);
     });
@@ -1739,12 +1763,14 @@ function renderProvinceMode(cfg, items) {
       total: provs.length,
       items: provs.map(prov => {
         const provItems = byProvince[prov];
+        const names = provItems.map(x => x.shrine.name).join('・');
         return {
           name: prov,
-          sub: `${provItems.filter(x=>x.visited).length}/${provItems.length}`,
+          sub: names,
           done: provItems.some(x => x.visited),
           idx: provItems[0].idx,
-          title: provItems.map(x => x.shrine.name).join('・'),
+          checkIdx: provItems.length === 1 ? provItems[0].idx : null,
+          title: `${names}（${provItems.filter(x=>x.visited).length}/${provItems.length}参拝済み）`,
         };
       }),
     };
@@ -1780,6 +1806,7 @@ function renderFlatMode(cfg, items) {
         sub: item.shrine.pref,
         done: item.visited,
         idx: item.idx,
+        checkIdx: item.idx,
         title: item.shrine.pref,
       })),
     };
