@@ -6,3 +6,5 @@
 !robots.txt
 !sitemap.xml
 !og-image.jpg
+!provinces/
+!provinces/*.html

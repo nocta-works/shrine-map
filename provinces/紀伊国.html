@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>紀伊国の神社一覧｜社巡り道標</title>
+<meta name="description" content="紀伊国（和歌山）の神社8社を格式・系統別に一覧。地図から探すこともできます。">
+<link rel="canonical" href="https://nocta-works.github.io/shrine-map/provinces/%E7%B4%80%E4%BC%8A%E5%9B%BD.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="社巡り道標">
+<meta property="og:title" content="紀伊国の神社一覧｜社巡り道標">
+<meta property="og:description" content="紀伊国（和歌山）の神社8社を格式・系統別に一覧。地図から探すこともできます。">
+<meta property="og:url" content="https://nocta-works.github.io/shrine-map/provinces/%E7%B4%80%E4%BC%8A%E5%9B%BD.html">
+<meta property="og:image" content="https://nocta-works.github.io/shrine-map/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="紀伊国の神社一覧｜社巡り道標">
+<meta name="twitter:description" content="紀伊国（和歌山）の神社8社を格式・系統別に一覧。地図から探すこともできます。">
+<meta name="twitter:image" content="https://nocta-works.github.io/shrine-map/og-image.jpg">
+<style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: linear-gradient(180deg, #150e08 0%, #0d0813 100%);
+      color: #e8dcc4;
+      font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Yu Gothic', 'Meiryo', 'Noto Sans JP', sans-serif;
+      line-height: 1.7;
+    }
+    a { color: #d4b880; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; }
+    .crumb { font-size: 12px; color: #8a7050; margin-bottom: 18px; }
+    .crumb a { color: #b89060; text-decoration: none; }
+    .crumb a:hover { color: #f5d08a; }
+    header.page-head { margin-bottom: 22px; }
+    h1 {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      font-size: 26px; color: #f5d08a; margin: 0 0 6px; letter-spacing: 0.04em;
+    }
+    .region-label { font-size: 13px; color: #907050; margin: 0; }
+    .map-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 16px; padding: 9px 18px; border-radius: 20px;
+      background: rgba(245,208,138,0.14); border: 1px solid #d4860a;
+      color: #f5d08a; text-decoration: none; font-size: 13px; letter-spacing: 0.03em;
+      transition: background 0.15s;
+    }
+    .map-cta:hover { background: rgba(245,208,138,0.24); }
+    .shrine-list { list-style: none; margin: 26px 0 0; padding: 0; }
+    .shrine-item {
+      padding: 16px 0; border-top: 1px solid #3a2010;
+    }
+    .shrine-item:last-child { border-bottom: 1px solid #3a2010; }
+    .badges { margin-bottom: 6px; }
+    .badge {
+      display: inline-block; font-size: 10.5px; padding: 2px 9px; border-radius: 10px;
+      margin-right: 5px; letter-spacing: 0.05em;
+    }
+    .shrine-name {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      font-size: 17px; color: #f0e0c0; margin: 2px 0 3px;
+    }
+    .shrine-pref { font-size: 11px; color: #705030; margin-bottom: 4px; }
+    .shrine-deity { font-size: 12.5px; color: #a89070; margin-bottom: 4px; }
+    .shrine-reason { font-size: 12px; color: #8a7454; margin-bottom: 8px; }
+    .links { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .links a {
+      font-size: 11px; padding: 4px 10px; border-radius: 6px; text-decoration: none;
+      background: rgba(255,255,255,0.04); border: 1px solid #4a3420; color: #c8a860;
+    }
+    .links a:hover { background: rgba(255,255,255,0.09); }
+    .disclaimer {
+      margin-top: 30px; padding-top: 14px; border-top: 1px solid #3a2010;
+      font-size: 10.5px; line-height: 1.7; color: #5a4a38;
+    }
+    .region-block { margin-bottom: 30px; }
+    .region-title {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+      font-size: 15px; color: #d4b880; border-bottom: 1px solid #3a2010;
+      padding-bottom: 6px; margin: 0 0 10px;
+    }
+    .prov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+    .prov-grid a {
+      display: flex; justify-content: space-between; gap: 8px;
+      padding: 6px 4px; font-size: 13px; text-decoration: none; color: #ddd0a0;
+      border-bottom: 1px dotted #2a1c10;
+    }
+    .prov-grid a:hover { color: #f5d08a; }
+    .prov-grid .cnt { color: #705030; font-size: 11px; }
+    @media (max-width: 520px) {
+      .prov-grid { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../index.html">⛩ 社巡り道標</a> ／ <a href="index.html">令制国一覧</a> ／ 紀伊国</div>
+  <header class="page-head">
+    <h1>紀伊国の神社</h1>
+    <p class="region-label">南海道｜和歌山｜8社</p>
+    <a class="map-cta" href="../index.html?province=%E7%B4%80%E4%BC%8A%E5%9B%BD">🗾 地図で見る</a>
+  </header>
+  <ul class="shrine-list">
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #f5c842; color:#f5c842; background:rgba(212,134,10,0.18);">神宮</span><span class="badge" style="border:1px solid #ff9a8a; color:#ff9a8a; background:rgba(232,48,32,0.18);">一宮</span></div>
+        <div class="shrine-name">日前神宮・國懸神宮</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：日前大神・国懸大神</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E6%97%A5%E5%89%8D%E7%A5%9E%E5%AE%AE%E3%83%BB%E5%9C%8B%E6%87%B8%E7%A5%9E%E5%AE%AE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E6%97%A5%E5%89%8D%E7%A5%9E%E5%AE%AE%E3%83%BB%E5%9C%8B%E6%87%B8%E7%A5%9E%E5%AE%AE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E6%97%A5%E5%89%8D%E7%A5%9E%E5%AE%AE%E3%83%BB%E5%9C%8B%E6%87%B8%E7%A5%9E%E5%AE%AE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #c4a8ff; color:#c4a8ff; background:rgba(124,58,237,0.18);">大社</span></div>
+        <div class="shrine-name">熊野本宮大社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：家都美御子大神</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E7%86%8A%E9%87%8E%E6%9C%AC%E5%AE%AE%E5%A4%A7%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E7%86%8A%E9%87%8E%E6%9C%AC%E5%AE%AE%E5%A4%A7%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E7%86%8A%E9%87%8E%E6%9C%AC%E5%AE%AE%E5%A4%A7%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #c4a8ff; color:#c4a8ff; background:rgba(124,58,237,0.18);">大社</span></div>
+        <div class="shrine-name">熊野速玉大社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：熊野速玉大神・熊野夫須美大神</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E7%86%8A%E9%87%8E%E9%80%9F%E7%8E%89%E5%A4%A7%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E7%86%8A%E9%87%8E%E9%80%9F%E7%8E%89%E5%A4%A7%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E7%86%8A%E9%87%8E%E9%80%9F%E7%8E%89%E5%A4%A7%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #c4a8ff; color:#c4a8ff; background:rgba(124,58,237,0.18);">大社</span></div>
+        <div class="shrine-name">熊野那智大社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：熊野夫須美大神</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E7%86%8A%E9%87%8E%E9%82%A3%E6%99%BA%E5%A4%A7%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E7%86%8A%E9%87%8E%E9%82%A3%E6%99%BA%E5%A4%A7%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E7%86%8A%E9%87%8E%E9%82%A3%E6%99%BA%E5%A4%A7%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #ff9a8a; color:#ff9a8a; background:rgba(232,48,32,0.18);">一宮</span><span class="badge" style="border:1px solid #7dd3fc; color:#7dd3fc; background:rgba(2,132,199,0.18);">名社２</span></div>
+        <div class="shrine-name">丹生都比売神社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：丹生都比売大神・高野御子大神ほか</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E4%B8%B9%E7%94%9F%E9%83%BD%E6%AF%94%E5%A3%B2%E7%A5%9E%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E4%B8%B9%E7%94%9F%E9%83%BD%E6%AF%94%E5%A3%B2%E7%A5%9E%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E4%B8%B9%E7%94%9F%E9%83%BD%E6%AF%94%E5%A3%B2%E7%A5%9E%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #88b4ff; color:#88b4ff; background:rgba(26,80,216,0.18);">二宮</span></div>
+        <div class="shrine-name">竈山神社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：彦五瀬命</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E7%AB%88%E5%B1%B1%E7%A5%9E%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E7%AB%88%E5%B1%B1%E7%A5%9E%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E7%AB%88%E5%B1%B1%E7%A5%9E%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #7dd3fc; color:#7dd3fc; background:rgba(2,132,199,0.18);">名社２</span></div>
+        <div class="shrine-name">鬪雞神社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：家都御子神ほか熊野権現</div>
+        
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E9%AC%AA%E9%9B%9E%E7%A5%9E%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E9%AC%AA%E9%9B%9E%E7%A5%9E%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E9%AC%AA%E9%9B%9E%E7%A5%9E%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+      <li class="shrine-item">
+        <div class="badges"><span class="badge" style="border:1px solid #ff7a3e; color:#ff7a3e; background:rgba(220,80,20,0.18);">開運</span></div>
+        <div class="shrine-name">飛瀧神社</div>
+        <div class="shrine-pref">和歌山</div>
+        <div class="shrine-deity">祭神：大己貴命（那智大滝を御神体）</div>
+        <div class="shrine-reason">落差133mの那智大滝そのものを御神体とする神社。熊野那智大社の別宮。東牟婁郡那智勝浦町に鎮座。世界遺産の滝のそばで開運・運気上昇を祈る聖地として名高い。</div>
+        <div class="links">
+          <a href="https://www.google.com/maps/search/%E9%A3%9B%E7%80%A7%E7%A5%9E%E7%A4%BE" target="_blank" rel="noopener">📍 地図</a>
+          <a href="https://www.google.com/search?q=%E9%A3%9B%E7%80%A7%E7%A5%9E%E7%A4%BE%20%E5%85%AC%E5%BC%8F" target="_blank" rel="noopener">🌐 公式</a>
+          <a href="https://ja.wikipedia.org/w/index.php?search=%E9%A3%9B%E7%80%A7%E7%A5%9E%E7%A4%BE&title=%E7%89%B9%E5%88%A5:%E6%A4%9C%E7%B4%A2&go=Go" target="_blank" rel="noopener">📖 Wiki</a>
+        </div>
+      </li>
+  </ul>
+  <p class="disclaimer">
+    登録不要・広告なし。格式の分類は一般的な整理に基づく機械的なものです。諸説あります。正確な情報は各神社の公式情報をご確認ください。<br>
+    このページは<a href="../index.html">社巡り道標</a>が自動生成しています。各リンクは外部サイト（Google マップ／Google 検索／Wikipedia）へ遷移します。
+  </p>
+</div>
+</body>
+</html>
