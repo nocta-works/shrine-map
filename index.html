@@ -166,6 +166,13 @@
       flex-shrink: 0;
     }
     .achieve-title { font-size: 16px; color: #f5d08a; letter-spacing: 0.06em; }
+    .achieve-header-actions { display: flex; align-items: center; gap: 4px; }
+    .achieve-io-btn {
+      cursor: pointer; color: #907050; font-size: 12px; letter-spacing: 0.03em;
+      padding: 5px 10px; border-radius: 14px; border: 1px solid #4a2a10;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .achieve-io-btn:hover { color: #d4b880; border-color: #6a4028; background: rgba(245,208,138,0.08); }
     .achieve-close {
       cursor: pointer; color: #907050; font-size: 20px; line-height: 1;
       padding: 4px 8px; border-radius: 4px;
@@ -636,6 +643,12 @@
     .ctrl-divider { display: none; }
     .stats { display: none; }
 
+    /* 巡り達成状況モーダル：保存/読み込みボタンはアイコンのみに縮小（タイトル折り返し・窮屈さを回避） */
+    .achieve-header { flex-wrap: wrap; row-gap: 8px; padding: 14px 16px; }
+    .achieve-title { font-size: 14px; }
+    .achieve-io-btn { padding: 6px 9px; font-size: 14px; }
+    .achieve-io-btn .io-label { display: none; }
+
     .filter-btn {
       padding: 4px 9px;
       font-size: 11px;
@@ -732,13 +745,18 @@
   <div class="achieve-modal">
     <div class="achieve-header">
       <span class="achieve-title">⛩ 巡り達成状況</span>
-      <span class="achieve-close" onclick="closeAchieveModal()">✕</span>
+      <div class="achieve-header-actions">
+        <span class="achieve-io-btn" onclick="exportVisits()" title="参拝記録を保存">⬇<span class="io-label"> 参拝記録を保存</span></span>
+        <span class="achieve-io-btn" onclick="triggerImportVisits()" title="参拝記録を読み込み">⬆<span class="io-label"> 読み込み</span></span>
+        <span class="achieve-close" onclick="closeAchieveModal()">✕</span>
+      </div>
     </div>
     <div class="achieve-tabs" id="achieve-tabs"></div>
     <div class="achieve-summary" id="achieve-summary"></div>
     <div class="achieve-body" id="achieve-body"></div>
   </div>
 </div>
+<input type="file" id="import-file-input" accept="application/json,.json" style="display:none">
 
 <div id="map-area">
   <div id="map"></div>
@@ -1337,6 +1355,52 @@ function setVisitDate(idx, dateStr) {
   saveVisits();
 }
 
+// ===== 参拝記録のエクスポート・インポート（端末変更・ブラウザデータ消去への備え） =====
+function exportVisits() {
+  const payload = {
+    app: 'shrine-map', version: 1,
+    exportedAt: new Date().toISOString(),
+    visits,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `参拝記録_${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function triggerImportVisits() {
+  document.getElementById('import-file-input').click();
+}
+
+function importVisits(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let incoming;
+    try {
+      const data = JSON.parse(e.target.result);
+      incoming = (data && typeof data.visits === 'object' && data.visits) ? data.visits : data;
+      if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) throw new Error('invalid');
+    } catch (err) {
+      alert('読み込みに失敗しました。この地図からエクスポートしたJSONファイルを選択してください。');
+      return;
+    }
+    const count = Object.keys(incoming).length;
+    if (!confirm(`${count}件の参拝記録を読み込みます。現在の記録と統合されます（同じ神社は上書きされます）。よろしいですか？`)) return;
+    Object.assign(visits, incoming);
+    saveVisits();
+    markerList.forEach(({ marker, shrine }) => marker.setIcon(getIcon(topTag(shrine.tags), isVisited(shrine))));
+    redrawMarkers();
+    if (document.getElementById('achieve-overlay').classList.contains('open')) renderAchieveBody();
+    alert(`${count}件の参拝記録を読み込みました。`);
+  };
+  reader.readAsText(file);
+}
+
 // ===== フィルター状態（localStorage・前回選択を復元／初回は神宮・一宮のみ） =====
 const FILTER_KEY = 'shrineMapFilters_v1';
 function readSavedFilters() {
@@ -1916,6 +1980,11 @@ updateStats();
 renderList();
 updateAllToggleLabel();
 applyURLState();
+document.getElementById('import-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) importVisits(file);
+  e.target.value = '';
+});
 // 初期表示時点で「その他のタグ」が展開済み（前回状態を復元）だと地図の描画領域が
 // ヘッダー確定前のサイズで計算されてしまうため、レイアウト確定後に一度補正する
 setTimeout(() => map.invalidateSize(), 50);
