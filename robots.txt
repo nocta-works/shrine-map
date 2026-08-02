@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nocta-works.github.io/shrine-map/sitemap.xml
