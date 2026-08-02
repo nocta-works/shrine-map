@@ -485,27 +485,76 @@
       color-scheme: dark;
     }
 
-    .popup-gmaps {
+    .popup-links {
+      display: flex;
+      gap: 5px;
+      margin-top: 6px;
+    }
+    .popup-link {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+      padding: 5px 6px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .popup-link-icon { font-size: 12px; }
+    .popup-link.gmaps {
+      background: rgba(66,133,244,0.14); border: 1px solid rgba(66,133,244,0.35); color: #7eb8ff;
+    }
+    .popup-link.gmaps:hover { background: rgba(66,133,244,0.28); color: #aad4ff; }
+    .popup-link.official {
+      background: rgba(212,134,10,0.14); border: 1px solid rgba(212,134,10,0.35); color: #e0b060;
+    }
+    .popup-link.official:hover { background: rgba(212,134,10,0.28); color: #f5d08a; }
+    .popup-link.wiki {
+      background: rgba(150,150,165,0.14); border: 1px solid rgba(150,150,165,0.35); color: #b8b8c8;
+    }
+    .popup-link.wiki:hover { background: rgba(150,150,165,0.28); color: #d8d8e8; }
+
+    .popup-share {
       margin-top: 6px;
       padding: 5px 10px;
       border-radius: 6px;
-      background: rgba(66,133,244,0.14);
-      border: 1px solid rgba(66,133,244,0.35);
-      color: #7eb8ff;
-      font-size: 11px;
-      text-decoration: none;
-      letter-spacing: 0.05em;
-      transition: background 0.15s, color 0.15s;
+      background: rgba(255,255,255,0.05);
+      border: 1px dashed #5a4a38;
+      color: #9a8a70;
+      font-size: 10.5px;
+      text-align: center;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
-    .popup-gmaps:hover {
-      background: rgba(66,133,244,0.28);
-      color: #aad4ff;
+    .popup-share:hover { background: rgba(255,255,255,0.09); color: #d4b880; border-color: #8a6a40; }
+
+    /* 令制国絞り込みバナー（?province= でURLから直接開いたとき） */
+    .province-banner {
+      display: none;
+      position: absolute;
+      top: 14px; left: 50%; transform: translateX(-50%);
+      z-index: 1100;
+      background: linear-gradient(135deg,rgba(30,14,6,0.95) 0%,rgba(15,10,26,0.95) 100%);
+      border: 1px solid #d4860a; border-radius: 20px;
+      padding: 7px 16px;
+      font-size: 12px; letter-spacing: 0.03em; color: #f5d08a;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      align-items: center; gap: 10px;
+      max-width: calc(100% - 28px);
     }
-    .popup-gmaps-icon { font-size: 13px; }
+    .province-banner.visible { display: flex; }
+    .province-banner-close {
+      cursor: pointer; color: #b89060; border: 1px solid #6a5030; border-radius: 12px;
+      padding: 2px 9px; font-size: 11px; white-space: nowrap; transition: color 0.15s, border-color 0.15s;
+    }
+    .province-banner-close:hover { color: #f5d08a; border-color: #d4860a; }
 
     /* Legend */
     .legend {
@@ -682,6 +731,12 @@
 
 <div id="map-area">
   <div id="map"></div>
+
+  <!-- ?province= でURLから直接開いたときに出る絞り込み表示バナー -->
+  <div id="province-banner" class="province-banner">
+    <span id="province-banner-text"></span>
+    <span class="province-banner-close" onclick="clearProvinceFilter()">✕ 解除</span>
+  </div>
 
   <!-- ── 右サイドバー ── -->
   <div id="sidebar">
@@ -1287,8 +1342,15 @@ const _savedFilters = readSavedFilters();
 const activeFilters = new Set(_savedFilters || ['jingu', 'ichi']);
 const markerList = [];
 
-// このシャインがどれかの表示条件を満たすか（分類タグ or 参拝済みフィルタ）
+// URLの ?province= で絞り込み中の令制国（複数可）。null なら絞り込みなし
+let provinceFilter = null;
+function inProvinceFilter(shrine) {
+  return !provinceFilter || provinceFilter.includes(shrine.province);
+}
+
+// このシャインがどれかの表示条件を満たすか（分類タグ or 参拝済みフィルタ、かつ令制国絞り込み）
 function passesFilter(shrine) {
+  if (!inProvinceFilter(shrine)) return false;
   return shrine.tags.some(t => activeFilters.has(t)) || (activeFilters.has('sanpai') && isVisited(shrine));
 }
 
@@ -1314,6 +1376,9 @@ function buildPopupContent(s, idx) {
     ? `<div class="popup-reason">${s.reason}</div>`
     : '';
   const gmapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(s.name)}`;
+  const officialUrl = `https://www.google.com/search?q=${encodeURIComponent(s.name + ' 公式')}`;
+  const wikiUrl = `https://ja.wikipedia.org/w/index.php?search=${encodeURIComponent(s.name)}&title=特別:検索&go=Go`;
+  const shareUrl = buildShareUrl(s);
   const visited = isVisited(s);
   const date = getVisitDate(s);
 
@@ -1329,9 +1394,12 @@ function buildPopupContent(s, idx) {
         <div class="popup-visit-btn ${visited ? 'checked' : ''}" data-idx="${idx}">${visited ? '✓ 参拝済み' : '○ 参拝済みにする'}</div>
         ${visited ? `<input type="date" class="popup-visit-date" value="${date}">` : ''}
       </div>
-      <a href="${gmapsUrl}" target="_blank" rel="noopener" class="popup-gmaps">
-        <span class="popup-gmaps-icon">📍</span> Google マップで開く
-      </a>
+      <div class="popup-links">
+        <a href="${gmapsUrl}" target="_blank" rel="noopener" class="popup-link gmaps"><span class="popup-link-icon">📍</span>地図</a>
+        <a href="${officialUrl}" target="_blank" rel="noopener" class="popup-link official"><span class="popup-link-icon">🌐</span>公式</a>
+        <a href="${wikiUrl}" target="_blank" rel="noopener" class="popup-link wiki"><span class="popup-link-icon">📖</span>Wiki</a>
+      </div>
+      <div class="popup-share" data-share-url="${shareUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" data-idx="${idx}">🔗 このページのリンクをコピー</div>
     </div>`;
 }
 
@@ -1354,6 +1422,29 @@ function bindPopupVisitEvents(marker, idx) {
     dateInput.onclick = (e) => e.stopPropagation();
     dateInput.onchange = (e) => setVisitDate(idx, e.target.value);
   }
+  const shareBtn = el.querySelector('.popup-share');
+  if (shareBtn) {
+    shareBtn.onclick = async (e) => {
+      e.stopPropagation();
+      const url = shareBtn.getAttribute('data-share-url');
+      try {
+        await navigator.clipboard.writeText(url);
+        shareBtn.textContent = '✓ コピーしました';
+      } catch (err) {
+        shareBtn.textContent = url;
+      }
+      setTimeout(() => { shareBtn.textContent = '🔗 このページのリンクをコピー'; }, 1800);
+    };
+  }
+}
+
+// 個別神社への共有リンク（?s=神社名。同名が複数ある場合のみ &pref= で曖昧さ回避）
+function buildShareUrl(s) {
+  const url = new URL(location.href);
+  url.search = '';
+  url.searchParams.set('s', s.name);
+  if (shrines.filter(x => x.name === s.name).length > 1) url.searchParams.set('pref', s.pref);
+  return url.toString();
 }
 
 shrines.forEach((s, idx) => {
@@ -1412,7 +1503,7 @@ function renderList() {
 
   // ── 参拝済みセクション（フィルタON時のみ・全ての参拝済み社をまとめて表示）──
   if (activeFilters.has('sanpai')) {
-    const visitedItems = markerList.filter(({shrine}) => isVisited(shrine));
+    const visitedItems = markerList.filter(({shrine}) => isVisited(shrine) && inProvinceFilter(shrine));
     if (visitedItems.length > 0) {
       const sec = document.createElement('div');
       sec.className = 'sidebar-section';
@@ -1430,7 +1521,7 @@ function renderList() {
     if (!activeFilters.has(tag)) return;
 
     // 「今表示中のタグの中での最優先」がこのタグのものだけ（重複防止）
-    const items = markerList.filter(({shrine}) => displayTag(shrine) === tag);
+    const items = markerList.filter(({shrine}) => displayTag(shrine) === tag && inProvinceFilter(shrine));
     if (items.length === 0) return;
 
     const cfg = TAG_CONFIG[tag];
@@ -1735,11 +1826,66 @@ function toggleSidebar() {
   setTimeout(() => map.invalidateSize(), 260);
 }
 
+// ===== URL状態管理（?s=神社名 でディープリンク／?province=令制国名 で絞り込み） =====
+// 同名神社が複数ある場合は &pref= で曖昧さを回避する
+function findShrineIndexByName(name, pref) {
+  const candidates = markerList.filter(({ shrine }) => shrine.name === name);
+  if (candidates.length === 0) return -1;
+  if (candidates.length > 1 && pref) {
+    const withPref = candidates.find(({ shrine }) => shrine.pref === pref);
+    if (withPref) return withPref.idx;
+  }
+  return candidates[0].idx;
+}
+
+function applyProvinceFilter(provinces) {
+  provinceFilter = provinces;
+  redrawMarkers();
+  const items = markerList.filter(({ shrine }) => provinceFilter.includes(shrine.province));
+  if (items.length > 0) {
+    map.fitBounds(L.latLngBounds(items.map(({ shrine }) => [shrine.lat, shrine.lng])), { padding: [40, 40], maxZoom: 12 });
+  }
+  const banner = document.getElementById('province-banner');
+  document.getElementById('province-banner-text').textContent = `${provinces.join('・')}の神社を表示中`;
+  banner.classList.add('visible');
+}
+
+function clearProvinceFilter() {
+  provinceFilter = null;
+  document.getElementById('province-banner').classList.remove('visible');
+  redrawMarkers();
+  const url = new URL(location.href);
+  url.searchParams.delete('province');
+  history.replaceState(null, '', url);
+}
+
+function applyURLState() {
+  const params = new URLSearchParams(location.search);
+  const provinceParam = params.get('province');
+  if (provinceParam) {
+    const provinces = provinceParam.split(',').filter(Boolean);
+    if (markerList.some(({ shrine }) => provinces.includes(shrine.province))) {
+      applyProvinceFilter(provinces);
+    }
+  }
+
+  const shrineParam = params.get('s');
+  if (shrineParam) {
+    const idx = findShrineIndexByName(shrineParam, params.get('pref'));
+    if (idx >= 0) {
+      const { marker } = markerList[idx];
+      if (!map.hasLayer(marker)) marker.addTo(map);
+      setTimeout(() => focusShrine(idx, document.querySelector(`.shrine-item[data-idx="${idx}"]`)), 300);
+    }
+  }
+}
+
 applyExpandState();
 initFilterButtons();
 updateStats();
 renderList();
 updateAllToggleLabel();
+applyURLState();
 // 初期表示時点で「その他のタグ」が展開済み（前回状態を復元）だと地図の描画領域が
 // ヘッダー確定前のサイズで計算されてしまうため、レイアウト確定後に一度補正する
 setTimeout(() => map.invalidateSize(), 50);
