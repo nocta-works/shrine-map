@@ -657,6 +657,16 @@
     .achieve-title { font-size: 14px; }
     .achieve-io-btn { padding: 6px 9px; font-size: 14px; }
     .achieve-io-btn .io-label { display: none; }
+    /* タブ数が増えても文字が縦に折り返さないよう、横スクロール一列に */
+    .achieve-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .achieve-tabs::-webkit-scrollbar { display: none; }
+    .achieve-tab { white-space: nowrap; flex-shrink: 0; }
 
     .filter-btn {
       padding: 4px 9px;
@@ -868,8 +878,8 @@ const shrines = [
   { pref:"東京",   name:"小野神社",            tags:["ichi"],          province:"武蔵国",       lat:35.65300, lng:139.44227, deity:"天下春命" },
   { pref:"東京",   name:"二宮神社",            tags:["ni"],            province:"武蔵国",       lat:35.72689, lng:139.31357, deity:"国常立尊" },
   { pref:"東京",   name:"明治神宮",            tags:["jingu"],         province:"武蔵国",       lat:35.67611, lng:139.69917, deity:"明治天皇・昭憲皇太后" },
-  { pref:"東京",   name:"神田神社（神田明神）", tags:["meisha"],       province:"武蔵国",       lat:35.70194, lng:139.76778, deity:"大己貴命・少彦名命・平将門命", reason:"江戸総鎮守。旧府社・別表神社。江戸城・将軍家の守護として崇敬された。" },
-  { pref:"東京",   name:"日枝神社",            tags:["meisha"],        province:"武蔵国",       lat:35.67472, lng:139.73958, deity:"大山咋神", reason:"勅祭社。旧官幣大社。江戸城（皇居）の産土神。山王祭は天下三大祭のひとつ。" },
+  { pref:"東京",   name:"神田神社（神田明神）", tags:["meisha"],       sets:["tokyo10"], province:"武蔵国",       lat:35.70194, lng:139.76778, deity:"大己貴命・少彦名命・平将門命", reason:"江戸総鎮守。旧府社・別表神社。江戸城・将軍家の守護として崇敬された。" },
+  { pref:"東京",   name:"日枝神社",            tags:["meisha"],        sets:["tokyo10"], province:"武蔵国",       lat:35.67472, lng:139.73958, deity:"大山咋神", reason:"勅祭社。旧官幣大社。江戸城（皇居）の産土神。山王祭は天下三大祭のひとつ。" },
   { pref:"東京",   name:"大国魂神社",          tags:["meisha"],        province:"武蔵国",       lat:35.66733, lng:139.47900, deity:"大国魂大神（大己貴命）", reason:"武蔵国総社。旧官幣小社。武蔵国内の神々を合祀する国の鎮守。" },
   { pref:"東京",   name:"靖国神社",            tags:["meisha"],        province:"武蔵国",       lat:35.69396, lng:139.74269, deity:"国事殉難者の御霊", reason:"旧別格官幣社。勅祭社。明治以降の戦没者246万余柱を祀る。春秋大祭に勅使参向。" },
   { pref:"神奈川", name:"寒川神社",            tags:["ichi"],          province:"相模国",       lat:35.37979, lng:139.38361, deity:"寒川比古命・寒川比女命" },
@@ -1040,9 +1050,9 @@ const shrines = [
   // ── 東京 ──
   { pref:"東京", name:"浅草神社",           tags:["meisha"],  province:"武蔵国", lat:35.71514, lng:139.79744, deity:"土師真中知命・桧前浜成命・桧前竹成命", reason:"三社様。浅草三社祭（江戸三大祭）で著名。浅草寺の隣に鎮座し年間多数の参拝者が訪れる旧府社。" },
   { pref:"東京", name:"湯島天満宮",         tags:["meisha"],  province:"武蔵国", lat:35.70777, lng:139.76823, deity:"天之手力雄命・菅原道真公",            reason:"通称・湯島天神。関東屈指の学問の神。合格祈願の絵馬が境内を埋め尽くす。梅まつりも有名。" },
-  { pref:"東京", name:"根津神社",           tags:["meisha"],  province:"武蔵国", lat:35.72023, lng:139.76072, deity:"須佐之男命・大山咋命・誉田別命",       reason:"東京十社のひとつ。国重要文化財の権現造社殿。つつじ苑（約3,000株）と千本鳥居が名所。" },
-  { pref:"東京", name:"亀戸天神社",         tags:["meisha3"], province:"武蔵国", lat:35.70278, lng:139.82083, deity:"天満大神・天菩日命",                  reason:"地名代表社。東の太宰府とも呼ばれる。藤まつりとスカイツリーの競演が絶景。梅まつりでも有名。" },
-  { pref:"東京", name:"品川神社",           tags:["meisha3"], province:"武蔵国", lat:35.61847, lng:139.73964, deity:"天比理刀咩命・素戔嗚尊・宇賀之売命",  reason:"東京十社のひとつ。品川宿の総鎮守。富士塚（品川富士）が境内にあり関東大繁盛の開運神社。" },
+  { pref:"東京", name:"根津神社",           tags:["meisha"],  sets:["tokyo10"], province:"武蔵国", lat:35.72023, lng:139.76072, deity:"須佐之男命・大山咋命・誉田別命",       reason:"東京十社のひとつ。国重要文化財の権現造社殿。つつじ苑（約3,000株）と千本鳥居が名所。" },
+  { pref:"東京", name:"亀戸天神社",         tags:["meisha3"], sets:["tokyo10"], province:"武蔵国", lat:35.70278, lng:139.82083, deity:"天満大神・天菩日命",                  reason:"地名代表社。東の太宰府とも呼ばれる。藤まつりとスカイツリーの競演が絶景。梅まつりでも有名。" },
+  { pref:"東京", name:"品川神社",           tags:["meisha3"], sets:["tokyo10"], province:"武蔵国", lat:35.61847, lng:139.73964, deity:"天比理刀咩命・素戔嗚尊・宇賀之売命",  reason:"東京十社のひとつ。品川宿の総鎮守。富士塚（品川富士）が境内にあり関東大繁盛の開運神社。" },
 
   // ── 神奈川 ──
   { pref:"神奈川", name:"箱根神社",         tags:["meisha"],  province:"相模国", lat:35.20389, lng:139.02556, deity:"瓊瓊杵尊・木花咲耶姫命・彦火火出見尊", reason:"関東総鎮守。旧国幣中社。芦ノ湖に立つ水中鳥居が絶景。源頼朝・徳川家ゆかりの武家の守護神。" },
@@ -1084,8 +1094,8 @@ const shrines = [
   // ── 追加：東京 ──
   { pref:"東京", name:"武蔵御嶽神社",     tags:["meisha"],  province:"武蔵国", lat:35.78311, lng:139.15008, deity:"櫛真智命・大己貴命・少彦名命・日本武尊", reason:"御岳山（標高929m）山頂に鎮座。関東一円の山岳信仰の中心。奥多摩随一の霊峰として全国から参拝者が訪れる古社。旧国幣小社。" },
   { pref:"東京", name:"東京大神宮",       tags:["meisha2"], province:"武蔵国", lat:35.69998, lng:139.74687, deity:"天照皇大神・豊受大神・造化三神・倭大国魂神", reason:"東京のお伊勢さま。日本初の神前結婚式を行った縁結びの聖地。明治時代に伊勢両宮を遥拝する神社として創建。" },
-  { pref:"東京", name:"芝大神宮",         tags:["meisha3"], province:"武蔵国", lat:35.65764, lng:139.75306, deity:"天照大御神・豊受大神",                     reason:"関東のお伊勢さま。1005年創建の都内最古級の神社のひとつ。だらだら祭り（生姜市）が有名。旧府社。" },
-  { pref:"東京", name:"王子神社",         tags:["meisha3"], province:"武蔵国", lat:35.75328, lng:139.73592, deity:"天児屋根命・伊波比主命・毘沙門天",         reason:"北区の総鎮守。関東諸国の十二社の一。江戸時代から北区王子の氏神として広く信仰されてきた名社。旧府社。" },
+  { pref:"東京", name:"芝大神宮",         tags:["meisha3"], sets:["tokyo10"], province:"武蔵国", lat:35.65764, lng:139.75306, deity:"天照大御神・豊受大神",                     reason:"関東のお伊勢さま。1005年創建の都内最古級の神社のひとつ。だらだら祭り（生姜市）が有名。旧府社。" },
+  { pref:"東京", name:"王子神社",         tags:["meisha3"], sets:["tokyo10"], province:"武蔵国", lat:35.75328, lng:139.73592, deity:"天児屋根命・伊波比主命・毘沙門天",         reason:"北区の総鎮守。関東諸国の十二社の一。江戸時代から北区王子の氏神として広く信仰されてきた名社。旧府社。" },
   { pref:"東京", name:"小網神社",         tags:["meisha3","inari"], province:"武蔵国", lat:35.68417, lng:139.78047, deity:"倉稲魂神・市杵島姫神",                     reason:"強運厄除・商売繁盛の神として金運パワースポットとして人気急上昇。戦時中の参拝者全員生還の逸話が有名な日本橋の古社。" },
 
   // ── 追加：埼玉 ──
@@ -1150,7 +1160,7 @@ const shrines = [
   { pref:"東京",   name:"花園神社",                tags:["kaiun","inari"], province:"武蔵国", lat:35.69355, lng:139.70518, deity:"倉稲魂命・日本武尊・稲荷大神",            reason:"新宿の総鎮守。新宿区に鎮座。商業・芸能・開運のご利益で有名。毎年11月の酉の市は新宿の風物詩として多くの熊手商が並ぶ。歌舞伎町に隣接する繁華街の守護神。" },
   { pref:"東京",   name:"谷保天満宮",              tags:["kaiun"], province:"武蔵国", lat:35.68045, lng:139.44444, deity:"菅原道真・菅原道武",                       reason:"関東三大天神のひとつ（湯島・亀戸と並ぶ）。国立市に鎮座。開運・合格・縁結びの神。梅の名所としても有名で、道真公ゆかりの梅が満開を迎えると多くの参拝者が訪れる。" },
   { pref:"東京",   name:"牛嶋神社",                tags:["kaiun"], province:"武蔵国", lat:35.71292, lng:139.80472, deity:"須佐之男命・天之穂日命・貞辰親王命",       reason:"全国の撫牛信仰の発祥地。墨田区向島に鎮座。撫牛（なでうし）を撫でると病気平癒・厄除け開運のご利益があるとされ、隅田川流域の人々に親しまれる古社。" },
-  { pref:"東京",   name:"赤坂氷川神社",            tags:["kaiun"], province:"武蔵国", lat:35.66821, lng:139.73556, deity:"素戔嗚尊・奇稲田姫命・大己貴命",           reason:"港区赤坂に鎮座する縁結び・厄除けのパワースポット。東京十社のひとつ。8代将軍吉宗が再建した都内屈指の格式ある社殿。縁結び・開運の霊験で現代でも人気が高い。" },
+  { pref:"東京",   name:"赤坂氷川神社",            tags:["kaiun"], sets:["tokyo10"], province:"武蔵国", lat:35.66821, lng:139.73556, deity:"素戔嗚尊・奇稲田姫命・大己貴命",           reason:"港区赤坂に鎮座する縁結び・厄除けのパワースポット。東京十社のひとつ。8代将軍吉宗が再建した都内屈指の格式ある社殿。縁結び・開運の霊験で現代でも人気が高い。" },
   { pref:"神奈川", name:"走水神社",                tags:["kaiun"], province:"相模国", lat:35.26144, lng:139.73092, deity:"日本武尊・弟橘媛命",                       reason:"横須賀市走水に鎮座。日本武尊の東征ゆかりの地。浦賀水道を望む海岸に建つ勝運・開運・航海安全の神。清々しいロケーションのパワースポットとして信仰が深い。" },
   { pref:"群馬",   name:"妙義神社",                tags:["kaiun"], province:"上野国", lat:36.30047, lng:138.76239, deity:"日本武尊・豊受大神・菅原道真ほか",          reason:"日本三大奇景・妙義山に鎮座する開運の名社。富岡市に所在。奇岩絶壁を御神体とし強力なパワースポットとして知られる。旧県社。関東地方屈指の山岳信仰の霊地。" },
   { pref:"山梨",   name:"小御嶽神社",              tags:["kaiun"], province:"甲斐国", lat:35.39436, lng:138.73348, deity:"磐長姫命・石動彦命",                       reason:"富士山五合目（吉田口）に鎮座。標高2,305mの境内は富士登山の出発点。富士山信仰と一体となった開運の神社で、縁結び・長寿・運気上昇を祈る参拝者が訪れる。" },
@@ -1259,7 +1269,7 @@ const shrines = [
   { pref:"三重", name:"猿田彦神社", tags:["meisha2"], province:"伊勢国", lat:34.46694, lng:136.72014, deity:"猿田彦神" },
   { pref:"長崎", name:"鎮西大社諏訪神社", tags:["meisha2"], province:"肥前国", lat:32.75438, lng:129.88177, deity:"イザナギ・イザナミ・住吉三神・八坂刀売神" },
   { pref:"兵庫", name:"海神社", tags:["meisha2"], province:"播磨国", lat:34.62872, lng:135.05426, deity:"綿津見三神" },
-  { pref:"東京", name:"富岡八幡宮", tags:["meisha2","hachiman"], province:"武蔵国", lat:35.67175, lng:139.79958, deity:"八幡神" },
+  { pref:"東京", name:"富岡八幡宮", tags:["meisha2","hachiman"], sets:["tokyo10"], province:"武蔵国", lat:35.67175, lng:139.79958, deity:"八幡神", reason:"東京十社のひとつ。江戸最大の八幡宮。深川八幡祭りは江戸三大祭の一。横綱力士碑があり、大相撲発祥の地としても知られる。" },
   { pref:"大分", name:"柞原八幡宮", tags:["meisha2","hachiman","ichi"], province:"豊後国", lat:33.2384, lng:131.551, deity:"仲哀天皇・八幡神" },
   { pref:"石川", name:"菅生石部神社", tags:["meisha2","ni"], province:"加賀国", lat:36.31278, lng:136.3209, deity:"菅生石部神" },
   { pref:"愛知", name:"尾張大国霊神社", tags:["meisha2"], province:"尾張国", lat:35.25594, lng:136.80562, deity:"尾張大国霊神" },
@@ -1328,6 +1338,9 @@ const shrines = [
   // ── 八幡・稲荷 拡充（九州） ──
   { pref:"福岡", name:"大分八幡宮", tags:["meisha3","hachiman"], province:"筑前国", lat:33.5844, lng:130.6256, deity:"応神天皇・神功皇后・玉依姫命", reason:"宇佐神宮・筥崎宮とともに日本最古級の八幡宮の一とされる。筑豊の総鎮守。" },
   { pref:"大分", name:"扇森稲荷神社", tags:["meisha3","inari"], province:"豊後国", lat:32.95678, lng:131.37036, deity:"宇迦之御魂大神", reason:"日本三大稲荷の一に数えられることもある。木彫りの千本鳥居で知られる。" },
+
+  // ── 巡拝セット拡充（東京十社） ──
+  { pref:"東京", name:"白山神社", tags:["meisha3"], sets:["tokyo10"], province:"武蔵国", lat:35.72208, lng:139.75053, deity:"菊理姫命・伊弉諾命・伊弉冊命", reason:"東京十社のひとつ。天暦2年(948)、加賀一宮白山神社を勧請して創建。徳川綱吉・桂昌院の崇敬を受けた。あじさいの名所。" },
 
 ];
 
@@ -1812,6 +1825,7 @@ const ACHIEVE_TAGS = [
   { tag: 'jingu',  label: '神宮',   mode: 'flat',      unit: '社', field: 'tags' },
   { tag: 'taisha', label: '大社',   mode: 'flat',      unit: '社', field: 'tags' },
   { tag: 'azuma3', label: '東国三社', mode: 'flat',    unit: '社', field: 'sets' },
+  { tag: 'tokyo10', label: '東京十社', mode: 'flat',   unit: '社', field: 'sets' },
 ];
 let currentAchieveTag = 'ichi';
 
