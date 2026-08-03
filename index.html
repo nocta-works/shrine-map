@@ -852,7 +852,7 @@ const shrines = [
   { pref:"福島",   name:"伊佐須美神社",        tags:["ichi"],          province:"岩代国",       lat:37.45690, lng:139.84072, deity:"伊弉諾尊・伊弉冉尊ほか" },
 
   // ── 関東 ──
-  { pref:"茨城",   name:"鹿島神宮",            tags:["ichi","jingu"],  province:"常陸国",       lat:35.96878, lng:140.63154, deity:"武甕槌大神" },
+  { pref:"茨城",   name:"鹿島神宮",            tags:["ichi","jingu"],  sets:["azuma3"], province:"常陸国",       lat:35.96878, lng:140.63154, deity:"武甕槌大神" },
   { pref:"茨城",   name:"静神社",              tags:["ni"],            province:"常陸国",       lat:36.50214, lng:140.42220, deity:"建葉槌命" },
   { pref:"栃木",   name:"日光二荒山神社",      tags:["ichi"],          province:"下野国",       lat:36.75895, lng:139.59643, deity:"大己貴命・田心姫命・味耜高彦根命" },
   { pref:"栃木",   name:"日光東照宮",          tags:["meisha"],        province:"下野国",       lat:36.75917, lng:139.59861, deity:"徳川家康（東照大権現）", reason:"旧別格官幣社。江戸幕府の権威の象徴。世界遺産登録（1999年）。" },
@@ -864,7 +864,7 @@ const shrines = [
   { pref:"埼玉",   name:"金鑚神社",            tags:["ni"],            province:"武蔵国",       lat:36.18042, lng:139.07292, deity:"天照大御神・素戔嗚尊" },
   { pref:"埼玉",   name:"三峯神社",            tags:["meisha"],        province:"武蔵国",       lat:35.92543, lng:138.93040, deity:"伊弉諾命・伊弉冉命", reason:"秩父三社のひとつ。眷属に狼を持ち、強力な気が宿るとされる関東屈指のパワースポット。" },
   { pref:"千葉",   name:"玉前神社",            tags:["ichi"],          province:"上総国",       lat:35.37626, lng:140.36053, deity:"玉依姫命" },
-  { pref:"千葉",   name:"香取神宮",            tags:["ichi","jingu"],    province:"下総国",       lat:35.88621, lng:140.52852, deity:"経津主大神" },
+  { pref:"千葉",   name:"香取神宮",            tags:["ichi","jingu"],  sets:["azuma3"],  province:"下総国",       lat:35.88621, lng:140.52852, deity:"経津主大神" },
   { pref:"東京",   name:"小野神社",            tags:["ichi"],          province:"武蔵国",       lat:35.65300, lng:139.44227, deity:"天下春命" },
   { pref:"東京",   name:"二宮神社",            tags:["ni"],            province:"武蔵国",       lat:35.72689, lng:139.31357, deity:"国常立尊" },
   { pref:"東京",   name:"明治神宮",            tags:["jingu"],         province:"武蔵国",       lat:35.67611, lng:139.69917, deity:"明治天皇・昭憲皇太后" },
@@ -1288,7 +1288,7 @@ const shrines = [
   { pref:"秋田", name:"与次郎稲荷神社", tags:["meisha3","inari"], province:"出羽国", lat:39.7219, lng:140.1231, deity:"宇迦之御魂大神", reason:"秋田市に鎮座。義に厚い狐「与次郎」の伝説で知られる古社。" },
 
   // ── 八幡・稲荷 拡充（関東） ──
-  { pref:"茨城", name:"息栖神社", tags:["meisha2"], province:"常陸国", lat:35.88581, lng:140.62513, deity:"久那戸神・天鳥船神・住吉三神", reason:"東国三社の一社。鹿島神宮・香取神宮とともに巡拝される。日本三霊泉の一「忍潮井」で知られる。" },
+  { pref:"茨城", name:"息栖神社", tags:["meisha2"], sets:["azuma3"], province:"常陸国", lat:35.88581, lng:140.62513, deity:"久那戸神・天鳥船神・住吉三神", reason:"東国三社の一社。鹿島神宮・香取神宮とともに巡拝される。日本三霊泉の一「忍潮井」で知られる。" },
   { pref:"東京", name:"穴八幡宮", tags:["meisha2","hachiman","kinun"], province:"武蔵国", lat:35.7072, lng:139.7174, deity:"応神天皇", reason:"江戸時代から続く金運・開運の御守り「一陽来復」で知られる。冬至から節分の間のみ授与される。" },
   { pref:"東京", name:"市谷亀岡八幡宮", tags:["meisha3","hachiman"], province:"武蔵国", lat:35.6927, lng:139.7337, deity:"応神天皇", reason:"太田道灌が江戸城築城にあたり鎌倉の鶴岡八幡宮を勧請。江戸城外堀の鎮守。" },
   { pref:"東京", name:"王子稲荷神社", tags:["meisha2","inari"], province:"武蔵国", lat:35.75608, lng:139.73333, deity:"宇迦之御魂大神", reason:"江戸時代から「関東稲荷総司」と称された。歌川広重の浮世絵「王子装束ゑの木大晦日の狐火」で有名。" },
@@ -1803,19 +1803,21 @@ function toggleMoreFilters() {
   setTimeout(() => map.invalidateSize(), 260);
 }
 
-// ===== 巡り達成チェック（一宮・神宮・大社） =====
+// ===== 巡り達成チェック（一宮・神宮・大社・巡拝セット） =====
 // 一宮＝令制国ごとに1社でも参拝済みなら「その国は達成」（一宮巡りの作法に合わせる）
-// 神宮・大社＝令制国と1:1対応しないので、1社ずつの単純な参拝チェックリスト
+// 神宮・大社・巡拝セット＝令制国と1:1対応しないので、1社ずつの単純な参拝チェックリスト
+// field: 判定対象のシャイン側プロパティ（格式・系統は'tags'、巡拝セットは'sets'）
 const ACHIEVE_TAGS = [
-  { tag: 'ichi',   label: '一宮', mode: 'province', unit: '国' },
-  { tag: 'jingu',  label: '神宮', mode: 'flat',      unit: '社' },
-  { tag: 'taisha', label: '大社', mode: 'flat',      unit: '社' },
+  { tag: 'ichi',   label: '一宮',   mode: 'province', unit: '国', field: 'tags' },
+  { tag: 'jingu',  label: '神宮',   mode: 'flat',      unit: '社', field: 'tags' },
+  { tag: 'taisha', label: '大社',   mode: 'flat',      unit: '社', field: 'tags' },
+  { tag: 'azuma3', label: '東国三社', mode: 'flat',    unit: '社', field: 'sets' },
 ];
 let currentAchieveTag = 'ichi';
 
-function computeAchieveItems(tag) {
+function computeAchieveItems(cfg) {
   return markerList
-    .filter(({ shrine }) => shrine.tags.includes(tag))
+    .filter(({ shrine }) => (shrine[cfg.field] || []).includes(cfg.tag))
     .map(({ shrine, idx }) => ({ shrine, idx, visited: isVisited(shrine) }));
 }
 
@@ -1965,7 +1967,7 @@ function renderAchieveTabs() {
 function renderAchieveBody() {
   renderAchieveTabs();
   const cfg = ACHIEVE_TAGS.find(t => t.tag === currentAchieveTag);
-  const items = computeAchieveItems(currentAchieveTag);
+  const items = computeAchieveItems(cfg);
   if (cfg.mode === 'province') renderProvinceMode(cfg, items);
   else renderFlatMode(cfg, items);
 }
