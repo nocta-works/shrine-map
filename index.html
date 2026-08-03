@@ -49,6 +49,15 @@
 
     .torii-icon { font-size: 26px; filter: drop-shadow(0 0 6px rgba(220,80,30,0.6)); }
 
+    .header-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .province-hub-link {
+      color: #d4b880; text-decoration: none; font-size: 12px; letter-spacing: 0.04em;
+      padding: 5px 12px; border: 1px solid #4a2a10; border-radius: 16px;
+      white-space: nowrap; flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+    }
+    .province-hub-link:hover { color: #f5d08a; border-color: #6a4028; background: rgba(245,208,138,0.08); }
+
     header h1 {
       font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
       font-size: 17px;
@@ -715,7 +724,9 @@
   <div>
     <h1>社巡り道標</h1>
     <p>分けて探して、次の一社へ</p>
-  </div></div>
+  </div>
+  <a href="provinces/index.html" class="province-hub-link">令制国一覧</a>
+  </div>
   <div class="controls-primary">
     <button class="filter-btn sanpai" onclick="toggleFilter('sanpai')"><span class="dot" style="background:#f5d08a;box-shadow:0 0 5px #f5d08a"></span> 参拝済み</button>
     <button class="filter-btn all-toggle" id="all-toggle-btn" onclick="toggleAllFilters()">全表示にする</button>
@@ -777,8 +788,7 @@
     <div id="sidebar-list"></div>
     <div class="sidebar-footnote">
       登録不要・広告なし。参拝済みの記録はこの端末内にのみ保存されます。<br>
-      格式の分類は一般的な整理に基づく機械的なものです。諸説あります。正確な情報は各神社の公式情報をご確認ください。<br>
-      <a href="provinces/index.html">令制国一覧から探す →</a>
+      格式の分類は一般的な整理に基づく機械的なものです。諸説あります。正確な情報は各神社の公式情報をご確認ください。
     </div>
   </div>
 
@@ -1425,17 +1435,21 @@ function inProvinceFilter(shrine) {
 }
 
 // このシャインがどれかの表示条件を満たすか（分類タグ or 参拝済みフィルタ、かつ令制国絞り込み）
+// ?province= で絞り込み中は「その国の全社」を見せるのが目的（令制国ページからの遷移）なので、
+// タグの有効/無効に関わらず対象国の社は無条件で表示する
 function passesFilter(shrine) {
   if (!inProvinceFilter(shrine)) return false;
+  if (provinceFilter) return true;
   return shrine.tags.some(t => activeFilters.has(t)) || (activeFilters.has('sanpai') && isVisited(shrine));
 }
 
 // サイドバーでの振り分け先：有効フィルタの中で最優先のタグ（非表示タグに埋もれて
 // リストから消えるのを防ぐため、topTag()とは別に「今表示中のタグ」だけで判定する）
+// 令制国絞り込み中は上と同じ理由でタグの有効/無効を無視し、その社の全タグから選ぶ
 function displayTag(shrine) {
-  const activeTags = shrine.tags.filter(t => activeFilters.has(t));
-  if (activeTags.length === 0) return null;
-  return activeTags.reduce((b,t) => PRIORITY[t] > PRIORITY[b] ? t : b, activeTags[0]);
+  const tags = provinceFilter && inProvinceFilter(shrine) ? shrine.tags : shrine.tags.filter(t => activeFilters.has(t));
+  if (tags.length === 0) return null;
+  return tags.reduce((b,t) => PRIORITY[t] > PRIORITY[b] ? t : b, tags[0]);
 }
 
 // 選択中のリストアイテムと演出レイヤー
@@ -1594,7 +1608,8 @@ function renderList() {
   }
 
   TAG_ORDER.forEach(tag => {
-    if (!activeFilters.has(tag)) return;
+    // 令制国絞り込み中はタグの有効/無効を無視してその国の全社を出す（passesFilter/displayTagと同じ理由）
+    if (!provinceFilter && !activeFilters.has(tag)) return;
 
     // 「今表示中のタグの中での最優先」がこのタグのものだけ（重複防止）
     const items = markerList.filter(({shrine}) => displayTag(shrine) === tag && inProvinceFilter(shrine));
