@@ -790,6 +790,12 @@
     <span class="province-banner-close" onclick="clearProvinceFilter()">✕ 解除</span>
   </div>
 
+  <!-- ?tag= でタグ別インデックスページから開いたときに出る絞り込み表示バナー（province-bannerとスタイル共用） -->
+  <div id="tag-banner" class="province-banner">
+    <span id="tag-banner-text"></span>
+    <span class="province-banner-close" onclick="clearTagFilter()">✕ 解除</span>
+  </div>
+
   <!-- ── 右サイドバー ── -->
   <div id="sidebar">
     <div class="sidebar-top">
@@ -1506,20 +1512,29 @@ function inProvinceFilter(shrine) {
   return !provinceFilter || provinceFilter.includes(shrine.province);
 }
 
-// このシャインがどれかの表示条件を満たすか（分類タグ or 参拝済みフィルタ、かつ令制国絞り込み）
-// ?province= で絞り込み中は「その国の全社」を見せるのが目的（令制国ページからの遷移）なので、
-// タグの有効/無効に関わらず対象国の社は無条件で表示する
+// URLの ?tag= で絞り込み中のタグ/巡拝セットキー（タグ別インデックスページからの遷移用）。null なら絞り込みなし
+// tags（格式・系統・ご利益）とsets（巡拝セット）の両方から探す
+let tagFilterKey = null;
+function matchesTagFilter(shrine) {
+  return !tagFilterKey || shrine.tags.includes(tagFilterKey) || (shrine.sets || []).includes(tagFilterKey);
+}
+
+// このシャインがどれかの表示条件を満たすか（分類タグ or 参拝済みフィルタ、かつ令制国・タグ絞り込み）
+// ?province= / ?tag= で絞り込み中は「対象の全社」を見せるのが目的（外部ページからの遷移）なので、
+// 通常のタグ有効/無効設定に関わらず対象の社は無条件で表示する
 function passesFilter(shrine) {
   if (!inProvinceFilter(shrine)) return false;
-  if (provinceFilter) return true;
+  if (!matchesTagFilter(shrine)) return false;
+  if (provinceFilter || tagFilterKey) return true;
   return shrine.tags.some(t => activeFilters.has(t)) || (activeFilters.has('sanpai') && isVisited(shrine));
 }
 
 // サイドバーでの振り分け先：有効フィルタの中で最優先のタグ（非表示タグに埋もれて
 // リストから消えるのを防ぐため、topTag()とは別に「今表示中のタグ」だけで判定する）
-// 令制国絞り込み中は上と同じ理由でタグの有効/無効を無視し、その社の全タグから選ぶ
+// 令制国・タグ絞り込み中は上と同じ理由でタグの有効/無効を無視し、その社の全タグから選ぶ
 function displayTag(shrine) {
-  const tags = provinceFilter && inProvinceFilter(shrine) ? shrine.tags : shrine.tags.filter(t => activeFilters.has(t));
+  const bypass = (provinceFilter && inProvinceFilter(shrine)) || tagFilterKey;
+  const tags = bypass ? shrine.tags : shrine.tags.filter(t => activeFilters.has(t));
   if (tags.length === 0) return null;
   return tags.reduce((b,t) => PRIORITY[t] > PRIORITY[b] ? t : b, tags[0]);
 }
@@ -1680,11 +1695,11 @@ function renderList() {
   }
 
   TAG_ORDER.forEach(tag => {
-    // 令制国絞り込み中はタグの有効/無効を無視してその国の全社を出す（passesFilter/displayTagと同じ理由）
-    if (!provinceFilter && !activeFilters.has(tag)) return;
+    // 令制国・タグ絞り込み中はタグの有効/無効を無視して対象の全社を出す（passesFilter/displayTagと同じ理由）
+    if (!provinceFilter && !tagFilterKey && !activeFilters.has(tag)) return;
 
     // 「今表示中のタグの中での最優先」がこのタグのものだけ（重複防止）
-    const items = markerList.filter(({shrine}) => displayTag(shrine) === tag && inProvinceFilter(shrine));
+    const items = markerList.filter(({shrine}) => displayTag(shrine) === tag && inProvinceFilter(shrine) && matchesTagFilter(shrine));
     if (items.length === 0) return;
 
     const cfg = TAG_CONFIG[tag];
@@ -2028,7 +2043,11 @@ function applyProvinceFilter(provinces) {
   redrawMarkers();
   const items = markerList.filter(({ shrine }) => provinceFilter.includes(shrine.province));
   if (items.length > 0) {
-    map.fitBounds(L.latLngBounds(items.map(({ shrine }) => [shrine.lat, shrine.lng])), { padding: [40, 40], maxZoom: 12 });
+    // ページ読み込み直後の同期実行ではヘッダー確定前でコンテナサイズが0になっていることがあり、
+    // その状態でfitBoundsするとズームが大きく狂う。invalidateSizeを同期で呼んでも
+    // レイアウト未確定なら効果がないため、レイアウト確定後まで一呼吸おく
+    const bounds = L.latLngBounds(items.map(({ shrine }) => [shrine.lat, shrine.lng]));
+    setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 }); }, 150);
   }
   const banner = document.getElementById('province-banner');
   document.getElementById('province-banner-text').textContent = `${provinces.join('・')}の神社を表示中`;
@@ -2044,6 +2063,29 @@ function clearProvinceFilter() {
   history.replaceState(null, '', url);
 }
 
+// タグ別インデックスページ（タグ一覧）からの「地図で見る」用。?tag= で単一タグ/巡拝セットに絞り込む
+function applyTagFilter(key, label) {
+  tagFilterKey = key;
+  redrawMarkers();
+  const items = markerList.filter(({ shrine }) => matchesTagFilter(shrine));
+  if (items.length > 0) {
+    const bounds = L.latLngBounds(items.map(({ shrine }) => [shrine.lat, shrine.lng]));
+    setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 }); }, 150);
+  }
+  const banner = document.getElementById('tag-banner');
+  document.getElementById('tag-banner-text').textContent = `${label}を表示中`;
+  banner.classList.add('visible');
+}
+
+function clearTagFilter() {
+  tagFilterKey = null;
+  document.getElementById('tag-banner').classList.remove('visible');
+  redrawMarkers();
+  const url = new URL(location.href);
+  url.searchParams.delete('tag');
+  history.replaceState(null, '', url);
+}
+
 function applyURLState() {
   const params = new URLSearchParams(location.search);
   const provinceParam = params.get('province');
@@ -2052,6 +2094,12 @@ function applyURLState() {
     if (markerList.some(({ shrine }) => provinces.includes(shrine.province))) {
       applyProvinceFilter(provinces);
     }
+  }
+
+  const tagParam = params.get('tag');
+  if (tagParam) {
+    const cfg = TAG_CONFIG[tagParam] || ACHIEVE_TAGS.find(t => t.tag === tagParam);
+    if (cfg) applyTagFilter(tagParam, cfg.label);
   }
 
   const shrineParam = params.get('s');
