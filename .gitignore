@@ -8,3 +8,5 @@
 !og-image.jpg
 !provinces/
 !provinces/*.html
+!tags/
+!tags/*.html
