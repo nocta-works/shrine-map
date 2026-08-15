@@ -998,7 +998,7 @@ const shrines = [
   { pref:"大分",    name:"宇佐神宮",           tags:["ichi","jingu","hachiman"],  province:"豊前国",       lat:33.52602, lng:131.37463, deity:"八幡大神・比売大神・神功皇后", reason:"全国四万社を超える八幡宮の総本宮。日本三大八幡宮の一。伊勢神宮に次ぐ格式ともいわれる。" },
   { pref:"大分",    name:"西寒多神社",         tags:["ichi"],            province:"豊後国",       lat:33.17294, lng:131.59828, deity:"天照大御神", reason:"豊後国一宮。旧国幣中社。古くは本宮山を祭祀の中心とし、応永15年（1408）に現在地へ遷座したと伝わる。" },
   { pref:"宮崎",    name:"都農神社",           tags:["ichi"],          province:"日向国",       lat:32.26313, lng:131.55867, deity:"大己貴命", reason:"日向国一宮。旧国幣小社。社伝では神武天皇の東遷に際し、大己貴命を祀って国土平安を祈ったことに始まる。" },
-  { pref:"宮崎",    name:"霧島神宮",           tags:["ni","jingu"],    province:"日向国",       lat:31.85864, lng:130.87132, deity:"天饒石国饒石天津日高彦火瓊瓊杵尊", reason:"旧官幣大社。天孫降臨の瓊瓊杵尊を主祭神に祀り、現在の社殿は正徳5年（1715）に島津吉貴が造営した。" },
+  { pref:"鹿児島",  name:"霧島神宮",           tags:["ni","jingu"],    province:"日向国",       lat:31.85864, lng:130.87132, deity:"天饒石国饒石天津日高彦火瓊瓊杵尊", reason:"旧官幣大社。天孫降臨の瓊瓊杵尊を主祭神に祀り、現在の社殿は正徳5年（1715）に島津吉貴が造営した。" },
   { pref:"宮崎",    name:"高千穂神社",         tags:["meisha"],        province:"日向国",       lat:32.70667, lng:131.30167, deity:"三毛入野命・十社大明神", reason:"旧国幣小社。天孫降臨の地・高千穂峡に鎮座。夜神楽発祥の社として全国的に知られる。" },
   { pref:"鹿児島",  name:"鹿児島神宮",         tags:["ichi","jingu"],  province:"大隅国",       lat:31.75371, lng:130.73787, deity:"天津日高彦穂穂出見命・豊玉比売命", reason:"大隅国一宮・旧官幣大社。彦火火出見尊を主祭神に祀り、古くは正八幡宮とも称された八幡信仰ゆかりの古社。" },
   { pref:"鹿児島",  name:"新田神社",           tags:["ichi"],            province:"薩摩国",       lat:31.82773, lng:130.29271, deity:"天津日高彦穂穂出見命", reason:"薩摩国一宮。神亀山に鎮座し、祭神・瓊瓊杵尊の陵とされる可愛山陵を背後に擁する。島津氏の崇敬も篤かった。" },
@@ -1359,6 +1359,128 @@ const shrines = [
   // ── 巡拝セット拡充（二十二社） ──
   { pref:"京都", name:"梅宮大社", tags:["meisha2"], sets:["nijuni"], province:"山城国", lat:35.00407, lng:135.69489, deity:"酒解神・酒解子神・大若子神・小若子神", reason:"二十二社（下八社）の一。橘嘉智子（檀林皇后）ゆかりの酒造・子授け・安産の神。境内を歩き回る猫でも知られる。" },
   { pref:"奈良", name:"丹生川上神社（中社）", tags:["meisha2"], sets:["nijuni"], province:"大和国", lat:34.39026, lng:135.98645, deity:"罔象女神", reason:"二十二社（下八社）の一。水を司る罔象女神を祀り、雨乞い・止雨の祈願で朝廷から篤い崇敬を受けた古社。" },
+
+  // ── 令制国拡充（畿内・社数3社以下の国に追加） ──
+  { pref:"大阪", name:"泉井上神社", tags:["meisha3"], province:"和泉国", lat:34.48699, lng:135.42771, deity:"神功皇后・仲哀天皇・応神天皇", reason:"和泉国総社。和泉五社の神々を合祀する総社として、和泉市府中町に鎮座する古社。" },
+  { pref:"大阪", name:"積川神社", tags:["meisha3"], province:"和泉国", lat:34.42506, lng:135.43946, deity:"生井神・栄井神・綱長井神・阿須波神・波比岐神", reason:"式内社で和泉国四宮。豊臣秀頼が再建したとされる本殿は国重要文化財。" },
+  { pref:"大阪", name:"日根神社", tags:["meisha3"], province:"和泉国", lat:34.37421, lng:135.34267, deity:"鵜葺草葺不合命・玉依毘売命", reason:"式内社・和泉五社の五宮。枕幡を担ぐ「まくら祭り」で知られ、日本遺産の日根荘遺跡に含まれる。" },
+
+  // ── 令制国拡充（東海道・社数3社以下の国に追加） ──
+  { pref:"三重", name:"大村神社", tags:["meisha3"], province:"伊賀国", lat:34.67045, lng:136.18368, deity:"大村神（社伝では息速別命）", reason:"式内社。要石を祀る地震除けの信仰で知られ、境内には国重要文化財の宝殿が残る。" },
+  { pref:"三重", name:"陽夫多神社", tags:["meisha3"], province:"伊賀国", lat:34.82669, lng:136.17517, deity:"須佐之男命", reason:"式内社。例祭の「願之山行事」は県指定無形民俗文化財で、裸々押しなどの神事が伝わる。" },
+  { pref:"三重", name:"射手神社", tags:["meisha3"], province:"伊賀国", lat:34.76715, lng:136.09357, deity:"応神天皇", reason:"式内社。源義経が戦勝を祈願し鏑矢を奉納したと伝わり、境内に重要文化財の十三重塔が残る。" },
+  { pref:"三重", name:"宇賀多神社", tags:["kaiun"], province:"志摩国", lat:34.33263, lng:136.82325, deity:"天忍穂耳命ほか七柱", reason:"「うかった」に通じる社名から合格・勝運の祈願で知られ、鵜方地区の鎮守として祀られる。" },
+  { pref:"三重", name:"佐美長神社", tags:["meisha3"], province:"志摩国", lat:34.37522, lng:136.80347, deity:"大歳神", reason:"伊雑宮の所管社。倭姫命が稲穂をくわえた鶴を見て大歳神を祀ったと伝わり、「穂落社」とも呼ばれる。" },
+  { pref:"三重", name:"神明神社", tags:["meisha2"], province:"志摩国", lat:34.38874, lng:136.9018, deity:"天照大神", reason:"相差の氏神。境内社「石神さん」は玉依姫命を祀り、海女の信仰から女性の願い事で知られる。" },
+  { pref:"千葉", name:"洲宮神社", tags:["meisha3"], province:"安房国", lat:34.95265, lng:139.83853, deity:"天比理乃咩命", reason:"式内社「后神天比理乃咩命神社」の論社の一つ。安房神社祭神・天太玉命の后神を祀る。" },
+  { pref:"千葉", name:"莫越山神社", tags:["meisha3"], province:"安房国", lat:35.05598, lng:139.95334, deity:"手置帆負命・彦狭知命", reason:"式内社。安房神社と同じ忌部系の手置帆負命・彦狭知命を祀る安房南部の古社。" },
+  { pref:"千葉", name:"下立松原神社", tags:["meisha3"], province:"安房国", lat:34.91533, lng:139.86785, deity:"天日鷲命", reason:"式内社の論社。白浜町滝口に鎮座し、阿波忌部の祖神とされる天日鷲命を主祭神とする。" },
+  { pref:"千葉", name:"橘樹神社", tags:["meisha3"], province:"上総国", lat:35.48271, lng:140.30247, deity:"弟橘媛命", reason:"式内社。日本武尊の東征で入水した弟橘媛を祀り、その陵墓と伝わる古墳が境内に残る。" },
+  { pref:"千葉", name:"飽富神社", tags:["meisha3"], province:"上総国", lat:35.42092, lng:139.98538, deity:"倉稲魂命", reason:"式内社。倉稲魂命を主祭神とし、袖ケ浦市飯富に鎮座する上総の古社。" },
+  { pref:"千葉", name:"島穴神社", tags:["meisha3"], province:"上総国", lat:35.49475, lng:140.06798, deity:"志那都比古尊", reason:"式内社。風の神・志那都比古尊を主祭神とし、日本武尊と倭比売尊も祀る上総の古社。" },
+
+  // ── 令制国拡充（東山道・社数3社以下の国に追加） ──
+  { pref:"岐阜", name:"飛騨総社", tags:["meisha3"], province:"飛騨国", lat:36.14819, lng:137.25417, deity:"大八椅命ほか", reason:"飛騨国総社。飛騨国内の神々を合祀する総社として、高山市中心部に鎮座する。" },
+  { pref:"岐阜", name:"槻本神社", tags:["meisha3"], province:"飛騨国", lat:36.161, lng:137.31851, deity:"大山津見神ほか", reason:"式内社。丹生川町山口に鎮座し、大山津見神などを祀る飛騨の古社。" },
+  { pref:"岐阜", name:"荏名神社", tags:["meisha3"], province:"飛騨国", lat:36.13556, lng:137.2704, deity:"高皇産霊神", reason:"式内社。高山市江名子町に鎮座し、高皇産霊神を主祭神とする飛騨の古社。" },
+
+  // ── 令制国拡充（北陸道・社数3社以下の国に追加） ──
+  { pref:"福井", name:"宇波西神社", tags:["meisha3"], province:"若狭国", lat:35.58704, lng:135.90623, deity:"鵜草葺不合尊", reason:"式内名神大社。王の舞などが奉納される例祭で知られ、若狭町気山に鎮座する古社。" },
+  { pref:"福井", name:"多田神社", tags:["meisha3"], province:"若狭国", lat:35.48155, lng:135.76789, deity:"大己貴命・応神天皇", reason:"式内社。小浜市多田に鎮座し、大己貴命と応神天皇を祀る若狭の古社。" },
+  { pref:"福井", name:"須部神社", tags:["meisha3"], province:"若狭国", lat:35.4847, lng:135.89126, deity:"蛭子命・大國主命・陶津耳命", reason:"式内社。若狭町末野に鎮座し、蛭子命・大國主命・陶津耳命を祀る。「恵比須神社」とも称する。" },
+  { pref:"石川", name:"石浦神社", tags:["meisha3"], province:"加賀国", lat:36.56115, lng:136.65965, deity:"大物主大神ほか", reason:"式内社。金沢最古の宮とも称され、兼六園近くに鎮座して城下町で長く信仰を集める。" },
+  { pref:"石川", name:"大野湊神社", tags:["meisha3"], province:"加賀国", lat:36.59595, lng:136.59832, deity:"猿田彦大神・護国八幡大神・天照坐皇大神", reason:"式内社の論社。金石地区の総鎮守で、四百年以上続く神事能が伝承される。" },
+  { pref:"石川", name:"安宅住吉神社", tags:["kaiun"], province:"加賀国", lat:36.41917, lng:136.41806, deity:"住吉三神", reason:"安宅の関跡に鎮座。「勧進帳」の舞台として知られる地で、難関突破の祈願で参拝を集める。" },
+  { pref:"石川", name:"須須神社", tags:["meisha3"], province:"能登国", lat:37.49833, lng:137.34667, deity:"高倉彦神・美穂須須美命", reason:"能登半島先端部の古社。高倉彦神・美穂須須美命を祀り、源義経ゆかりと伝わる宝物も伝える。" },
+  { pref:"石川", name:"久麻加夫都阿良加志比古神社", tags:["meisha3"], province:"能登国", lat:37.13061, lng:136.83377, deity:"久麻加夫都阿良加志比古神・都奴加阿良斯止神", reason:"式内社。中島町宮前に鎮座し、例祭の枠旗祭りは地域を代表する伝統行事として伝わる。" },
+  { pref:"石川", name:"伊須流岐比古神社", tags:["meisha3"], province:"能登国", lat:36.96332, lng:136.97388, deity:"伊須流岐比古神・伊弉諾尊", reason:"石動山信仰の中心を担った古社。前田利常寄進の本殿を移築して伝え、拝殿とともに県指定文化財。" },
+  { pref:"富山", name:"射水神社", tags:["meisha3"], province:"越中国", lat:36.74853, lng:137.02116, deity:"二上神（瓊瓊杵尊）", reason:"越中国一宮。二上山を仰ぐ二上神を祀り、現在は高岡古城公園内に鎮座する。" },
+  { pref:"富山", name:"雄山神社", tags:["meisha2"], province:"越中国", lat:36.57318, lng:137.61792, deity:"伊邪那岐神・天手力雄神", reason:"越中国一宮の一社。立山信仰の中心で、峰本社・中宮祈願殿・前立社壇の三社から成る。" },
+  { pref:"富山", name:"日枝神社", tags:["meisha3"], province:"越中国", lat:36.6867, lng:137.2138, deity:"大山咋神・大己貴神ほか", reason:"富山城下の総産土神。「山王さん」と親しまれ、毎年の山王まつりは富山市を代表する祭礼。" },
+  { pref:"新潟", name:"大膳神社", tags:["meisha3"], province:"佐渡国", lat:37.97356, lng:138.36775, deity:"御食津大神・日野資朝・大膳坊賢栄", reason:"日野資朝らを祀る古社。境内の能舞台は弘化3年再建で、佐渡に残る古い能舞台の一つ。" },
+  { pref:"新潟", name:"牛尾神社", tags:["meisha3"], province:"佐渡国", lat:38.04105, lng:138.44351, deity:"大国主命ほか", reason:"出雲から勧請したと伝わる古社。茅葺きの拝殿や能舞台を備え、佐渡の能文化を伝える。" },
+  { pref:"新潟", name:"宇賀神社", tags:["kinun"], province:"佐渡国", lat:38.06911, lng:138.51123, deity:"倉稲魂命", reason:"両尾の宇賀山山頂に鎮座。倉稲魂命を祀り、白蛇信仰と金運・商売繁盛の祈願で知られる。" },
+
+  // ── 令制国拡充（山陰道・社数3社以下の国に追加） ──
+  { pref:"京都", name:"薭田野神社", tags:["meisha3"], province:"丹波国", lat:35.01759, lng:135.53496, deity:"保食命・大山祇命・野椎命", reason:"式内社。亀岡市薭田野町に鎮座し、佐伯郷燈籠祭では神輿などの伝統行事が奉納される。" },
+  { pref:"京都", name:"生身天満宮", tags:["meisha3"], province:"丹波国", lat:35.10416, lng:135.47432, deity:"菅原道真公", reason:"菅原道真が存命中に生祠を建てたと伝わり、「日本最古の天満宮」を称する南丹市の古社。" },
+  { pref:"京都", name:"大原神社", tags:["meisha3"], province:"丹波国", lat:35.24633, lng:135.29411, deity:"伊邪那美命・天照大神・月読命", reason:"安産の神として知られる古社。江戸後期再建の社殿は京都府指定文化財。" },
+  { pref:"京都", name:"大宮売神社", tags:["meisha3"], province:"丹後国", lat:35.59109, lng:135.10183, deity:"大宮売神・若宮売神", reason:"式内名神大社で丹後国二宮。境内から古代祭祀に関わる遺物が出土し、古い祭祀の場を伝える。" },
+  { pref:"京都", name:"竹野神社", tags:["meisha3"], province:"丹後国", lat:35.7367, lng:135.1126, deity:"天照皇大神", reason:"式内社。丹後町宮に鎮座し、開化天皇の后・竹野媛が天照皇大神を祀ったと伝わる。" },
+  { pref:"京都", name:"浦嶋神社", tags:["meisha3"], province:"丹後国", lat:35.72889, lng:135.25781, deity:"浦嶋子", reason:"式内社。浦嶋子を祀り、『丹後国風土記』逸文などに伝わる浦島伝説ゆかりの社として知られる。" },
+  { pref:"兵庫", name:"粟鹿神社", tags:["meisha3"], province:"但馬国", lat:35.30067, lng:134.90494, deity:"阿米弥佐利命・彦坐王命", reason:"式内名神大社で、但馬国一宮とされる一社。勅使門を残し、但馬を代表する古社の一つ。" },
+  { pref:"兵庫", name:"養父神社", tags:["meisha3"], province:"但馬国", lat:35.38759, lng:134.80386, deity:"倉稲魂命・大己貴命・少彦名命ほか", reason:"式内名神大社を含む五座・但馬国三宮。農業の神として信仰され、「お走り祭り」で知られる。" },
+  { pref:"兵庫", name:"小田井縣神社", tags:["meisha3"], province:"但馬国", lat:35.55552, lng:134.86984, deity:"国作大己貴命", reason:"式内社。豊岡市小田井町に鎮座し、国作大己貴命を祀る旧県社。円山川流域の古社。" },
+  { pref:"鳥取", name:"賀露神社", tags:["meisha3"], province:"因幡国", lat:35.53492, lng:134.19088, deity:"大山祇命・吉備真備命・猿田彦命ほか", reason:"旧県社。二年ごとのホーエンヤ祭では神輿の海上渡御が行われ、県無形民俗文化財に指定される。" },
+  { pref:"鳥取", name:"酒賀神社", tags:["meisha3"], province:"因幡国", lat:35.45828, lng:134.37367, deity:"大穴牟遅命・八上姫命", reason:"式内社。大穴牟遅命と八上姫命を祀り、国府町菅野の山間に鎮座する因幡の古社。" },
+  { pref:"鳥取", name:"倭文神社（鳥取市）", tags:["meisha3"], province:"因幡国", lat:35.44047, lng:134.20057, deity:"武葉槌神・大己貴神・経津主神・武甕槌神", reason:"式内社。機織の神・武葉槌神を主祭神とし、鳥取市倭文に鎮座する因幡の古社。伯耆国一宮の同名社とは別。" },
+  { pref:"鳥取", name:"金持神社", tags:["kinun"], province:"伯耆国", lat:35.21519, lng:133.45917, deity:"天之常立命・八束水臣津努命・淤美豆奴命", reason:"「金持」の地名にちなみ金運・開運祈願で知られる。周辺は古くから良質な砂鉄の産地だった。" },
+  { pref:"鳥取", name:"赤猪岩神社", tags:["kaiun"], province:"伯耆国", lat:35.36528, lng:133.34925, deity:"大国主命", reason:"『古事記』で大国主神が赤猪に見立てた焼石により命を落とし、蘇生した神話の伝承地とされる。" },
+  { pref:"鳥取", name:"國坂神社", tags:["meisha3"], province:"伯耆国", lat:35.49003, lng:133.82652, deity:"少彦名神", reason:"北栄町国坂に鎮座する旧郷社。少彦名神を祀り、伯耆の古い信仰を伝える神社。" },
+  { pref:"島根", name:"染羽天石勝神社", tags:["meisha3"], province:"石見国", lat:34.68024, lng:131.86101, deity:"天石勝命・伊弉諾尊・伊弉冉尊", reason:"式内社。天正11年再建の本殿は国重要文化財で、益田の中世文化を伝える古社。" },
+  { pref:"島根", name:"柿本神社", tags:["meisha3"], province:"石見国", lat:34.66824, lng:131.7446, deity:"柿本人麿命", reason:"歌聖・柿本人麻呂を祀る旧県社。益田市戸田町に鎮座し、人麻呂ゆかりの地として信仰される。" },
+  { pref:"島根", name:"伊甘神社", tags:["meisha3"], province:"石見国", lat:34.92983, lng:132.11046, deity:"天足彦国押人命", reason:"式内社。石見国府跡の推定地の一つに鎮座し、古代石見の歴史を伝える古社。" },
+  { pref:"島根", name:"玉若酢命神社", tags:["meisha3"], province:"隠岐国", lat:36.20705, lng:133.31266, deity:"玉若酢命", reason:"隠岐国総社。社家の億岐家とともに古い祭祀を伝え、境内の八百杉でも知られる。" },
+  { pref:"島根", name:"隠岐神社", tags:["meisha3"], province:"隠岐国", lat:36.09575, lng:133.10125, deity:"後鳥羽天皇", reason:"隠岐配流の地で崩御した後鳥羽天皇を祀る。昭和14年、天皇の七百年祭に合わせて創建された。" },
+  { pref:"島根", name:"伊勢命神社", tags:["meisha3"], province:"隠岐国", lat:36.31975, lng:133.23545, deity:"伊勢命", reason:"『続日本後紀』に名神大社として記される古社。隠岐造の本殿を持ち、独自の伊勢命を祀る。" },
+
+  // ── 令制国拡充（山陽道・社数3社以下の国に追加） ──
+  { pref:"岡山", name:"高野神社", tags:["meisha3"], province:"美作国", lat:35.05916, lng:133.9643, deity:"鵜葺草葺不合尊", reason:"美作国二宮。式内社に比定され、津山市二宮に鎮座する美作を代表する古社。" },
+  { pref:"岡山", name:"美作総社宮", tags:["meisha3"], province:"美作国", lat:35.07408, lng:133.9943, deity:"大己貴命", reason:"美作国総社。国司が国内の神々を一か所で祭祀するため設けた総社で、津山市総社に鎮座する。" },
+  { pref:"岡山", name:"徳守神社", tags:["meisha3"], province:"美作国", lat:35.06019, lng:133.99515, deity:"天照皇大神", reason:"津山城下の総鎮守。森忠政が慶長9年に現在地へ遷座・造営し、城下町とともに発展した。" },
+  { pref:"岡山", name:"石上布都魂神社", tags:["meisha3"], province:"備前国", lat:34.85187, lng:133.96972, deity:"素盞嗚尊", reason:"式内社・備前国一宮の一社。素盞嗚尊を祀り、山上の磐座に古い祭祀の面影を残す。" },
+  { pref:"岡山", name:"安仁神社", tags:["meisha3"], province:"備前国", lat:34.61042, lng:134.09589, deity:"五瀬命・稲氷命・御毛沼命", reason:"式内名神大社・旧国幣中社。神武天皇の兄神三柱を祀る備前の古社。" },
+  { pref:"岡山", name:"岡山神社", tags:["meisha3"], province:"備前国", lat:34.66775, lng:133.93164, deity:"倭迹迹日百襲姫命", reason:"岡山城下の総鎮守。宇喜多秀家・小早川秀秋・池田家ら歴代岡山城主の崇敬を受けた。" },
+  { pref:"岡山", name:"備中国総社宮", tags:["meisha3"], province:"備中国", lat:34.6733, lng:133.738, deity:"大名持命・須世理姫命", reason:"備中国総社。国内の神々を合祀し、総社市の地名の由来ともなった古社。" },
+  { pref:"岡山", name:"皷神社", tags:["meisha3"], province:"備中国", lat:34.77645, lng:133.82768, deity:"遣霊彦命・大吉備津彦命・楽楽森彦命・高田姫命", reason:"式内社で備中国二宮。境内の石造宝塔は南北朝期の作で国重要文化財。" },
+  { pref:"岡山", name:"由加神社本宮", tags:["kaiun"], province:"備中国", lat:34.50592, lng:133.85106, deity:"手置帆負命・彦狭知命・神直日命", reason:"厄除けで知られる由加山の本宮。江戸期には金刀比羅宮と併せて参る「両参り」が広まった。" },
+  { pref:"広島", name:"多家神社", tags:["meisha3"], province:"安芸国", lat:34.39603, lng:132.5105, deity:"神武天皇・安芸津彦命", reason:"式内名神大社の後裔とされる古社。「埃宮」の伝承地の一つで、神武天皇と安芸津彦命を祀る。" },
+  { pref:"広島", name:"草津八幡宮", tags:["hachiman"], province:"安芸国", lat:34.38283, lng:132.40153, deity:"品陀和気命ほか", reason:"広島市西部の総氏神。「厄除けの八幡様」として信仰され、表参道の石段は189段を数える。" },
+  { pref:"広島", name:"清神社", tags:["meisha3"], province:"安芸国", lat:34.66997, lng:132.70567, deity:"素戔嗚尊ほか", reason:"郡山城麓の鎮守社。戦国期に毛利氏の崇敬を受け、元禄7年建立の社殿と古い棟札が残る。" },
+  { pref:"山口", name:"遠石八幡宮", tags:["hachiman"], province:"周防国", lat:34.04005, lng:131.82369, deity:"応神天皇・神功皇后・宗像三女神", reason:"周南市遠石に鎮座する旧県社。応神天皇・神功皇后・宗像三女神を祀る八幡宮。" },
+  { pref:"山口", name:"花岡八幡宮", tags:["hachiman"], province:"周防国", lat:34.03936, lng:131.87223, deity:"誉田別尊・息長足姫命・宗像三女神", reason:"和銅2年に宇佐から勧請したと伝わる古社。大内・陶・毛利氏の崇敬を受け、境内に多宝塔が残る。" },
+  { pref:"山口", name:"仁壁神社", tags:["meisha3"], province:"周防国", lat:34.1893, lng:131.49186, deity:"住吉三神・味耜高彦根命・下照姫命", reason:"式内社で周防国三宮。山口市宮野に鎮座し、住吉三神などを祀る古社。" },
+
+  // ── 令制国拡充（南海道・社数3社以下の国に追加） ──
+  { pref:"兵庫", name:"おのころ島神社", tags:["meisha2"], province:"淡路国", lat:34.30883, lng:134.77471, deity:"伊弉諾命・伊弉冉命", reason:"国生み神話の「おのころ島」伝承地の一つ。高さ約21メートルの大鳥居で知られる。" },
+  { pref:"兵庫", name:"石屋神社", tags:["meisha3"], province:"淡路国", lat:34.58656, lng:135.02205, deity:"國常立尊・伊弉諾尊・伊弉冉尊", reason:"岩屋港近くに鎮座する古社。国生み神話に関わる三神を祀り、天地大明神・岩屋明神とも称された。" },
+  { pref:"兵庫", name:"河上神社天満宮", tags:["meisha3"], province:"淡路国", lat:34.39731, lng:134.81762, deity:"河上大神・菅原道真公", reason:"式内社の論社とされる古社。河上大神と菅原道真公を祀り、五色町鮎原に鎮座する。" },
+  { pref:"徳島", name:"天石門別八倉比売神社", tags:["meisha3"], province:"阿波国", lat:34.05342, lng:134.47118, deity:"大日霊女命", reason:"式内大社・阿波国一宮の論社。国府町の気延山麓に鎮座し、古墳と結び付く祭祀伝承を持つ。" },
+  { pref:"徳島", name:"上一宮大粟神社", tags:["meisha3"], province:"阿波国", lat:33.97101, lng:134.36697, deity:"大宜都比売命", reason:"阿波国一宮の論社の一つ。五穀の神・大宜都比売命を祀り、神山町大粟山に鎮座する。" },
+  { pref:"徳島", name:"大御和神社", tags:["meisha3"], province:"阿波国", lat:34.06966, lng:134.4797, deity:"大己貴命", reason:"古代阿波国府の中心部に鎮座する式内社。「府中宮」と呼ばれ、国府の守護神として信仰される。" },
+  { pref:"香川", name:"白鳥神社", tags:["meisha3"], province:"讃岐国", lat:34.24614, lng:134.36375, deity:"日本武尊・両道入姫命・橘姫命", reason:"日本武尊を祀る東かがわ市の古社。境内の松原は白鳥の松原として知られ、白鳥伝説を伝える。" },
+  { pref:"香川", name:"石清尾八幡宮", tags:["hachiman"], province:"讃岐国", lat:34.33736, lng:134.03444, deity:"足仲彦命・誉田別命・息長帯姫命", reason:"延喜18年創祀と伝わる高松総鎮守。歴代領主の崇敬を受け、「高松の氏神さん」と親しまれる。" },
+  { pref:"香川", name:"冠纓神社", tags:["meisha3"], province:"讃岐国", lat:34.23858, lng:134.01161, deity:"応神天皇・仲哀天皇・神功皇后", reason:"「かむろ八幡宮」とも呼ばれる旧県社。香南町由佐に鎮座し、讃岐の八幡信仰を伝える古社。" },
+  { pref:"高知", name:"小村神社", tags:["meisha3"], province:"土佐国", lat:33.54328, lng:133.393, deity:"国常立命", reason:"土佐国二宮。国常立命を祀る古社で、国宝の金銅荘環頭大刀を社宝として伝える。" },
+  { pref:"高知", name:"鳴無神社", tags:["meisha3"], province:"土佐国", lat:33.41431, lng:133.36879, deity:"一言主命", reason:"浦ノ内湾の奥に鎮座し、海へ向かう参道で知られる。現在の社殿は国重要文化財。" },
+  { pref:"高知", name:"若宮八幡宮", tags:["hachiman"], province:"土佐国", lat:33.495, lng:133.54361, deity:"応神天皇・神功皇后・宗像三女神", reason:"長宗我部元親が初陣に際して戦勝を祈願したと伝わる。出陣にちなむ独特の社殿配置でも知られる。" },
+
+  // ── 令制国拡充（西海道・社数3社以下の国に追加） ──
+  { pref:"福岡", name:"大善寺玉垂宮", tags:["meisha3"], province:"筑後国", lat:33.27582, lng:130.47429, deity:"玉垂命・八幡大神・住吉大神", reason:"筑後の古社。「日本三大火祭り」の一つとされる「鬼夜」は国重要無形民俗文化財。" },
+  { pref:"福岡", name:"水田天満宮", tags:["meisha2"], province:"筑後国", lat:33.19861, lng:130.48583, deity:"菅原道真公", reason:"菅原道真を祀る天満宮で、「九州二大天満宮」の一つを称する。境内に恋木神社が鎮座する。" },
+  { pref:"福岡", name:"水天宮", tags:["meisha"], province:"筑後国", lat:33.32028, lng:130.49611, deity:"天御中主神・安徳天皇・高倉平中宮・二位の尼", reason:"全国の水天宮の総本宮。平家ゆかりの安徳天皇らを祀り、筑後川花火大会の起源とも関わる。" },
+  { pref:"福岡", name:"大富神社", tags:["meisha3"], province:"豊前国", lat:33.60478, lng:131.10133, deity:"宗像三女神・八幡大神", reason:"豊前市四郎丸に鎮座する古社。例祭の「感応楽」は国重要無形民俗文化財に指定される。" },
+  { pref:"福岡", name:"到津八幡神社", tags:["hachiman"], province:"豊前国", lat:33.87781, lng:130.8533, deity:"応神天皇・神功皇后・宗像三女神・豊日別命", reason:"小倉北区上到津に鎮座。応神天皇らを祀り、豊前国の八幡信仰を伝える古社。" },
+  { pref:"大分", name:"薦神社", tags:["meisha2"], province:"豊前国", lat:33.56728, lng:131.21814, deity:"応神天皇・比咩大神・神功皇后", reason:"宇佐神宮の祖宮と伝わる八幡社。三角池を内宮とし、神門は国重要文化財。" },
+  { pref:"大分", name:"宇奈岐日女神社", tags:["meisha3"], province:"豊後国", lat:33.2568, lng:131.36562, deity:"国常立尊ほか五柱", reason:"式内社。六柱を祀ることから「六所宮」とも呼ばれ、由布院の守護神として信仰される。" },
+  { pref:"大分", name:"八幡朝見神社", tags:["hachiman"], province:"豊後国", lat:33.27156, lng:131.49494, deity:"大鷦鷯尊・誉田別命・足仲彦命・気長足姫命", reason:"別府温泉の総鎮守。大友能直が建久7年に鶴岡八幡宮を勧請して創建したと伝わる。" },
+  { pref:"大分", name:"火男火売神社", tags:["meisha3"], province:"豊後国", lat:33.28609, lng:131.42977, deity:"火之加具土命・火焼速女命", reason:"式内社。鶴見岳の男嶽・女嶽を神格化した二神を祀り、別府八湯の守り神として信仰される。" },
+  { pref:"鹿児島", name:"益救神社", tags:["meisha3"], province:"大隅国", lat:30.42742, lng:130.57171, deity:"天津日高彦火火出見尊", reason:"屋久島・宮之浦に鎮座する式内社。南島で唯一『延喜式』神名帳に載る神社とされる。" },
+  { pref:"鹿児島", name:"菅原神社（荒平天神）", tags:["meisha3"], province:"大隅国", lat:31.37741, lng:130.78281, deity:"菅原道真公", reason:"海岸の岩山に鎮座する菅原神社。満潮時は参道が海に囲まれ、海上の鳥居と社殿で知られる。" },
+  { pref:"鹿児島", name:"荒田八幡宮", tags:["hachiman"], province:"薩摩国", lat:31.57441, lng:130.55355, deity:"応神天皇・神功皇后・玉依姫尊", reason:"鹿児島市下荒田に鎮座する旧県社。応神天皇・神功皇后・玉依姫尊を祀る八幡宮。" },
+  { pref:"鹿児島", name:"藤川天神（菅原神社）", tags:["meisha3"], province:"薩摩国", lat:31.93908, lng:130.31684, deity:"菅原道真公", reason:"菅原道真が当地に隠棲したという伝承を持つ。境内の臥龍梅は国天然記念物に指定される。" },
+  { pref:"鹿児島", name:"八坂神社", tags:["meisha3"], province:"薩摩国", lat:31.60553, lng:130.5682, deity:"素盞嗚尊・奇稲田比売命", reason:"鹿児島五社の一つ。鹿児島祇園祭「おぎおんさぁ」の中心となり、祇園信仰を伝える。" },
+  { pref:"長崎", name:"月讀神社", tags:["meisha3"], province:"壱岐国", lat:33.79963, lng:129.72369, deity:"月讀命", reason:"式内社。月讀命を祀る壱岐の古社で、全国の月讀神社の総本社とも伝えられる。" },
+  { pref:"長崎", name:"男嶽神社", tags:["meisha3"], province:"壱岐国", lat:33.8375, lng:129.75117, deity:"猿田彦命", reason:"男岳山頂近くに鎮座し、猿田彦命を祀る。境内には奉納された数百体の石猿が並ぶ。" },
+  { pref:"長崎", name:"女嶽神社", tags:["meisha3"], province:"壱岐国", lat:33.8321, lng:129.74886, deity:"天宇受売命", reason:"男嶽神社と対をなす社で、天宇受売命を祀る。壱岐の山岳信仰を伝える神社の一つ。" },
+  { pref:"長崎", name:"和多都美神社", tags:["meisha2"], province:"対馬国", lat:34.37931, lng:129.31186, deity:"彦火火出見尊・豊玉姫命", reason:"浅茅湾に面して鎮座し、海へ連なる鳥居で知られる。彦火火出見尊と豊玉姫命を祀る海宮。" },
+  { pref:"長崎", name:"天神多久頭魂神社", tags:["meisha3"], province:"対馬国", lat:34.63814, lng:129.33326, deity:"天神地祇", reason:"式内社。社殿を設けず山と磐座を祭祀する古い形を残し、対馬の天道信仰を伝える。" },
+  { pref:"長崎", name:"雷神社", tags:["meisha3"], province:"対馬国", lat:34.12346, lng:129.18592, deity:"雷大臣命", reason:"式内社。雷大臣命を祀り、神功皇后の新羅遠征に従って功を立てた人物と伝わる。" },
+
+  // ── 令制国拡充（沖縄・社数3社以下の国に追加） ──
+  { pref:"沖縄", name:"普天満宮", tags:["meisha2"], province:"琉球", lat:26.29292, lng:127.77722, deity:"熊野権現・琉球古神道神", reason:"琉球八社の一社。普天満洞穴に古くからの信仰があり、のち熊野権現を合祀したと伝わる。" },
+  { pref:"沖縄", name:"沖宮", tags:["meisha3"], province:"琉球", lat:26.20278, lng:127.67708, deity:"天照大御神ほか", reason:"琉球八社の一社。現在は奥武山公園内に鎮座し、天照大御神などを祀る。" },
+  { pref:"沖縄", name:"安里八幡宮", tags:["hachiman"], province:"琉球", lat:26.22111, lng:127.69494, deity:"応神天皇・玉依姫命・神功皇后", reason:"琉球八社で唯一の八幡宮。尚徳王が喜界島遠征の戦勝祈願に勧請したと伝わる。" },
 
 ];
 
@@ -2044,16 +2166,28 @@ function findShrineIndexByName(name, pref) {
   return candidates[0].idx;
 }
 
+// ページ読み込み直後の同期実行ではヘッダー確定前でコンテナサイズが0になっていることがあり、
+// その状態でfitBoundsするとズームが大きく狂う（実測：513社超で固定ディレイ150msでは間に合わない
+// ケースを確認）。固定ディレイに頼らず、コンテナに実サイズが付くまでフレーム単位で待つ。
+function fitBoundsWhenReady(bounds, attempts = 0) {
+  // getSize()はLeafletの内部キャッシュを返すだけで自動更新されない。
+  // invalidateSize()を毎試行呼んでDOMの実サイズを再計測させる必要がある
+  map.invalidateSize();
+  const size = map.getSize();
+  if ((size.x > 0 && size.y > 0) || attempts >= 30) {
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+  } else {
+    requestAnimationFrame(() => fitBoundsWhenReady(bounds, attempts + 1));
+  }
+}
+
 function applyProvinceFilter(provinces) {
   provinceFilter = provinces;
   redrawMarkers();
   const items = markerList.filter(({ shrine }) => provinceFilter.includes(shrine.province));
   if (items.length > 0) {
-    // ページ読み込み直後の同期実行ではヘッダー確定前でコンテナサイズが0になっていることがあり、
-    // その状態でfitBoundsするとズームが大きく狂う。invalidateSizeを同期で呼んでも
-    // レイアウト未確定なら効果がないため、レイアウト確定後まで一呼吸おく
     const bounds = L.latLngBounds(items.map(({ shrine }) => [shrine.lat, shrine.lng]));
-    setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 }); }, 150);
+    fitBoundsWhenReady(bounds);
   }
   const banner = document.getElementById('province-banner');
   document.getElementById('province-banner-text').textContent = `${provinces.join('・')}の神社を表示中`;
@@ -2076,7 +2210,7 @@ function applyTagFilter(key, label) {
   const items = markerList.filter(({ shrine }) => matchesTagFilter(shrine));
   if (items.length > 0) {
     const bounds = L.latLngBounds(items.map(({ shrine }) => [shrine.lat, shrine.lng]));
-    setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 }); }, 150);
+    fitBoundsWhenReady(bounds);
   }
   const banner = document.getElementById('tag-banner');
   document.getElementById('tag-banner-text').textContent = `${label}を表示中`;
