@@ -86,7 +86,7 @@
       gap: 6px;
       flex-wrap: wrap;
     }
-    .controls-primary { margin-left: auto; }
+    .controls-primary { margin-left: 40px; }
     /* 収納タグ（その他のタグ）：常に単独の行（幅100%で強制改行）。
        上の行には触れずに独立して現れる／消える */
     .more-filters {
@@ -743,11 +743,11 @@
     </div>
   </a>
   <a href="provinces/index.html" class="province-hub-link">🗾 令制国一覧</a>
+  <button class="filter-btn achieve" onclick="openAchieveModal()">⛩ 巡り達成状況</button>
   </div>
   <div class="controls-primary">
     <button class="filter-btn sanpai" onclick="toggleFilter('sanpai')"><span class="dot" style="background:#f5d08a;box-shadow:0 0 5px #f5d08a"></span> 参拝済み</button>
     <button class="filter-btn all-toggle" id="all-toggle-btn" onclick="toggleAllFilters()">全表示にする</button>
-    <button class="filter-btn achieve" onclick="openAchieveModal()">⛩ 巡り達成状況</button>
   </div>
   <div class="controls-tags">
     <button class="filter-btn jingu"  onclick="toggleFilter('jingu')" ><span class="dot gold"  ></span> 神宮</button>
