@@ -87,6 +87,12 @@
       flex-wrap: wrap;
     }
     .controls-primary { margin-left: 40px; }
+    /* 分類タグ本体：常に単独の行いっぱいに広げ、右端に揃える。
+       展開時の収納タグ（.more-filters）も同じく右端揃えなので、開閉しても右端の位置が動かない */
+    .controls-tags {
+      width: 100%;
+      justify-content: flex-end;
+    }
     /* 収納タグ（その他のタグ）：常に単独の行（幅100%で強制改行）。
        上の行には触れずに独立して現れる／消える */
     .more-filters {
@@ -639,9 +645,12 @@
       gap: 5px;
       width: 100%;
     }
-    /* 分類タグ（神宮・大社・一宮…その他のタグ）と収納タグは横スクロール一列に */
+    /* 分類タグ（神宮・大社・一宮…その他のタグ）と収納タグは横スクロール一列に。
+       右端揃え（flex-end）は横スクロールと相性が悪い（開いた瞬間、先頭の神宮タグが
+       スクロール外に隠れてしまう）ため、スマホ幅では左詰めに戻す */
     .controls-tags, .more-filters {
       margin-left: 0;
+      justify-content: flex-start;
       flex-wrap: nowrap;
       overflow-x: auto;
       overflow-y: hidden;
