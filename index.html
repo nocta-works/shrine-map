@@ -87,10 +87,12 @@
       flex-wrap: wrap;
     }
     .controls-primary { margin-left: 40px; }
-    /* 分類タグ本体：常に単独の行いっぱいに広げ、右端に揃える。
-       展開時の収納タグ（.more-filters）も同じく右端揃えなので、開閉しても右端の位置が動かない */
+    /* 分類タグ本体：幅が許せばタイトル行と同じ行に収まり、右端に寄る。
+       入らない場合のみ自然に折り返す（width:100%で強制改行はしない＝行を圧迫しない）。
+       margin-left:autoで右端に寄せるので、展開時の収納タグ（.more-filters、width:100%）と
+       右端の位置は揃ったまま */
     .controls-tags {
-      width: 100%;
+      margin-left: auto;
       justify-content: flex-end;
     }
     /* 収納タグ（その他のタグ）：常に単独の行（幅100%で強制改行）。
