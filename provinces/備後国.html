@@ -21,38 +21,59 @@
 <meta name="twitter:description" content="備後国（広島）の神社4社を格式・系統別に一覧。地図から探すこともできます。">
 <meta name="twitter:image" content="https://nocta-works.github.io/shrine-map/og-image.jpg">
 <style>
+    :root {
+      --bg-page-1: #150e08;
+      --bg-page-2: #0d0813;
+      --text-body: #e8dcc4;
+      --gold: #f5d08a;
+      --gold-dim: #d4b880;
+      --gold-dim-2: #c8a860;
+      --tan-text: #ddd0a0;
+      --muted-1: #8a7050;
+      --muted-2: #907050;
+      --muted-3: #8a7454;
+      --muted-4: #a89070;
+      --brown-text: #705030;
+      --brown-text-2: #5a4a38;
+      --shrine-name: #f0e0c0;
+      --border-1: #3a2010;
+      --border-2: #4a3420;
+      --border-3: #2a1c10;
+      --accent: #d4860a;
+      --gold-rgb: 245,208,138; /* --gold(#f5d08a)のrgbトリプレット。半透明背景用 */
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0; min-height: 100vh;
-      background: linear-gradient(180deg, #150e08 0%, #0d0813 100%);
-      color: #e8dcc4;
+      background: linear-gradient(180deg, var(--bg-page-1) 0%, var(--bg-page-2) 100%);
+      color: var(--text-body);
       font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Yu Gothic', 'Meiryo', 'Noto Sans JP', sans-serif;
       line-height: 1.7;
     }
-    a { color: #d4b880; }
+    a { color: var(--gold-dim); }
     .wrap { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; }
-    .crumb { font-size: 12px; color: #8a7050; margin-bottom: 18px; }
+    .crumb { font-size: 12px; color: var(--muted-1); margin-bottom: 18px; }
     .crumb a { color: #b89060; text-decoration: none; }
-    .crumb a:hover { color: #f5d08a; }
+    .crumb a:hover { color: var(--gold); }
     header.page-head { margin-bottom: 22px; }
     h1 {
       font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-      font-size: 26px; color: #f5d08a; margin: 0 0 6px; letter-spacing: 0.04em;
+      font-size: 26px; color: var(--gold); margin: 0 0 6px; letter-spacing: 0.04em;
     }
-    .region-label { font-size: 13px; color: #907050; margin: 0; }
+    .region-label { font-size: 13px; color: var(--muted-2); margin: 0; }
     .map-cta {
       display: inline-flex; align-items: center; gap: 6px;
       margin-top: 16px; padding: 9px 18px; border-radius: 20px;
-      background: rgba(245,208,138,0.14); border: 1px solid #d4860a;
-      color: #f5d08a; text-decoration: none; font-size: 13px; letter-spacing: 0.03em;
+      background: rgba(var(--gold-rgb),0.14); border: 1px solid var(--accent);
+      color: var(--gold); text-decoration: none; font-size: 13px; letter-spacing: 0.03em;
       transition: background 0.15s;
     }
-    .map-cta:hover { background: rgba(245,208,138,0.24); }
+    .map-cta:hover { background: rgba(var(--gold-rgb),0.24); }
     .shrine-list { list-style: none; margin: 26px 0 0; padding: 0; }
     .shrine-item {
-      padding: 16px 0; border-top: 1px solid #3a2010;
+      padding: 16px 0; border-top: 1px solid var(--border-1);
     }
-    .shrine-item:last-child { border-bottom: 1px solid #3a2010; }
+    .shrine-item:last-child { border-bottom: 1px solid var(--border-1); }
     .badges { margin-bottom: 6px; }
     .badge {
       display: inline-block; font-size: 10.5px; padding: 2px 9px; border-radius: 10px;
@@ -60,35 +81,35 @@
     }
     .shrine-name {
       font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-      font-size: 17px; color: #f0e0c0; margin: 2px 0 3px;
+      font-size: 17px; color: var(--shrine-name); margin: 2px 0 3px;
     }
-    .shrine-pref { font-size: 11px; color: #705030; margin-bottom: 4px; }
-    .shrine-deity { font-size: 12.5px; color: #a89070; margin-bottom: 4px; }
-    .shrine-reason { font-size: 12px; color: #8a7454; margin-bottom: 8px; }
+    .shrine-pref { font-size: 11px; color: var(--brown-text); margin-bottom: 4px; }
+    .shrine-deity { font-size: 12.5px; color: var(--muted-4); margin-bottom: 4px; }
+    .shrine-reason { font-size: 12px; color: var(--muted-3); margin-bottom: 8px; }
     .links { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
     .links a {
       font-size: 11px; padding: 4px 10px; border-radius: 6px; text-decoration: none;
-      background: rgba(255,255,255,0.04); border: 1px solid #4a3420; color: #c8a860;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-2); color: var(--gold-dim-2);
     }
     .links a:hover { background: rgba(255,255,255,0.09); }
     .disclaimer {
-      margin-top: 30px; padding-top: 14px; border-top: 1px solid #3a2010;
-      font-size: 10.5px; line-height: 1.7; color: #5a4a38;
+      margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--border-1);
+      font-size: 10.5px; line-height: 1.7; color: var(--brown-text-2);
     }
     .region-block { margin-bottom: 30px; }
     .region-title {
       font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-      font-size: 15px; color: #d4b880; border-bottom: 1px solid #3a2010;
+      font-size: 15px; color: var(--gold-dim); border-bottom: 1px solid var(--border-1);
       padding-bottom: 6px; margin: 0 0 10px;
     }
     .prov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
     .prov-grid a {
       display: flex; justify-content: space-between; gap: 8px;
-      padding: 6px 4px; font-size: 13px; text-decoration: none; color: #ddd0a0;
-      border-bottom: 1px dotted #2a1c10;
+      padding: 6px 4px; font-size: 13px; text-decoration: none; color: var(--tan-text);
+      border-bottom: 1px dotted var(--border-3);
     }
-    .prov-grid a:hover { color: #f5d08a; }
-    .prov-grid .cnt { color: #705030; font-size: 11px; }
+    .prov-grid a:hover { color: var(--gold); }
+    .prov-grid .cnt { color: var(--brown-text); font-size: 11px; }
     @media (max-width: 520px) {
       .prov-grid { grid-template-columns: 1fr; }
     }
