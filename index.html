@@ -847,6 +847,26 @@
     .popup-reason  { font-size: 10px; line-height: 1.5; }
     .shrine-popup .leaflet-popup-content-wrapper { max-width: 82vw; }
   }
+
+  /* ── Safe Mode 基盤：OSの「視差効果を減らす」設定を尊重する。
+     今のtransitionは全て0.4s以下の軽微なものなので現状の見た目への影響は無いが、
+     第二フェーズで動きを増やす枝（枝2）が乗る前提の受け皿として先に敷いておく。
+     手動トグルUIは、実際にモーションが増えてから該当の枝で追加する ──
+     html[data-motion="reduced"] は将来のJSトグル用のフックで、現状は付与しないため無効 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  html[data-motion="reduced"] *, html[data-motion="reduced"] *::before, html[data-motion="reduced"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
   </style>
 </head>
 <body>
