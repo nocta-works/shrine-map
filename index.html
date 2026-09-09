@@ -875,6 +875,18 @@
     transform-origin: 50% 95%;
   }
 
+  /* ── リスト項目の追従（枝2-B2・parallax as hierarchy）：マーカー（B1）は速く反応する
+     主役、サイドバーのリスト項目はやや遅れて・横からスライドして追従する脇役、という
+     速度差で「今どちらが主役か」を示す。0.6s＝共有トークン--dur-bar(0.4s)の1.5倍
+     （--dur-barは達成状況のプログレスバーとも共有のため専用値にした） ── */
+  @keyframes listItemIn {
+    from { opacity: 0; transform: translateX(14px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .shrine-item.list-item-in {
+    animation: listItemIn 0.6s ease-out both;
+  }
+
   /* ── ホバーカーソル演出（枝2-B3）：hover:hover かつ pointer:fine の環境（PC）限定でJS側が
      有効化する。マーカー／リスト項目にカーソルを乗せた時、次に何が起きるかを実カーソルの
      すぐ横に小さく先読み表示する（Cubertoの「対象に応じてカーソルの役割を変える」流儀） ── */
@@ -2019,12 +2031,16 @@ shrines.forEach((s, idx) => {
 const TAG_ORDER = ['jingu','taisha','ichi','ni','meisha','meisha2','hachiman','inari','meisha3','kinun','kaiun'];
 
 // 1件分のリストアイテムDOMを組み立てる（参拝済みチェック＋任意の日付つき）
-function buildShrineItem(shrine, sIdx, dotColor) {
+function buildShrineItem(shrine, sIdx, dotColor, reduceMotion) {
   const visited = isVisited(shrine);
   const date = getVisitDate(shrine);
   const item = document.createElement('div');
   item.className = 'shrine-item' + (visited ? ' visited' : '');
   item.dataset.idx = sIdx;
+  if (!reduceMotion) {
+    item.classList.add('list-item-in');
+    item.style.animationDelay = (Math.random() * 375).toFixed(0) + 'ms';
+  }
   item.innerHTML = `
     <div class="visit-check ${visited ? 'checked' : ''}" title="参拝済みにする">✓</div>
     <div class="shrine-item-dot" style="background:${dotColor};box-shadow:0 0 5px ${dotColor}80;"></div>
@@ -2051,6 +2067,9 @@ function renderList() {
   const list = document.getElementById('sidebar-list');
   list.innerHTML = '';
   let total = 0;
+  // 枝2-B2：マーカー（B1）は速く反応する主役、リストはやや遅れて追従する脇役、
+  // という速度差で「今どちらが主役か」を示す（parallax as hierarchyの解釈）
+  const reduceMotion = prefersReducedMotion();
 
   // ── 参拝済みセクション（フィルタON時のみ・全ての参拝済み社をまとめて表示）──
   if (activeFilters.has('sanpai')) {
@@ -2063,7 +2082,7 @@ function renderList() {
       title.style.cssText = `background:${SANPAI_CONFIG.bg}; border-left:3px solid ${SANPAI_CONFIG.border}; color:${SANPAI_CONFIG.border};`;
       title.innerHTML = `<span>${SANPAI_CONFIG.label}</span><span class="sidebar-section-count">${visitedItems.length}社</span>`;
       sec.appendChild(title);
-      visitedItems.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, SANPAI_CONFIG.color)));
+      visitedItems.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, SANPAI_CONFIG.color, reduceMotion)));
       list.appendChild(sec);
     }
   }
@@ -2088,7 +2107,7 @@ function renderList() {
     title.innerHTML = `<span>${cfg.label}</span><span class="sidebar-section-count">${items.length}社</span>`;
     sec.appendChild(title);
 
-    items.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, cfg.color)));
+    items.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, cfg.color, reduceMotion)));
 
     list.appendChild(sec);
     total += items.length;
