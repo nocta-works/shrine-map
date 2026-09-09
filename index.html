@@ -875,6 +875,27 @@
     transform-origin: 50% 95%;
   }
 
+  /* ── ホバーカーソル演出（枝2-B3）：hover:hover かつ pointer:fine の環境（PC）限定でJS側が
+     有効化する。マーカー／リスト項目にカーソルを乗せた時、次に何が起きるかを実カーソルの
+     すぐ横に小さく先読み表示する（Cubertoの「対象に応じてカーソルの役割を変える」流儀） ── */
+  #hover-cursor-tag {
+    position: fixed;
+    z-index: 3000;
+    pointer-events: none;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(var(--bg-popup-1-rgb),0.92);
+    border: 1px solid var(--border-header);
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(14px, 18px) scale(0.9);
+    transition: opacity var(--dur-fast), transform var(--dur-fast);
+  }
+  #hover-cursor-tag.visible { opacity: 1; transform: translate(14px, 18px) scale(1); }
+
   /* ── Safe Mode 基盤：OSの「視差効果を減らす」設定を尊重する。
      今のtransitionは全て0.4s以下の軽微なものなので現状の見た目への影響は無いが、
      第二フェーズで動きを増やす枝（枝2）が乗る前提の受け皿として先に敷いておく。
@@ -897,6 +918,7 @@
   </style>
 </head>
 <body>
+<div id="hover-cursor-tag"></div>
 <header>
   <div class="header-top">
   <a href="index.html" class="title-link">
@@ -1722,6 +1744,38 @@ function getIcon(tag, visited) {
   return iconCache[key];
 }
 
+// ===== ホバーカーソル演出（枝2-B3・PC限定） =====
+// hover:hover かつ pointer:fine（実マウスを持つ環境）でのみ有効化。タッチ端末はhoverが
+// 不安定に発火するため対象外（スマホでは常に無効のまま）。
+(function initHoverCursorTag() {
+  if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const tag = document.getElementById('hover-cursor-tag');
+  let current = null;
+
+  function show(label) {
+    if (current === label) return;
+    current = label;
+    tag.textContent = label;
+    tag.classList.add('visible');
+  }
+  function hide() {
+    if (current === null) return;
+    current = null;
+    tag.classList.remove('visible');
+  }
+
+  document.addEventListener('mousemove', e => {
+    tag.style.left = e.clientX + 'px';
+    tag.style.top = e.clientY + 'px';
+  });
+  document.addEventListener('mouseover', e => {
+    const markerEl = e.target.closest('.leaflet-marker-icon');
+    if (markerEl) { show(markerEl.dataset.name || '見る'); return; }
+    if (e.target.closest('.shrine-item')) { show('地図へ'); return; }
+    hide();
+  });
+})();
+
 // ===== 参拝済み記録（localStorage） =====
 const VISIT_KEY = 'shrineMapVisits_v1';
 function loadVisits() {
@@ -1742,6 +1796,7 @@ function toggleVisited(idx) {
   else visits[key] = { date: '' };
   saveVisits();
   marker.setIcon(getIcon(topTag(shrine.tags), isVisited(shrine)));
+  if (marker._icon) marker._icon.dataset.name = shrine.name;
   if (marker.isPopupOpen()) {
     marker.getPopup().setContent(buildPopupContent(shrine, idx));
     bindPopupVisitEvents(marker, idx);
@@ -1794,7 +1849,10 @@ function importVisits(file) {
     if (!confirm(`${count}件の参拝記録を読み込みます。現在の記録と統合されます（同じ神社は上書きされます）。よろしいですか？`)) return;
     Object.assign(visits, incoming);
     saveVisits();
-    markerList.forEach(({ marker, shrine }) => marker.setIcon(getIcon(topTag(shrine.tags), isVisited(shrine))));
+    markerList.forEach(({ marker, shrine }) => {
+      marker.setIcon(getIcon(topTag(shrine.tags), isVisited(shrine)));
+      if (marker._icon) marker._icon.dataset.name = shrine.name;
+    });
     redrawMarkers();
     if (document.getElementById('achieve-overlay').classList.contains('open')) renderAchieveBody();
     alert(`${count}件の参拝記録を読み込みました。`);
@@ -1951,7 +2009,10 @@ shrines.forEach((s, idx) => {
   });
 
   markerList.push({ marker, shrine:s, idx });
-  if (passesFilter(s)) marker.addTo(map);
+  if (passesFilter(s)) {
+    marker.addTo(map);
+    if (marker._icon) marker._icon.dataset.name = s.name;
+  }
 });
 
 // ===== サイドバー：リスト描画 =====
@@ -2055,6 +2116,7 @@ function focusShrine(idx, listItem) {
   // これをしないと openPopup() が this._map 未設定のため黙って失敗し、
   // 発光サークルだけ表示されて肝心のマーカー・ポップアップが出ない事態になる
   if (!map.hasLayer(marker)) marker.addTo(map);
+  if (marker._icon) marker._icon.dataset.name = shrine.name;
 
   // 発光サークル演出
   if (flashLayer) { map.removeLayer(flashLayer); flashLayer = null; }
@@ -2094,6 +2156,7 @@ function redrawMarkers() {
     }
     if (show && !onMap) {
       marker.addTo(map);
+      if (marker._icon) marker._icon.dataset.name = shrine.name;
       if (!reduceMotion) {
         const icon = marker._icon;
         if (icon) {
@@ -2478,8 +2541,9 @@ function applyURLState() {
   if (shrineParam) {
     const idx = findShrineIndexByName(shrineParam, params.get('pref'));
     if (idx >= 0) {
-      const { marker } = markerList[idx];
+      const { marker, shrine } = markerList[idx];
       if (!map.hasLayer(marker)) marker.addTo(map);
+      if (marker._icon) marker._icon.dataset.name = shrine.name;
       setTimeout(() => focusShrine(idx, document.querySelector(`.shrine-item[data-idx="${idx}"]`)), 300);
     }
   }
