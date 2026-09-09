@@ -2161,6 +2161,20 @@ function prefersReducedMotion() {
     (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 
+// マーカーの出現/消滅アニメーションを再生する。アニメーション終了後は必ずクラスを外す：
+// Leafletはマーカーの位置決め（translate3d）に同じtransformプロパティを使っており、
+// animationのfill-mode(both)がtransformを恒久的に上書きしたままだと、以後の
+// Leafletの再配置（地図移動・ズーム時）が効かなくなり、マーカーが古い位置に取り残される
+// （2026-09-09発覚：タグ操作を繰り返すほどマーカーが画面外に取り残されていくバグの原因）。
+// クリーンアップは`animationend`イベントに頼らず、setTimeoutで固定時間後に強制的に
+// 行う――バックグラウンドタブ等ではCSSアニメーション自体が進行を止まり
+// `animationend`が発火しないことがあり、それだと直らないケースが残るため
+function playMarkerAnim(icon, addClass, removeClass, totalMs) {
+  icon.classList.remove(removeClass);
+  icon.classList.add(addClass);
+  setTimeout(() => icon.classList.remove(addClass), totalMs);
+}
+
 function redrawMarkers() {
   const reduceMotion = prefersReducedMotion();
   markerList.forEach(item => {
@@ -2183,8 +2197,9 @@ function redrawMarkers() {
       if (!reduceMotion) {
         const icon = marker._icon;
         if (icon) {
-          icon.classList.add('marker-pop-in');
-          icon.style.animationDelay = (Math.random() * 180).toFixed(0) + 'ms';
+          const delayMs = Math.random() * 180;
+          icon.style.animationDelay = delayMs.toFixed(0) + 'ms';
+          playMarkerAnim(icon, 'marker-pop-in', 'marker-pop-out', delayMs + 250);
         }
       }
     } else if (!show && onMap && !item._removeTimer) {
@@ -2192,7 +2207,10 @@ function redrawMarkers() {
         map.removeLayer(marker);
       } else {
         const icon = marker._icon;
-        if (icon) icon.classList.add('marker-pop-out');
+        if (icon) {
+          icon.style.animationDelay = '0ms';
+          playMarkerAnim(icon, 'marker-pop-out', 'marker-pop-in', 150);
+        }
         item._removeTimer = setTimeout(() => {
           item._removeTimer = null;
           // 発火時点で改めてpassesFilter()を確認する（防御的な二重チェック）。
