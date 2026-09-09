@@ -2195,7 +2195,11 @@ function redrawMarkers() {
         if (icon) icon.classList.add('marker-pop-out');
         item._removeTimer = setTimeout(() => {
           item._removeTimer = null;
-          if (map.hasLayer(marker)) map.removeLayer(marker);
+          // 発火時点で改めてpassesFilter()を確認する（防御的な二重チェック）。
+          // スケジュール時に捕まえたshow変数を信用せず「今も非表示にすべきか」を
+          // 実行時に再評価することで、キャンセル漏れの経路が万一あっても
+          // 表示すべきマーカーを誤って消さないようにする
+          if (map.hasLayer(marker) && !passesFilter(shrine)) map.removeLayer(marker);
         }, 130);
       }
     }
