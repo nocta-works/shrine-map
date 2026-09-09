@@ -519,9 +519,13 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
     }
     .shrine-item.selected .shrine-item-name { color: var(--gold); }
-    .shrine-item-main { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+    /* 参拝日は神社名の下ではなく右隣に置く（本人指摘）。name側にflex:1/min-width:0が
+       無いとellipsis省略が効かず、日付欄を押し出して溢れるので併せて指定 */
+    .shrine-item-main { flex:1; min-width:0; display:flex; align-items:center; gap:6px; }
     .shrine-item-pref {
       font-size: 10px;
       color: var(--brown-text-4);
@@ -940,7 +944,7 @@
       <p>分けて探して、次の一社へ</p>
     </div>
   </a>
-  <a href="provinces/index.html" class="province-hub-link">🗾 令制国一覧</a>
+  <a href="provinces/index.html" class="province-hub-link">🧭 令制国一覧</a>
   <button class="filter-btn achieve" onclick="openAchieveModal()">⛩ 巡り達成状況</button>
   </div>
   <div class="controls-primary">
@@ -2048,7 +2052,7 @@ function buildShrineItem(shrine, sIdx, dotColor, reduceMotion) {
       <div class="shrine-item-name">${shrine.name}</div>
       ${visited ? `<input type="date" class="visit-date" value="${date}">` : ''}
     </div>
-    <div class="shrine-item-pref">${shrine.pref}</div>`;
+    ${visited ? '' : `<div class="shrine-item-pref">${shrine.pref}</div>`}`;
 
   item.querySelector('.visit-check').addEventListener('click', (e) => {
     e.stopPropagation();
