@@ -934,6 +934,15 @@
   </style>
 </head>
 <body>
+<!-- マーカーのグロー効果（getIcon()参照）。全マーカー共通の1つの定義をここに1回だけ置く。
+     以前は各マーカーのSVG内に同じid（タグ名ベース）でfilterを重複定義していたため、
+     同じタグのマーカーが複数ある時にDOM上でidが重複し、ブラウザによってはfilterの
+     解決が不安定になる問題があった（2026-09-09発覚：タグ再表示時に色/発光が
+     おかしくなる症状の原因の可能性） -->
+<svg width="0" height="0" style="position:absolute">
+  <defs><filter id="markerGlow"><feGaussianBlur stdDeviation="1.8" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+</svg>
 <div id="hover-cursor-tag"></div>
 <header>
   <div class="header-top">
@@ -1745,11 +1754,9 @@ function getIcon(tag, visited) {
     <circle cx="27" cy="9" r="7" fill="#1a1209" stroke="#f5d08a" stroke-width="1.5"/>
     <text x="27" y="12.5" text-anchor="middle" font-size="9" font-weight="bold" fill="#f5d08a">✓</text>` : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="42" viewBox="0 0 34 42">
-    <defs><filter id="g${key}"><feGaussianBlur stdDeviation="1.8" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
     <path d="M17 2C9 2 2 9 2 17c0 10 15 23 15 23S32 27 32 17C32 9 25 2 17 2z"
           fill="${c.color}" fill-opacity="0.9" stroke="${c.border}" stroke-width="1.5"
-          filter="url(#g${key})"/>
+          filter="url(#markerGlow)"/>
     <circle cx="17" cy="17" r="9" fill="rgba(255,255,255,0.13)"/>
     <text x="17" y="22" text-anchor="middle"
           font-family="'Hiragino Mincho ProN','Yu Mincho',serif"
