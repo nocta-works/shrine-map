@@ -41,6 +41,12 @@
       --border-3: #2a1c10;
       --accent: #d4860a;
       --gold-rgb: 245,208,138; /* --gold(#f5d08a)のrgbトリプレット。半透明背景用 */
+      /* index.htmlの実ヘッダーと同一の値（.site-header用）。トップページに戻った時の
+         見た目の落差を減らすため、令制国ページのヘッダーはメインの色をそのまま複製する */
+      --bg-header-1: #2c1810;
+      --bg-header-2: #1a0f0a;
+      --border-header: #6b3a1f;
+      --gold-glow-rgb: 245,180,60;
     }
     * { box-sizing: border-box; }
     body {
@@ -51,6 +57,21 @@
       line-height: 1.7;
     }
     a { color: var(--gold-dim); }
+    /* メインページのheaderバーを複製（同じグラデーション・鳥居アイコン・タイトル）。
+       左上に固定表示し、トップへの戻り導線がメインページと同じ見た目になるようにする */
+    .site-header {
+      background: linear-gradient(135deg, var(--bg-header-1) 0%, var(--bg-header-2) 100%);
+      border-bottom: 2px solid var(--border-header);
+      padding: 10px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+    .site-header-link { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .site-header .torii-icon { font-size: 26px; filter: drop-shadow(0 0 8px rgba(220,80,30,0.75)); }
+    .site-header .site-title {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+      font-size: 18px; letter-spacing: 0.04em; color: var(--gold);
+      text-shadow: 0 0 16px rgba(var(--gold-glow-rgb),0.6);
+    }
     .wrap { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; }
     .crumb { font-size: 12px; color: var(--muted-1); margin-bottom: 18px; }
     .crumb a { color: #b89060; text-decoration: none; }
@@ -116,8 +137,11 @@
 </style>
 </head>
 <body>
+<header class="site-header">
+  <a href="../index.html" class="site-header-link"><span class="torii-icon">⛩</span><span class="site-title">社巡り道標</span></a>
+</header>
 <div class="wrap">
-  <div class="crumb"><a href="../index.html">⛩ 社巡り道標</a> ／ <a href="index.html">タグ一覧</a> ／ 名社１</div>
+  <div class="crumb"><a href="index.html">🏷 タグ一覧</a> ／ 名社１</div>
   <header class="page-head">
     <h1>名社１の神社</h1>
     <p class="region-label">43社</p>
