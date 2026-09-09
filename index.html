@@ -857,6 +857,24 @@
     .shrine-popup .leaflet-popup-content-wrapper { max-width: 82vw; }
   }
 
+  /* ── マーカーの段階的出現（枝2-B）：フィルタ切替時に536件が一斉add/removeされていたのを、
+     縮小→拡大／拡大→縮小のふわっとした出入りに変更。同じ@keyframesを逆再生することで
+     出現(marker-pop-in)と消滅(marker-pop-out)の2クラスをまかなう。
+     transform-originはgetIcon()のiconAnchor[17,40]（34x42中のピン先端）に合わせてあり、
+     ピンの接地点を起点に伸び縮みする ── */
+  @keyframes markerPopIn {
+    from { opacity: 0; transform: scale(0.4); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .marker-pop-in {
+    animation: markerPopIn var(--dur-slower) cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transform-origin: 50% 95%;
+  }
+  .marker-pop-out {
+    animation: markerPopIn var(--dur-fast) ease-in reverse both;
+    transform-origin: 50% 95%;
+  }
+
   /* ── Safe Mode 基盤：OSの「視差効果を減らす」設定を尊重する。
      今のtransitionは全て0.4s以下の軽微なものなので現状の見た目への影響は無いが、
      第二フェーズで動きを増やす枝（枝2）が乗る前提の受け皿として先に敷いておく。
@@ -2053,11 +2071,48 @@ function focusShrine(idx, listItem) {
 }
 
 // ===== マーカー表示切り替え =====
+function prefersReducedMotion() {
+  return document.documentElement.getAttribute('data-motion') === 'reduced' ||
+    (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
 function redrawMarkers() {
-  markerList.forEach(({ marker, shrine }) => {
+  const reduceMotion = prefersReducedMotion();
+  markerList.forEach(item => {
+    const { marker, shrine } = item;
     const show = passesFilter(shrine);
-    if (show && !map.hasLayer(marker)) marker.addTo(map);
-    else if (!show && map.hasLayer(marker)) map.removeLayer(marker);
+    const onMap = map.hasLayer(marker);
+    if (show && item._removeTimer) {
+      // 消去アニメ中（onMapはまだtrue）に再びONにされた：保留中の削除を取り消して元に戻す。
+      // ここを素通りすると、後から発火する削除タイマーだけが残り、再表示したはずが
+      // 消えたままになる（マーカー個別のtoggle競合バグ）
+      clearTimeout(item._removeTimer);
+      item._removeTimer = null;
+      const icon = marker._icon;
+      if (icon) icon.classList.remove('marker-pop-out');
+      return;
+    }
+    if (show && !onMap) {
+      marker.addTo(map);
+      if (!reduceMotion) {
+        const icon = marker._icon;
+        if (icon) {
+          icon.classList.add('marker-pop-in');
+          icon.style.animationDelay = (Math.random() * 180).toFixed(0) + 'ms';
+        }
+      }
+    } else if (!show && onMap && !item._removeTimer) {
+      if (reduceMotion) {
+        map.removeLayer(marker);
+      } else {
+        const icon = marker._icon;
+        if (icon) icon.classList.add('marker-pop-out');
+        item._removeTimer = setTimeout(() => {
+          item._removeTimer = null;
+          if (map.hasLayer(marker)) map.removeLayer(marker);
+        }, 130);
+      }
+    }
   });
   updateStats();
   renderList();
