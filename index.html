@@ -711,8 +711,15 @@
       backdrop-filter:blur(4px); box-shadow:0 4px 16px rgba(0,0,0,0.5);
     }
     .legend-title { font-size:10px; letter-spacing:0.12em; color:var(--brown-text-4); margin-bottom:8px; border-bottom:1px solid var(--border-2); padding-bottom:5px; }
-    .legend-item  { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .legend-item  {
+      display:flex; align-items:center; gap:8px; margin-bottom:5px;
+      transform-origin: left center;
+      transition: opacity var(--dur-slow), transform var(--dur-slow);
+    }
     .legend-item:last-child { margin-bottom:0; }
+    /* 押してないタグは凡例上で縮小・減光する（完全非表示にはしない＝まだ押してない
+       タグの意味を発見できる状態は残す。フィルタボタンの非アクティブ時opacity:0.42と揃える） */
+    .legend-item.inactive { opacity: 0.42; transform: scale(0.9); }
     .legend-pin   { width:13px; height:16px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:1.5px solid; flex-shrink:0; }
     .legend-pin.jingu   { background:rgba(var(--tag-jingu-rgb),0.85); border-color:var(--tag-jingu-light); box-shadow:0 0 5px rgba(var(--tag-jingu-rgb),0.5); }
     .legend-pin.taisha  { background:rgba(var(--tag-taisha-rgb),0.85); border-color:var(--tag-taisha-light); box-shadow:0 0 5px rgba(var(--tag-taisha-rgb),0.5); }
@@ -960,15 +967,15 @@
 
   <div class="legend">
     <div class="legend-title">凡 例</div>
-    <div class="legend-item"><div class="legend-pin jingu" ></div><div class="legend-label"><strong>神宮</strong><span>〜神宮の称号を持つ社</span></div></div>
-    <div class="legend-item"><div class="legend-pin taisha"></div><div class="legend-label"><strong>大社</strong><span>〜大社の称号を持つ社</span></div></div>
-    <div class="legend-item"><div class="legend-pin ichi"  ></div><div class="legend-label"><strong>一宮</strong><span>旧国最高格式の神社</span></div></div>
-    <div class="legend-item"><div class="legend-pin ni"    ></div><div class="legend-label"><strong>二宮</strong><span>旧国第二格式の神社</span></div></div>
-    <div class="legend-item"><div class="legend-pin meisha" ></div><div class="legend-label"><strong>名社１</strong><span>勅祭社・世界遺産・著名社</span></div></div>
-    <div class="legend-item"><div class="legend-pin meisha2"></div><div class="legend-label"><strong>名社２</strong><span>氷川・大神宮など著名社</span></div></div>
-    <div class="legend-item"><div class="legend-pin meisha3"></div><div class="legend-label"><strong>名社３</strong><span>地名代表社・浅間神社系</span></div></div>
-    <div class="legend-item"><div class="legend-pin hachiman"></div><div class="legend-label"><strong>八幡</strong><span>八幡宮・八幡神社</span></div></div>
-    <div class="legend-item"><div class="legend-pin inari"></div><div class="legend-label"><strong>稲荷</strong><span>稲荷神社</span></div></div>
+    <div class="legend-item" data-tag="jingu"><div class="legend-pin jingu" ></div><div class="legend-label"><strong>神宮</strong><span>〜神宮の称号を持つ社</span></div></div>
+    <div class="legend-item" data-tag="taisha"><div class="legend-pin taisha"></div><div class="legend-label"><strong>大社</strong><span>〜大社の称号を持つ社</span></div></div>
+    <div class="legend-item" data-tag="ichi"><div class="legend-pin ichi"  ></div><div class="legend-label"><strong>一宮</strong><span>旧国最高格式の神社</span></div></div>
+    <div class="legend-item" data-tag="ni"><div class="legend-pin ni"    ></div><div class="legend-label"><strong>二宮</strong><span>旧国第二格式の神社</span></div></div>
+    <div class="legend-item" data-tag="meisha"><div class="legend-pin meisha" ></div><div class="legend-label"><strong>名社１</strong><span>勅祭社・世界遺産・著名社</span></div></div>
+    <div class="legend-item" data-tag="meisha2"><div class="legend-pin meisha2"></div><div class="legend-label"><strong>名社２</strong><span>氷川・大神宮など著名社</span></div></div>
+    <div class="legend-item" data-tag="meisha3"><div class="legend-pin meisha3"></div><div class="legend-label"><strong>名社３</strong><span>地名代表社・浅間神社系</span></div></div>
+    <div class="legend-item" data-tag="hachiman"><div class="legend-pin hachiman"></div><div class="legend-label"><strong>八幡</strong><span>八幡宮・八幡神社</span></div></div>
+    <div class="legend-item" data-tag="inari"><div class="legend-pin inari"></div><div class="legend-label"><strong>稲荷</strong><span>稲荷神社</span></div></div>
   </div>
 </div>
 
@@ -2055,6 +2062,15 @@ function redrawMarkers() {
   updateStats();
   renderList();
   updateAllToggleLabel();
+  updateLegendState();
+}
+
+// 押してないタグは凡例上で縮小・減光する（.legend-item.inactive、CSS側で定義）。
+// 完全非表示にはしない＝まだ押してないタグが何を意味するかを発見できる状態を残す。
+function updateLegendState() {
+  document.querySelectorAll('.legend-item[data-tag]').forEach(el => {
+    el.classList.toggle('inactive', !activeFilters.has(el.dataset.tag));
+  });
 }
 
 function updateStats() {
@@ -2104,6 +2120,7 @@ function initFilterButtons() {
     const btn = document.querySelector(`.filter-btn.${t}`);
     if (btn) btn.classList.toggle('active', activeFilters.has(t));
   });
+  updateLegendState();
 }
 
 // ===== 「その他のタグ」展開パネル =====
