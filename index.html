@@ -862,21 +862,23 @@
   }
 
   /* ── マーカーの段階的出現（枝2-B）：フィルタ切替時に536件が一斉add/removeされていたのを、
-     縮小→拡大／拡大→縮小のふわっとした出入りに変更。同じ@keyframesを逆再生することで
+     ふわっとしたフェードの出入りに変更。同じ@keyframesを逆再生することで
      出現(marker-pop-in)と消滅(marker-pop-out)の2クラスをまかなう。
-     transform-originはgetIcon()のiconAnchor[17,40]（34x42中のピン先端）に合わせてあり、
-     ピンの接地点を起点に伸び縮みする ── */
+     opacityのみでtransformには触れない：
+     ①Leafletがマーカーの位置決め（translate3d）に同じtransformを使っており、
+       scaleを絡めるとアニメーション完了後の後片付け漏れで位置がズレる事故が起きた
+     ②SVGのグローフィルタ（feGaussianBlur）とtransformのアニメーションを組み合わせると
+       ブラウザによって発光が不安定になる（2026-09-09〜11、2回の修正でも直らず解決）
+     の両方の火種をopacity単独にすることで断つ ── */
   @keyframes markerPopIn {
-    from { opacity: 0; transform: scale(0.4); }
-    to   { opacity: 1; transform: scale(1); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
   .marker-pop-in {
-    animation: markerPopIn var(--dur-slower) cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    transform-origin: 50% 95%;
+    animation: markerPopIn var(--dur-slower) ease-out both;
   }
   .marker-pop-out {
     animation: markerPopIn var(--dur-fast) ease-in reverse both;
-    transform-origin: 50% 95%;
   }
 
   /* ── リスト項目の追従（枝2-B2・parallax as hierarchy）：マーカー（B1）は速く反応する
