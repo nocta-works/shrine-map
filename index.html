@@ -70,39 +70,41 @@
       --border-12: #c05838;
       --border-13: #d49070;
       /* タグ11色（格式・系統・ご利益）。-rgbはrgba()背景/シャドウ用の同色トリプレット */
-      --tag-jingu: #d4860a;
-      --tag-jingu-rgb: 212,134,10;
-      --tag-jingu-light: #f5c842;
-      --tag-taisha: #7c3aed;
-      --tag-taisha-rgb: 124,58,237;
-      --tag-taisha-light: #c4a8ff;
-      --tag-ichi: #e83020;
-      --tag-ichi-rgb: 232,48,32;
-      --tag-ichi-light: #ff9a8a;
-      --tag-ni: #1a50d8;
-      --tag-ni-rgb: 26,80,216;
-      --tag-ni-light: #88b4ff;
-      --tag-meisha: #059669;
-      --tag-meisha-rgb: 5,150,105;
-      --tag-meisha-light: #6ee7b7;
-      --tag-meisha2: #0284c7;
-      --tag-meisha2-rgb: 2,132,199;
-      --tag-meisha2-light: #7dd3fc;
-      --tag-meisha3: #b45309;
-      --tag-meisha3-rgb: 180,83,9;
-      --tag-meisha3-light: #fcd34d;
-      --tag-kinun: #b8860b;
-      --tag-kinun-rgb: 184,134,11;
-      --tag-kinun-light: #ffd700;
-      --tag-kaiun: #c03808;
-      --tag-kaiun-light: #ff7a3e;
-      --tag-hachiman: #be185d;
-      --tag-hachiman-rgb: 190,24,93;
-      --tag-hachiman-light: #f9a8d4;
-      --tag-inari: #0d9488;
-      --tag-inari-rgb: 13,148,136;
-      --tag-inari-light: #5eead4;
-      --tag-kaiun-bg-rgb: 220,80,20; /* kaiunのみ背景/シャドウが枠線と異なる既存色 */
+      /* 依頼BN・BO（2026-10-11）：伝統色。神宮＝金茶・大社＝古代紫・一宮＝朱・二宮＝藍・名社1＝常磐・名社2＝松葉・名社3＝朽葉・八幡＝臙脂・稲荷＝青碧・金運＝墨（印は金）・開運＝生成り（印は墨）。
+         -light＝非表示時の線・文字・一覧の見出し。名社2・3・八幡・稲荷のlightは依頼に値が無く、地の色の明るい版 */
+      --tag-jingu: #a8791f;
+      --tag-jingu-rgb: 168,121,31;
+      --tag-jingu-light: #e6c886;
+      --tag-taisha: #6a4580;
+      --tag-taisha-rgb: 106,69,128;
+      --tag-taisha-light: #c4a6d4;
+      --tag-ichi: #b23a24;
+      --tag-ichi-rgb: 178,58,36;
+      --tag-ichi-light: #e8a090;
+      --tag-ni: #2c5585;
+      --tag-ni-rgb: 44,85,133;
+      --tag-ni-light: #9db6d6;
+      --tag-meisha: #2c6249;
+      --tag-meisha-rgb: 44,98,73;
+      --tag-meisha-light: #9cc4ae;
+      --tag-meisha2: #55692c;
+      --tag-meisha2-rgb: 85,105,44;
+      --tag-meisha2-light: #b4c78a;
+      --tag-meisha3: #7a5530;
+      --tag-meisha3-rgb: 122,85,48;
+      --tag-meisha3-light: #d9b88f;
+      --tag-hachiman: #8a2a46;
+      --tag-hachiman-rgb: 138,42,70;
+      --tag-hachiman-light: #e3a0b5;
+      --tag-inari: #2a6a6c;
+      --tag-inari-rgb: 42,106,108;
+      --tag-inari-light: #8ec9ca;
+      --tag-kinun: #3b3426;
+      --tag-kinun-rgb: 59,52,38;
+      --tag-kinun-light: #e6c35c;
+      --tag-kaiun: #e9dcc0;
+      --tag-kaiun-rgb: 233,220,192;
+      --tag-kaiun-light: #e9dcc0;
       /* ドット色（凡例・タグボタンのdot要素） */
       --dot-purple: #a070f8;
       --dot-blue: #2060e8;
@@ -219,32 +221,44 @@
       font-size: 13px;
       letter-spacing: 0.05em;
       transition: all var(--dur-slow);
-      opacity: 0.42;
+      opacity: 0.7;
     }
     .filter-btn.active { opacity: 1; }
 
-    .filter-btn.jingu   { background:rgba(var(--tag-jingu-rgb),0.12); border-color:var(--tag-jingu); color:var(--tag-jingu-light); }
-    .filter-btn.jingu.active   { background:rgba(var(--tag-jingu-rgb),0.38); box-shadow:0 0 9px rgba(var(--tag-jingu-rgb),0.4); }
-    .filter-btn.taisha  { background:rgba(var(--tag-taisha-rgb),0.12); border-color:var(--tag-taisha); color:var(--tag-taisha-light); }
-    .filter-btn.taisha.active  { background:rgba(var(--tag-taisha-rgb),0.32); box-shadow:0 0 9px rgba(var(--tag-taisha-rgb),0.4); }
-    .filter-btn.ichi    { background:rgba(var(--tag-ichi-rgb),0.12); border-color:var(--tag-ichi); color:var(--tag-ichi-light); }
-    .filter-btn.ichi.active    { background:rgba(var(--tag-ichi-rgb),0.36); box-shadow:0 0 9px rgba(var(--tag-ichi-rgb),0.4); }
-    .filter-btn.ni      { background:rgba(var(--tag-ni-rgb),0.12); border-color:var(--tag-ni); color:var(--tag-ni-light); }
-    .filter-btn.ni.active      { background:rgba(var(--tag-ni-rgb),0.32); box-shadow:0 0 9px rgba(var(--tag-ni-rgb),0.4); }
-    .filter-btn.meisha  { background:rgba(var(--tag-meisha-rgb),0.12); border-color:var(--tag-meisha); color:var(--tag-meisha-light); }
-    .filter-btn.meisha.active  { background:rgba(var(--tag-meisha-rgb),0.32); box-shadow:0 0 9px rgba(var(--tag-meisha-rgb),0.4); }
-    .filter-btn.meisha2 { background:rgba(var(--tag-meisha2-rgb),0.12); border-color:var(--tag-meisha2); color:var(--tag-meisha2-light); }
-    .filter-btn.meisha2.active { background:rgba(var(--tag-meisha2-rgb),0.32); box-shadow:0 0 9px rgba(var(--tag-meisha2-rgb),0.4); }
-    .filter-btn.meisha3 { background:rgba(var(--tag-meisha3-rgb),0.12);  border-color:var(--tag-meisha3); color:var(--tag-meisha3-light); }
-    .filter-btn.meisha3.active { background:rgba(var(--tag-meisha3-rgb),0.32);  box-shadow:0 0 9px rgba(var(--tag-meisha3-rgb),0.4); }
-    .filter-btn.kinun  { background:rgba(var(--tag-kinun-rgb),0.12); border-color:var(--tag-kinun); color:var(--tag-kinun-light); }
-    .filter-btn.kinun.active  { background:rgba(var(--tag-kinun-rgb),0.38); box-shadow:0 0 9px rgba(var(--tag-kinun-rgb),0.4); }
-    .filter-btn.kaiun  { background:rgba(var(--tag-kaiun-bg-rgb),0.12);  border-color:var(--tag-kaiun); color:var(--tag-kaiun-light); }
-    .filter-btn.kaiun.active  { background:rgba(var(--tag-kaiun-bg-rgb),0.38);  box-shadow:0 0 9px rgba(var(--tag-kaiun-bg-rgb),0.4); }
-    .filter-btn.hachiman { background:rgba(var(--tag-hachiman-rgb),0.12); border-color:var(--tag-hachiman); color:var(--tag-hachiman-light); }
-    .filter-btn.hachiman.active { background:rgba(var(--tag-hachiman-rgb),0.36); box-shadow:0 0 9px rgba(var(--tag-hachiman-rgb),0.4); }
-    .filter-btn.inari  { background:rgba(var(--tag-inari-rgb),0.12); border-color:var(--tag-inari); color:var(--tag-inari-light); }
-    .filter-btn.inari.active  { background:rgba(var(--tag-inari-rgb),0.36); box-shadow:0 0 9px rgba(var(--tag-inari-rgb),0.4); }
+    /* 依頼BO-4（BN-4と同じ形）：丸いボタンの左に格式・系統の印（18px）。表示中＝地の色で塗り＋金の細線＋文字#fbf3e0／
+       非表示＝塗りなし＋地の色の線＋薄い文字。非表示の濃さは0.42→0.7（地の色の線が見えるよう）。
+       墨（金運）・生成り（開運）は地が暗い／明るいので、線・文字・印だけ個別に指定する */
+    .filter-btn.jingu { background:transparent; border-color:var(--tag-jingu); color:var(--tag-jingu-light); }
+    .filter-btn.jingu.active { background:var(--tag-jingu); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.taisha { background:transparent; border-color:var(--tag-taisha); color:var(--tag-taisha-light); }
+    .filter-btn.taisha.active { background:var(--tag-taisha); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.ichi { background:transparent; border-color:var(--tag-ichi); color:var(--tag-ichi-light); }
+    .filter-btn.ichi.active { background:var(--tag-ichi); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.ni { background:transparent; border-color:var(--tag-ni); color:var(--tag-ni-light); }
+    .filter-btn.ni.active { background:var(--tag-ni); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.meisha { background:transparent; border-color:var(--tag-meisha); color:var(--tag-meisha-light); }
+    .filter-btn.meisha.active { background:var(--tag-meisha); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.meisha2 { background:transparent; border-color:var(--tag-meisha2); color:var(--tag-meisha2-light); }
+    .filter-btn.meisha2.active { background:var(--tag-meisha2); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.meisha3 { background:transparent; border-color:var(--tag-meisha3); color:var(--tag-meisha3-light); }
+    .filter-btn.meisha3.active { background:var(--tag-meisha3); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.hachiman { background:transparent; border-color:var(--tag-hachiman); color:var(--tag-hachiman-light); }
+    .filter-btn.hachiman.active { background:var(--tag-hachiman); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.inari { background:transparent; border-color:var(--tag-inari); color:var(--tag-inari-light); }
+    .filter-btn.inari.active { background:var(--tag-inari); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.kinun { background:transparent; border-color:var(--tag-kinun); color:var(--tag-kinun-light); }
+    .filter-btn.kinun.active { background:var(--tag-kinun); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.kaiun { background:transparent; border-color:var(--tag-kaiun); color:var(--tag-kaiun-light); }
+    .filter-btn.kaiun.active { background:var(--tag-kaiun); border-color:#ecd08c; color:#fbf3e0; }
+    .filter-btn.kinun { border-color:#6e5f35; }
+    .filter-btn.kinun.active .tag-mark { color:#e6c35c; }
+    .filter-btn.kaiun.active { color:#3b3426; }
+    .filter-btn .tag-mark { display:block; width:18px; height:18px; flex-shrink:0; }
+    .filter-btn .tag-mark svg { display:block; width:100%; height:100%; }
+    .filter-btn .carve { stroke:var(--bg-body); }
+    .filter-btn.active.kinun .carve { stroke:var(--tag-kinun); }
+    .filter-btn.active.kaiun .carve { stroke:var(--tag-kaiun); }
+    .filter-btn.sanpai .tag-mark { width:16px; height:16px; }
     .filter-btn.sanpai { background:rgba(var(--gold-rgb),0.10); border-color:var(--gold-dim-2); color:var(--gold); }
     .filter-btn.sanpai.active { background:rgba(var(--gold-rgb),0.30); box-shadow:0 0 9px rgba(var(--gold-rgb),0.4); }
 
@@ -327,7 +341,7 @@
       background: rgba(255,255,255,0.06); overflow: hidden;
     }
     .achieve-bar-fill {
-      height: 100%; background: linear-gradient(90deg, #c47a08, var(--tag-jingu-light));
+      height: 100%; background: linear-gradient(90deg, #a8791f, var(--tag-jingu-light));
       border-radius: 4px; transition: width var(--dur-bar) ease;
     }
 
@@ -724,16 +738,9 @@
     /* 押してないタグは凡例上で縮小・減光する（完全非表示にはしない＝まだ押してない
        タグの意味を発見できる状態は残す。フィルタボタンの非アクティブ時opacity:0.42と揃える） */
     .legend-item.inactive { opacity: 0.42; transform: scale(0.9); }
-    .legend-pin   { width:13px; height:16px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); border:1.5px solid; flex-shrink:0; }
-    .legend-pin.jingu   { background:rgba(var(--tag-jingu-rgb),0.85); border-color:var(--tag-jingu-light); box-shadow:0 0 5px rgba(var(--tag-jingu-rgb),0.5); }
-    .legend-pin.taisha  { background:rgba(var(--tag-taisha-rgb),0.85); border-color:var(--tag-taisha-light); box-shadow:0 0 5px rgba(var(--tag-taisha-rgb),0.5); }
-    .legend-pin.ichi    { background:rgba(var(--tag-ichi-rgb),0.85);  border-color:var(--tag-ichi-light); box-shadow:0 0 5px rgba(var(--tag-ichi-rgb),0.5); }
-    .legend-pin.ni      { background:rgba(var(--tag-ni-rgb),0.85);  border-color:var(--tag-ni-light); box-shadow:0 0 5px rgba(var(--tag-ni-rgb),0.5); }
-    .legend-pin.meisha  { background:rgba(var(--tag-meisha-rgb),0.85);  border-color:var(--tag-meisha-light); box-shadow:0 0 5px rgba(var(--tag-meisha-rgb),0.5); }
-    .legend-pin.meisha2 { background:rgba(var(--tag-meisha2-rgb),0.85);  border-color:var(--tag-meisha2-light); box-shadow:0 0 5px rgba(var(--tag-meisha2-rgb),0.5); }
-    .legend-pin.meisha3 { background:rgba(var(--tag-meisha3-rgb),0.85);   border-color:var(--tag-meisha3-light); box-shadow:0 0 5px rgba(var(--tag-meisha3-rgb),0.5); }
-    .legend-pin.hachiman{ background:rgba(var(--tag-hachiman-rgb),0.85);  border-color:var(--tag-hachiman-light); box-shadow:0 0 5px rgba(var(--tag-hachiman-rgb),0.5); }
-    .legend-pin.inari   { background:rgba(var(--tag-inari-rgb),0.85); border-color:var(--tag-inari-light); box-shadow:0 0 5px rgba(var(--tag-inari-rgb),0.5); }
+    /* 依頼BO：凡例の印はJS（initRankMarks）が絵馬形のSVGに差し替える。旧い色つきの丸ピン（.legend-pin.jingu等）は使わなくなった */
+    .legend-pin   { width:16px; height:20px; flex-shrink:0; }
+    .legend-pin svg { display:block; width:100%; height:100%; }
     .legend-label       { font-size:11px; line-height:1.3; }
     .legend-label strong{ display:block; color:var(--gold-dim); }
     .legend-label span  { color:var(--brown-text-2); font-size:10px; }
@@ -975,10 +982,10 @@
     <button class="filter-btn ni" onclick="toggleFilter('ni')"><span class="dot blue"></span> 二宮</button>
     <button class="filter-btn meisha2" onclick="toggleFilter('meisha2')"><span class="dot cyan"></span> 名社２</button>
     <button class="filter-btn meisha3" onclick="toggleFilter('meisha3')"><span class="dot orange"></span> 名社３</button>
-    <button class="filter-btn hachiman" onclick="toggleFilter('hachiman')"><span class="dot" style="background:#be185d;box-shadow:0 0 5px #be185d"></span> 八幡</button>
-    <button class="filter-btn inari" onclick="toggleFilter('inari')"><span class="dot" style="background:#0d9488;box-shadow:0 0 5px #0d9488"></span> 稲荷</button>
-    <button class="filter-btn kinun" onclick="toggleFilter('kinun')" ><span class="dot" style="background:#ffd700;box-shadow:0 0 5px #ffd700"></span> 金運</button>
-    <button class="filter-btn kaiun" onclick="toggleFilter('kaiun')" ><span class="dot" style="background:#ff7a3e;box-shadow:0 0 5px #ff7a3e"></span> 開運</button>
+    <button class="filter-btn hachiman" onclick="toggleFilter('hachiman')"><span class="dot"></span> 八幡</button>
+    <button class="filter-btn inari" onclick="toggleFilter('inari')"><span class="dot"></span> 稲荷</button>
+    <button class="filter-btn kinun" onclick="toggleFilter('kinun')" ><span class="dot"></span> 金運</button>
+    <button class="filter-btn kaiun" onclick="toggleFilter('kaiun')" ><span class="dot"></span> 開運</button>
   </div>
 </header>
 
@@ -1720,20 +1727,22 @@ const shrines = [
 ];
 
 // ===== 設定 =====
+// 依頼BN・BO（2026-10-11）：color＝地の色（マーカーの塗り）／border＝薄い色（一覧の見出しの線・文字）／bg＝見出しの背景／dot＝一覧の点の色（省略時はcolor）。
+// 文字（char）は使わなくなった（印は下のRANK_SYMBOLS）
 const TAG_CONFIG = {
-  jingu:  { label:"神宮", char:"神", color:"#c47a08", glow:"rgba(196,122,8,0.65)",   border:"#f5c842", bg:"rgba(212,134,10,0.18)" },
-  taisha: { label:"大社", char:"大", color:"#6d28d9", glow:"rgba(109,40,217,0.65)",  border:"#c4a8ff", bg:"rgba(124,58,237,0.18)" },
-  ichi:   { label:"一宮", char:"一", color:"#c41810", glow:"rgba(196,24,16,0.65)",   border:"#ff9a8a", bg:"rgba(232,48,32,0.18)"  },
-  ni:     { label:"二宮", char:"二", color:"#1540c0", glow:"rgba(21,64,192,0.65)",   border:"#88b4ff", bg:"rgba(26,80,216,0.18)"  },
-  meisha:  { label:"名社１", char:"名", color:"#047857", glow:"rgba(4,120,87,0.65)",   border:"#6ee7b7", bg:"rgba(5,150,105,0.18)"  },
-  meisha2: { label:"名社２", char:"社", color:"#0369a1", glow:"rgba(3,105,161,0.65)",  border:"#7dd3fc", bg:"rgba(2,132,199,0.18)"  },
-  meisha3: { label:"名社３", char:"奉", color:"#92400e", glow:"rgba(146,64,14,0.65)",  border:"#fcd34d", bg:"rgba(180,83,9,0.18)"   },
-  hachiman:{ label:"八幡",   char:"八", color:"#be185d", glow:"rgba(190,24,93,0.65)",  border:"#f9a8d4", bg:"rgba(190,24,93,0.18)" },
-  inari:   { label:"稲荷",   char:"稲", color:"#0d9488", glow:"rgba(13,148,136,0.65)", border:"#5eead4", bg:"rgba(13,148,136,0.18)" },
-  kinun:   { label:"金運",   char:"金", color:"#b8860b", glow:"rgba(184,134,11,0.65)", border:"#ffd700", bg:"rgba(184,134,11,0.18)" },
-  kaiun:   { label:"開運",   char:"開", color:"#c03808", glow:"rgba(192,56,8,0.65)",   border:"#ff7a3e", bg:"rgba(220,80,20,0.18)"  },
+  jingu: { label:"神宮", color:"#a8791f", border:"#e6c886", bg:"rgba(168,121,31,0.18)" },
+  taisha: { label:"大社", color:"#6a4580", border:"#c4a6d4", bg:"rgba(106,69,128,0.18)" },
+  ichi: { label:"一宮", color:"#b23a24", border:"#e8a090", bg:"rgba(178,58,36,0.18)" },
+  ni: { label:"二宮", color:"#2c5585", border:"#9db6d6", bg:"rgba(44,85,133,0.18)" },
+  meisha: { label:"名社１", color:"#2c6249", border:"#9cc4ae", bg:"rgba(44,98,73,0.18)" },
+  meisha2: { label:"名社２", color:"#55692c", border:"#b4c78a", bg:"rgba(85,105,44,0.18)" },
+  meisha3: { label:"名社３", color:"#7a5530", border:"#d9b88f", bg:"rgba(122,85,48,0.18)" },
+  hachiman: { label:"八幡", color:"#8a2a46", border:"#e3a0b5", bg:"rgba(138,42,70,0.18)" },
+  inari: { label:"稲荷", color:"#2a6a6c", border:"#8ec9ca", bg:"rgba(42,106,108,0.18)" },
+  kinun: { label:"金運", color:"#3b3426", border:"#e6c35c", bg:"rgba(59,52,38,0.18)", dot:"#e6c35c" },
+  kaiun: { label:"開運", color:"#e9dcc0", border:"#e9dcc0", bg:"rgba(233,220,192,0.18)" },
 };
-const SANPAI_CONFIG = { label:"参拝済み", char:"参", color:"#c8a860", glow:"rgba(245,208,138,0.7)", border:"#f5d08a", bg:"rgba(245,208,138,0.18)" };
+const SANPAI_CONFIG = { label:"参拝済み", color:"#c8a860", border:"#f5d08a", bg:"rgba(245,208,138,0.18)" };
 
 function topTag(tags) {
   return tags.reduce((b,t) => PRIORITY[t] > PRIORITY[b] ? t : b, tags[0]);
@@ -1748,27 +1757,87 @@ L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 // ===== アイコン =====
+// 依頼BN・BO（2026-10-11）：マーカー＝絵馬の形。中の印は文字を使わない絵（viewBox 0 0 34 42の座標）。
+// fgは線・面の色、groundはその地の色（葉脈・金運の横線・開運の骨を地の色で抜く）、kは線の太さの倍率。
+// 共通5種（神宮・大社・一宮・二宮）は海外版（依頼BN）と同じ。名社1〜3＝葉の枚数（3・2・1）、八幡＝「八」の2画、
+// 稲荷＝「稲」の文字（幹は日本語版なので文字でよい）、金運＝小判、開運＝末広
+const RANK_FG = '#f6ecd6';     // 印の色（生成り）
+const RANK_EDGE = '#ecd08c';   // 絵馬の縁・バッジの縁（金の細線。全タグ共通）
+const RANK_INK = '#3b3426';    // 墨
+const RANK_GOLD = '#e6c35c';   // 金運の印の金
+const RANK_SYMBOLS = {
+  jingu: (fg, ground, k) =>
+    `<path d="M9.5 23.5L17 16L24.5 23.5" fill="none" stroke="${fg}" stroke-width="${2.2*k}" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="M14.5 15.5L19.5 10.5M19.5 15.5L14.5 10.5" fill="none" stroke="${fg}" stroke-width="${1.6*k}" stroke-linecap="round"/>` +
+    `<path d="M10.5 26H23.5" fill="none" stroke="${fg}" stroke-width="${1.6*k}" stroke-linecap="round"/>`,
+  taisha: (fg, ground, k) =>
+    `<rect x="7.5" y="13" width="19" height="4.2" rx="2.1" fill="${fg}"/>` +
+    `<path d="M11 17.5L12.6 20L11 22.5L12.6 25M17 17.5L18.6 20L17 22.5L18.6 25M23 17.5L24.6 20L23 22.5L24.6 25" fill="none" stroke="${fg}" stroke-width="${1.3*k}" stroke-linejoin="round"/>`,
+  ichi: (fg) => `<rect x="8.5" y="17.6" width="17" height="3.2" rx="1.6" fill="${fg}"/>`,
+  ni: (fg) =>
+    `<rect x="10" y="14.2" width="14" height="3" rx="1.5" fill="${fg}"/>` +
+    `<rect x="8.5" y="21" width="17" height="3" rx="1.5" fill="${fg}"/>`,
+  meisha: (fg) =>
+    `<path d="M8 25C8 19.5 11.5 16 17 15.5C17 21 13.5 24.5 8 25Z" fill="${fg}"/>` +
+    `<path d="M13 23C13 16.5 17 12.5 23 12C23 18.5 19 22.5 13 23Z" fill="${fg}"/>` +
+    `<path d="M17.5 26C17.5 21 21 18 26 17.5C26 22.5 22.5 25.5 17.5 26Z" fill="${fg}"/>`,
+  meisha2: (fg) =>
+    `<path d="M8.5 25C8.5 18.5 12.5 14.5 19 14C19 20.5 15 24.5 8.5 25Z" fill="${fg}"/>` +
+    `<path d="M15 25.5C15 19.5 19 16 25 15.5C25 21.5 21 25 15 25.5Z" fill="${fg}"/>`,
+  meisha3: (fg) =>
+    `<path d="M11 25C11 17.5 16 12.5 23.5 12C23.5 19.5 18.5 24.5 11 25Z" fill="${fg}"/>`,
+  hachiman: (fg, ground, k) =>
+    `<path d="M15 11.5C14.6 16.5 12.8 21.5 9 25" fill="none" stroke="${fg}" stroke-width="${2.6*k}" stroke-linecap="round"/>` +
+    `<path d="M19 12C19.8 17 21.8 21.8 25.5 25" fill="none" stroke="${fg}" stroke-width="${2.6*k}" stroke-linecap="round"/>`,
+  inari: (fg) =>
+    `<text x="17" y="23" text-anchor="middle" font-family="'Hiragino Mincho ProN','Yu Mincho',serif" font-size="13" font-weight="bold" fill="${fg}">稲</text>`,
+  kinun: (fg, ground) =>
+    `<ellipse cx="17" cy="18.5" rx="6" ry="8.5" fill="${fg}"/>` +
+    `<path class="carve" d="M13.2 14.6H20.8M13.2 18.5H20.8M13.2 22.4H20.8" fill="none"${ground ? ` stroke="${ground}"` : ''} stroke-width="1.2" stroke-linecap="round"/>`,
+  kaiun: (fg, ground) =>
+    `<path d="M17 25L8 15.5C12.5 11 21.5 11 26 15.5Z" fill="${fg}"/>` +
+    `<path class="carve" d="M17 25L12.1 13M17 25L17 12.1M17 25L21.9 13" fill="none"${ground ? ` stroke="${ground}"` : ''} stroke-width="1.1" stroke-linecap="round"/>`,
+};
+// 印そのものの色：金運＝金・開運＝墨・それ以外＝生成り
+function rankFg(tag) { return tag === 'kinun' ? RANK_GOLD : tag === 'kaiun' ? RANK_INK : RANK_FG; }
+// 絵馬形のマーカーSVG（w×h。地図のマーカー・凡例で使う）。visitedなら右上に朱印の印を足す
+function rankMarkerSvg(tag, w, h, visited) {
+  const c = TAG_CONFIG[tag];
+  // 依頼BO-3：参拝済み＝右上に小さな朱の丸＋金の点（朱印に見立てる）
+  const stamp = visited ? `
+    <circle cx="28.5" cy="7.5" r="5.5" fill="#b23a24" stroke="${RANK_EDGE}" stroke-width="1"/>
+    <circle cx="28.5" cy="7.5" r="1.8" fill="${RANK_EDGE}"/>` : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 34 42">
+    <path d="M17 2L31 10V30H20.5L17 39.5L13.5 30H3V10Z" fill="${c.color}" stroke="${RANK_EDGE}" stroke-width="1" stroke-linejoin="round"/>
+    ${RANK_SYMBOLS[tag](rankFg(tag), c.color, 1)}${stamp}
+  </svg>`;
+}
+// ボタン用の印だけのSVG（印の周りを詰めたviewBoxで拡大）。fg='currentColor'＝ボタンの文字色に従う
+function rankMarkSvg(tag, k) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="5.5 6.5 23 23" aria-hidden="true" focusable="false">${RANK_SYMBOLS[tag]('currentColor', null, k)}</svg>`;
+}
 const iconCache = {};
 function getIcon(tag, visited) {
   const key = tag + (visited ? '_v' : '');
   if (iconCache[key]) return iconCache[key];
-  const c = TAG_CONFIG[tag];
-  const badge = visited ? `
-    <circle cx="27" cy="9" r="7" fill="#1a1209" stroke="#f5d08a" stroke-width="1.5"/>
-    <text x="27" y="12.5" text-anchor="middle" font-size="9" font-weight="bold" fill="#f5d08a">✓</text>` : '';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="42" viewBox="0 0 34 42">
-    <path d="M17 2C9 2 2 9 2 17c0 10 15 23 15 23S32 27 32 17C32 9 25 2 17 2z"
-          fill="${c.color}" fill-opacity="0.9" stroke="${c.border}" stroke-width="1.5"
-          filter="url(#markerGlow)"/>
-    <circle cx="17" cy="17" r="9" fill="rgba(255,255,255,0.13)"/>
-    <text x="17" y="22" text-anchor="middle"
-          font-family="'Hiragino Mincho ProN','Yu Mincho',serif"
-          font-size="12" font-weight="bold" fill="white">${c.char}</text>
-    ${badge}
-  </svg>`;
+  const svg = rankMarkerSvg(tag, 34, 42, visited);
   iconCache[key] = L.divIcon({ html:svg, className:'', iconSize:[34,42], iconAnchor:[17,40], popupAnchor:[0,-42] });
   return iconCache[key];
 }
+// フィルターのボタンと凡例の印を差し込む（HTMLの丸い点・CSSの丸ピンを置き換える）
+function initRankMarks() {
+  Object.keys(TAG_CONFIG).forEach(tag => {
+    const btn = document.querySelector(`.filter-btn.${tag}`);
+    const dot = btn && btn.querySelector('.dot');
+    if (dot) dot.outerHTML = `<span class="tag-mark">${rankMarkSvg(tag, 1.35)}</span>`;
+    const pin = document.querySelector(`.legend-item[data-tag="${tag}"] .legend-pin`);
+    if (pin) pin.innerHTML = rankMarkerSvg(tag, 16, 20, false);
+  });
+  // 参拝済みのボタン：朱印の印（朱の丸＋金の点）
+  const sanpaiDot = document.querySelector('.filter-btn.sanpai .dot');
+  if (sanpaiDot) sanpaiDot.outerHTML = `<span class="tag-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8" fill="#b23a24" stroke="${RANK_EDGE}" stroke-width="1.4"/><circle cx="10" cy="10" r="2.4" fill="${RANK_EDGE}"/></svg></span>`;
+}
+initRankMarks();
 
 // ===== ホバーカーソル演出（枝2-B3・PC限定） =====
 // hover:hover かつ pointer:fine（実マウスを持つ環境）でのみ有効化。タッチ端末はhoverが
@@ -2121,7 +2190,7 @@ function renderList() {
     title.innerHTML = `<span>${cfg.label}</span><span class="sidebar-section-count">${items.length}社</span>`;
     sec.appendChild(title);
 
-    items.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, cfg.color, reduceMotion)));
+    items.forEach(({shrine, idx: sIdx}) => sec.appendChild(buildShrineItem(shrine, sIdx, cfg.dot || cfg.color, reduceMotion)));
 
     list.appendChild(sec);
     total += items.length;
